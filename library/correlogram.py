@@ -18,23 +18,6 @@ class Crosser:
         self.nyqf = (1 / self.bin_size) / 2
         self.freq_kernel = self._set_freq_kernel()
 
-    # def cross(self, tsp1, tsp2, intersect_mask=None):
-    #
-    #     if intersect_mask:
-    #         tsp1, tsp2 = tsp1[intersect_mask], tsp2[intersect_mask]
-    #
-    #     (N1, edges1), (N2, edges2) = self._hist(tsp1, tsp2)
-    #
-    #     r, lags = correlate(N1, N2)
-    #
-    #     lags_t = lags * self.bin_size
-    #
-    #     r_filt = self._filter(r)
-    #
-    #     if self.method == 'huxter':
-    #         lags_inter, r_inter = custum_interpolate(lags_t, r_filt)
-    #         timelag, r_at_timelag = self._find_nearest_peak(lags_inter, r_inter)
-    #         return timelag, r_at_timelag
 
 
     @staticmethod
@@ -62,9 +45,9 @@ class Crosser:
 
     def _filter(self, signal):
         if hasattr(self.bandpass, '__iter__'):
-            b, a = butter(4, self.freq_kernel, btype='bandpass')
+            b, a = butter(1, self.freq_kernel, btype='bandpass')
         else:
-            b, a = butter(4, self.freq_kernel)
+            b, a = butter(1, self.freq_kernel)
         signal_filt = filtfilt(b, a, signal)
         return signal_filt
 
@@ -132,12 +115,9 @@ class ThetaEstimator(Crosser):
         tsp1_expanded = np.matmul(tsp1_concat.reshape(-1, 1), np.ones((1, tsp2_concat.shape[0])))
         tsp2_expanded = np.matmul(np.ones((tsp1_concat.shape[0], 1)), tsp2_concat.reshape(1, -1))
         isi = (tsp1_expanded - tsp2_expanded).flatten()
-        # isi = isi[np.abs(isi) < theta_window/2]
-        # isibins, isiedges = np.histogram(isi,
-        #                              bins=np.arange(-self.window_width / 2 - (self.bin_size/2), self.window_width / 2 + (self.bin_size/2) + self.bin_size, self.bin_size))
-        isi = isi[np.abs(isi) < theta_window]
+        isi = isi[np.abs(isi) < theta_window/2]
         isibins, isiedges = np.histogram(isi,
-                                         bins=np.arange(-self.window_width - (self.bin_size/2), self.window_width + (self.bin_size/2) + self.bin_size, self.bin_size))
+                                     bins=np.arange(-self.window_width / 2 - (self.bin_size/2), self.window_width / 2 + (self.bin_size/2) + self.bin_size, self.bin_size))
 
 
         isiedges_m = (isiedges[1:] + isiedges[:-1]) / 2
@@ -146,14 +126,6 @@ class ThetaEstimator(Crosser):
         signal_filt = self._filter(isibins)
         z = hilbert(signal_filt)
         alphas = np.angle(z)
-
-        # Cut the intervals to -0.15s to 0.15s
-        winmask = np.abs(isiedges_m)< (theta_window/2-0.0001)
-        isiedges = isiedges[np.abs(isiedges) < (theta_window/2-0.0001)]
-        isiedges_m = isiedges_m[winmask]
-        isibins = isibins[winmask]
-        signal_filt, z, alphas = signal_filt[winmask], z[winmask], alphas[winmask]
-        isi = isi[(isi < np.max(isiedges_m)) & (isi > np.min(isiedges_m))]
 
         if (np.max(signal_filt) < 0.0001) or (isi.shape[0]==0):  # If no signal is found
             return default_Ttheta, np.nan, np.nan
@@ -172,113 +144,3 @@ class ThetaEstimator(Crosser):
                 Tperiod_list.append(Tperiod)
 
         return np.mean(Tperiod_list), phase_at_zero, (isibins, isiedges, signal_filt, z, alphas, isi)
-
-
-class Bootstrapper:
-    def __init__(self, field_df, bs_size=None, bs_rinterval=0.1, bs_roffset=0, ks_metric='ks_dist_masked', seed_num=None, verbose=False):
-        self.field_df = field_df.copy()
-        self.bs_size = bs_size
-        self.bs_rinterval = bs_rinterval
-        self.bs_roffset = bs_roffset
-        self.ks_metric = ks_metric
-        self.seed_num = seed_num if seed_num else np.random.randint(9e5)
-        self.verbose = verbose
-        self.inter_idx = int(1/self.bs_rinterval)
-        self.r_intervals = [(x/self.inter_idx, x/self.inter_idx+self.bs_rinterval) for x in range(self.inter_idx)] + \
-                           [(x/self.inter_idx + self.bs_roffset, x/self.inter_idx+self.bs_rinterval + bs_roffset) for x in range(self.inter_idx)]
-    
-    def _msg(self, *arg, **kwarg):
-        if self.verbose:
-            print(*arg, **kwarg)
-        else:
-            pass
-
-    def _get_bs_size(self):
-        
-        self._msg('Adaptively determine the bootstrapping size from the data')
-        num_samples_list = []
-        for ca_idx, ca in enumerate(['CA{}'.format(x+1) for x in range(3)]): 
-            for rinter in self.r_intervals:
-                mask = (self.field_df[self.ks_metric] < rinter[1]) & (self.field_df[self.ks_metric] > rinter[0]) & (self.field_df.ca == ca) & \
-                       (np.isnan(self.field_df.phaselag_AB) == False) & (np.isnan(self.field_df.phaselag_BA) == False)
-                
-                num_samples = self.field_df[mask].shape[0]
-                num_samples_list.append(num_samples)
-        selected_bs_size = np.max(num_samples_list)
-        self._msg('All num_samples = \n%s' % str(np.around(num_samples_list, 3)))
-        self._msg('Selected bootstrapping size = %d' % selected_bs_size)
-        return selected_bs_size
-    
-    def bootstrap(self):
-        if self.bs_size is None:
-            self.bs_size = self._get_bs_size()
-            
-        # Random seeds
-        for ca_idx, ca in enumerate(['CA{}'.format(x+1) for x in range(3)]): 
-            self._msg('Bootstraping %s' % ca)
-            for rinter in self.r_intervals:
-                
-                
-                zero_phaser = ThetaEstimator(0.005, 0.3, [5, 12])  # Parameters must be the same as the pre-processing step
-
-                mask = (self.field_df[self.ks_metric] < rinter[1]) & (self.field_df[self.ks_metric] > rinter[0]) & (self.field_df.ca == ca) & \
-                       (np.isnan(self.field_df.phaselag_AB) == False) & (np.isnan(self.field_df.phaselag_BA) == False)
-                df_rwithin = self.field_df[mask]
-                num_samples = df_rwithin.shape[0]
-
-                if (num_samples == 0) or (num_samples > self.bs_size):
-                    self._msg('R=[%0.3f, %0.3f] %s N_samples = %d '% (rinter[0], rinter[1], 'skipped', num_samples))
-                    continue
-                new_to_add = self.bs_size - num_samples
-                current_iter = 0
-                self._msg('R=[%0.3f, %0.3f], N_samples = %d , %d to add'% (rinter[0], rinter[1], num_samples, new_to_add))
-
-                while (current_iter < new_to_add):
-                    df_sampled = df_rwithin.sample(frac=1, random_state=self.seed_num)
-                    added_field_df_dict = {key:[] for key in list(self.field_df.columns)}
-                    for i in range(df_sampled.shape[0]):
-                        if current_iter > new_to_add:
-                            break
-                        AB1, AB2, BA1, BA2 = df_sampled.iloc[i][['AB_tsp1', 'AB_tsp2', 'BA_tsp1', 'BA_tsp2']]  
-                        AB1np, AB2np, BA1np, BA2np = np.array(AB1), np.array(AB2), np.array(BA1), np.array(BA2)
-                        np.random.seed(self.seed_num)
-                        permAB = np.random.choice(len(AB1np), size=len(AB1np), replace=True)
-                        np.random.seed(self.seed_num)
-                        permBA = np.random.choice(len(BA1np), size=len(BA1np), replace=True)
-
-                        _, phaselag_AB, corr_info_AB = zero_phaser.find_theta_isi_hilbert(AB1np[permAB], AB2np[permAB])
-                        
-                        _, phaselag_AB_flip, corr_info_AB_flip = zero_phaser.find_theta_isi_hilbert(AB2np[permAB], AB1np[permAB])
-                        _, phaselag_BA, corr_info_BA = zero_phaser.find_theta_isi_hilbert(BA1np[permBA], BA2np[permBA])
-                        _, phaselag_BA_flip, corr_info_BA_flip = zero_phaser.find_theta_isi_hilbert(BA2np[permBA], BA1np[permBA])
-                        
-                        if np.isnan(phaselag_AB) or np.isnan(phaselag_BA):
-                            self.seed_num += 1
-                            continue
-                        
-                        
-                        for key in added_field_df_dict.keys():
-                            added_field_df_dict[key].append(df_sampled[key].iloc[i])
-
-
-                        added_field_df_dict['phaselag_AB'][-1] = phaselag_AB
-                        added_field_df_dict['phaselag_BA'][-1] = phaselag_BA
-                        added_field_df_dict['phaselag_AB_flip'][-1] = phaselag_AB_flip
-                        added_field_df_dict['phaselag_BA_flip'][-1] = phaselag_BA_flip
-                        added_field_df_dict['AB_tsp1'][-1] = AB1
-                        added_field_df_dict['AB_tsp2'][-1] = AB2
-                        added_field_df_dict['BA_tsp1'][-1] = BA1
-                        added_field_df_dict['BA_tsp2'][-1] = BA2
-                        added_field_df_dict['corr_info_AB'][-1] = corr_info_AB
-                        added_field_df_dict['corr_info_BA'][-1] = corr_info_BA
-
-
-                        current_iter += 1
-                        self.seed_num += 1
-
-
-                    added_field_df = pd.DataFrame(added_field_df_dict)
-                    self.field_df = pd.concat([self.field_df, added_field_df], axis=0, ignore_index=True, sort=False)
-                    
-        _ = self._get_bs_size()
-        return self.field_df

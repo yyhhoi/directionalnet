@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import random
 
+import torch
 from scipy.interpolate import interp1d
 from scipy.special import comb
 from scipy.stats import pearsonr, vonmises, norm, ranksums, f as fdist, fisher_exact
@@ -585,94 +586,6 @@ class IndataProcessor:
         pass_df = pd.DataFrame(pass_dict)
         return pass_df
 
-    def construct_singlefield_passdf_all(self, tok, tsp, interp_x, interp_y, interp_angle):
-
-        pass_dict = dict(x=[], y=[], t=[], v=[], angle=[], tsp=[], spikex=[], spikey=[], spikeangle=[],
-                         straightrank=[], chunked=[], duration=[], num_spikes=[])
-        all_passidx = segment_passes(tok)
-
-        for pid1, pid2 in all_passidx:
-            # segment by speed
-            belowspeed_idx = self.speedmask_idx[(self.speedmask_idx >= pid1) & (self.speedmask_idx < pid2)]
-            if belowspeed_idx.shape[0] >= 1:  # If there is at least one split (based on speed)
-                all_segmentidx = [pid1] + list(belowspeed_idx) + [pid2]
-                for j in range(len(all_segmentidx)-1):
-                    chunkid = j+1
-                    jid1, jid2 = all_segmentidx[j], all_segmentidx[j+1]
-                    x_in = self.x[jid1:jid2]
-                    y_in = self.y[jid1:jid2]
-                    t_in = self.t[jid1:jid2]
-                    v_in = self.speed[jid1:jid2]
-                    angle_in = self.angle[jid1:jid2]
-
-                    if t_in.shape[0] < 2:
-                        continue
-
-                    # Spike counts
-                    tsp_in = tsp[(tsp < t_in.max()) & (tsp >= t_in.min())]
-                    num_spikes = tsp_in.shape[0]
-
-                    # Straightness constraint
-                    straightrank = compute_straightness(angle_in)
-
-                    # Minimum duration constraint
-                    duration = t_in.max() - t_in.min()
-
-                    pass_dict['x'].append(x_in)
-                    pass_dict['y'].append(y_in)
-                    pass_dict['t'].append(t_in)
-                    pass_dict['v'].append(v_in)
-                    pass_dict['angle'].append(angle_in)
-                    pass_dict['tsp'].append(tsp_in)
-                    pass_dict['spikex'].append(interp_x(tsp_in))
-                    pass_dict['spikey'].append(interp_y(tsp_in))
-                    pass_dict['spikeangle'].append(interp_angle(tsp_in))
-                    pass_dict['straightrank'].append(straightrank)
-                    pass_dict['chunked'].append(chunkid)
-                    pass_dict['num_spikes'].append(num_spikes)
-                    pass_dict['duration'].append(duration)
-
-
-            else:  # If all speed is above threshold and no further spilting is needed
-
-                chunkid = 0
-                x_in = self.x[pid1:pid2]
-                y_in = self.y[pid1:pid2]
-                t_in = self.t[pid1:pid2]
-                v_in = self.speed[pid1:pid2]
-                angle_in = self.angle[pid1:pid2]
-
-                if t_in.shape[0] < 3:
-                    continue
-
-                # Spike counts
-                tsp_in = tsp[(tsp < t_in.max()) & (tsp >= t_in.min())]
-                num_spikes = tsp_in.shape[0]
-
-                # Straightness constraint
-                straightrank = compute_straightness(angle_in)
-
-                # Minimum duration constraint
-                duration = t_in.max() - t_in.min()
-
-                pass_dict['x'].append(x_in)
-                pass_dict['y'].append(y_in)
-                pass_dict['t'].append(t_in)
-                pass_dict['v'].append(v_in)
-                pass_dict['angle'].append(angle_in)
-                pass_dict['tsp'].append(tsp_in)
-                pass_dict['spikex'].append(interp_x(tsp_in))
-                pass_dict['spikey'].append(interp_y(tsp_in))
-                pass_dict['spikeangle'].append(interp_angle(tsp_in))
-                pass_dict['straightrank'].append(straightrank)
-                pass_dict['chunked'].append(chunkid)
-                pass_dict['num_spikes'].append(num_spikes)
-                pass_dict['duration'].append(duration)
-
-        pass_df = pd.DataFrame(pass_dict)
-        return pass_df
-
-
     def construct_pairfield_passdf(self, tok_pair, tok1, tok2, tsp1, tsp2, interp_x, interp_y, interp_angle):
 
         pass_dict = dict(x=[], y=[], t=[], v=[], angle=[], passidx=[], straightrank=[], infield1=[], infield2=[],
@@ -812,300 +725,6 @@ class IndataProcessor:
         pass_df = pd.DataFrame(pass_dict)
         return pass_df
 
-
-
-    def construct_pairfield_passdf(self, tok_pair, tok1, tok2, tsp1, tsp2, interp_x, interp_y, interp_angle):
-
-        pass_dict = dict(x=[], y=[], t=[], v=[], angle=[], passidx=[], straightrank=[], infield1=[], infield2=[],
-                         chunked=[], direction=[], rejected=[],
-                         tsp1=[], spike1x=[], spike1y=[], spike1angle=[],
-                         tsp2=[], spike2x=[], spike2y=[], spike2angle=[])
-        all_passidx = segment_passes(tok_pair)
-        for pid1, pid2 in all_passidx:
-            # segment by speed
-            belowspeed_idx = self.speedmask_idx[(self.speedmask_idx >= pid1) & (self.speedmask_idx < pid2)]
-            if belowspeed_idx.shape[0] >= 1:  # If there is at least one split (based on speed)
-                all_segmentidx = [pid1] + list(belowspeed_idx) + [pid2]
-                for j in range(len(all_segmentidx)-1):
-
-                    jid1, jid2 = all_segmentidx[j], all_segmentidx[j+1]
-                    chunkid = j+1
-                    rejected = False
-
-                    x_in = self.x[jid1:jid2]
-                    y_in = self.y[jid1:jid2]
-                    t_in = self.t[jid1:jid2]
-                    v_in = self.speed[jid1:jid2]
-                    angle_in = self.angle[jid1:jid2]
-
-                    if t_in.shape[0] < 3:
-                        continue
-
-                    # Spike count threshold, at least 2
-                    tsp1_in = tsp1[(tsp1 < t_in.max()) & (tsp1 >= t_in.min())]
-                    tsp2_in = tsp2[(tsp2 < t_in.max()) & (tsp2 >= t_in.min())]
-
-                    if (tsp1_in.shape[0] < 2) and ((tsp2_in.shape[0] < 2)):
-                        rejected = True
-
-                    # Straightness constraint
-                    straightrank = compute_straightness(angle_in)
-                    if straightrank < self.sthresh:
-                        rejected = True
-
-                    # Minimum duration constraint
-                    if (t_in.shape[0] < 5) or ((t_in[-1]-t_in[0]) < self.minpasstime):
-                        rejected = True
-
-                    # Border crossing
-                    infield1 = tok1[jid1:jid2]
-                    infield2 = tok2[jid1:jid2]
-                    loc, direction = ThetaEstimator.find_direction(infield1, infield2)
-                    cross1 = np.sum(np.abs(np.diff(infield1)))
-                    cross2 = np.sum(np.abs(np.diff(infield2)))
-                    if (cross1 > 1) or (cross2 > 1):
-                        direction = None
-
-
-                    pass_dict['x'].append(x_in)
-                    pass_dict['y'].append(y_in)
-                    pass_dict['t'].append(t_in)
-                    pass_dict['v'].append(v_in)
-                    pass_dict['angle'].append(angle_in)
-                    pass_dict['passidx'].append((jid1, jid2))
-                    pass_dict['straightrank'].append(straightrank)
-                    pass_dict['infield1'].append(infield1)
-                    pass_dict['infield2'].append(infield2)
-                    pass_dict['chunked'].append(chunkid)
-                    pass_dict['direction'].append(direction)
-                    pass_dict['rejected'].append(rejected)
-
-
-                    pass_dict['tsp1'].append(tsp1_in)
-                    pass_dict['spike1x'].append(interp_x(tsp1_in))
-                    pass_dict['spike1y'].append(interp_y(tsp1_in))
-                    pass_dict['spike1angle'].append(interp_angle(tsp1_in))
-                    pass_dict['tsp2'].append(tsp2_in)
-                    pass_dict['spike2x'].append(interp_x(tsp2_in))
-                    pass_dict['spike2y'].append(interp_y(tsp2_in))
-                    pass_dict['spike2angle'].append(interp_angle(tsp2_in))
-
-
-            else:  # If all speed is above threshold and no further spilting is needed
-                rejected = False
-                chunkid = 0
-                x_in = self.x[pid1:pid2]
-                y_in = self.y[pid1:pid2]
-                t_in = self.t[pid1:pid2]
-                v_in = self.speed[pid1:pid2]
-                angle_in = self.angle[pid1:pid2]
-
-                if t_in.shape[0] < 3:
-                    continue
-
-                # Spike count threshold, at least 2
-                tsp1_in = tsp1[(tsp1 < t_in.max()) & (tsp1 >= t_in.min())]
-                tsp2_in = tsp2[(tsp2 < t_in.max()) & (tsp2 >= t_in.min())]
-
-                if (tsp1_in.shape[0] < 2) and ((tsp2_in.shape[0] < 2)):
-                    rejected = True
-
-                # Straightness constraint
-                straightrank = compute_straightness(angle_in)
-                if straightrank < self.sthresh:
-                    rejected = True
-
-                # Minimum duration constraint
-                if (t_in.shape[0] < 5) or ((t_in[-1]-t_in[0]) < self.minpasstime):
-                    rejected = True
-
-                # Border crossing
-                infield1 = tok1[pid1:pid2]
-                infield2 = tok2[pid1:pid2]
-                loc, direction = ThetaEstimator.find_direction(infield1, infield2)
-                cross1 = np.sum(np.abs(np.diff(infield1)))
-                cross2 = np.sum(np.abs(np.diff(infield2)))
-                if (cross1 > 1) or (cross2 > 1):
-                    rejected = True
-
-
-                pass_dict['x'].append(x_in)
-                pass_dict['y'].append(y_in)
-                pass_dict['t'].append(t_in)
-                pass_dict['v'].append(v_in)
-                pass_dict['angle'].append(angle_in)
-                pass_dict['passidx'].append((pid1, pid2))
-                pass_dict['straightrank'].append(straightrank)
-                pass_dict['infield1'].append(infield1)
-                pass_dict['infield2'].append(infield2)
-                pass_dict['chunked'].append(chunkid)
-                pass_dict['direction'].append(direction)
-                pass_dict['rejected'].append(rejected)
-
-                pass_dict['tsp1'].append(tsp1_in)
-                pass_dict['spike1x'].append(interp_x(tsp1_in))
-                pass_dict['spike1y'].append(interp_y(tsp1_in))
-                pass_dict['spike1angle'].append(interp_angle(tsp1_in))
-                pass_dict['tsp2'].append(tsp2_in)
-                pass_dict['spike2x'].append(interp_x(tsp2_in))
-                pass_dict['spike2y'].append(interp_y(tsp2_in))
-                pass_dict['spike2angle'].append(interp_angle(tsp2_in))
-        pass_df = pd.DataFrame(pass_dict)
-        return pass_df
-
-
-    def construct_pairfield_passdf_all(self, tok_pair, tok1, tok2, tsp1, tsp2, interp_x, interp_y, interp_angle):
-
-        pass_dict = dict(x=[], y=[], t=[], v=[], angle=[], passidx=[], straightrank=[],
-                         chunked=[], direction=[], duration=[],
-                         tsp1=[], spike1x=[], spike1y=[], spike1angle=[], num_spikes1=[], infield1=[],
-                         tsp2=[], spike2x=[], spike2y=[], spike2angle=[], num_spikes2=[], infield2=[],
-                         tsp_pair=[], num_spikes_pair=[])
-        all_passidx = segment_passes(tok_pair)
-        for pid1, pid2 in all_passidx:
-            # segment by speed
-            belowspeed_idx = self.speedmask_idx[(self.speedmask_idx >= pid1) & (self.speedmask_idx < pid2)]
-            if belowspeed_idx.shape[0] >= 1:  # If there is at least one split (based on speed)
-                all_segmentidx = [pid1] + list(belowspeed_idx) + [pid2]
-                for j in range(len(all_segmentidx)-1):
-
-                    jid1, jid2 = all_segmentidx[j], all_segmentidx[j+1]
-                    chunkid = j+1
-
-                    x_in = self.x[jid1:jid2]
-                    y_in = self.y[jid1:jid2]
-                    t_in = self.t[jid1:jid2]
-                    v_in = self.speed[jid1:jid2]
-                    angle_in = self.angle[jid1:jid2]
-
-                    if t_in.shape[0] < 2:
-                        continue
-
-                    # Spike count
-                    tsp1_in = tsp1[(tsp1 < t_in.max()) & (tsp1 >= t_in.min())]
-                    tsp2_in = tsp2[(tsp2 < t_in.max()) & (tsp2 >= t_in.min())]
-                    num_spikes1 = tsp1_in.shape[0]
-                    num_spikes2 = tsp2_in.shape[0]
-
-                    # Paired spikes
-                    tsp1_idx, tsp2_idx = find_pair_times(tsp1_in, tsp2_in)
-                    tsp_pair = np.concatenate([tsp1_in[tsp1_idx], tsp2_in[tsp2_idx]])
-                    num_spikes_pair = tsp_pair.shape[0]
-
-
-                    # Straightness constraint
-                    straightrank = compute_straightness(angle_in)
-
-                    # Minimum duration constraint
-                    duration = t_in.max() - t_in.min()
-
-
-                    # Border crossing
-                    infield1 = tok1[jid1:jid2]
-                    infield2 = tok2[jid1:jid2]
-                    loc, direction = ThetaEstimator.find_direction(infield1, infield2)
-                    cross1 = np.sum(np.abs(np.diff(infield1)))
-                    cross2 = np.sum(np.abs(np.diff(infield2)))
-                    if (cross1 > 1) or (cross2 > 1):
-                        direction = None
-
-
-                    pass_dict['x'].append(x_in)
-                    pass_dict['y'].append(y_in)
-                    pass_dict['t'].append(t_in)
-                    pass_dict['v'].append(v_in)
-                    pass_dict['angle'].append(angle_in)
-                    pass_dict['passidx'].append((jid1, jid2))
-                    pass_dict['straightrank'].append(straightrank)
-                    pass_dict['chunked'].append(chunkid)
-                    pass_dict['direction'].append(direction)
-                    pass_dict['duration'].append(duration)
-
-                    pass_dict['tsp1'].append(tsp1_in)
-                    pass_dict['spike1x'].append(interp_x(tsp1_in))
-                    pass_dict['spike1y'].append(interp_y(tsp1_in))
-                    pass_dict['spike1angle'].append(interp_angle(tsp1_in))
-                    pass_dict['num_spikes1'].append(num_spikes1)
-                    pass_dict['infield1'].append(infield1)
-
-                    pass_dict['tsp2'].append(tsp2_in)
-                    pass_dict['spike2x'].append(interp_x(tsp2_in))
-                    pass_dict['spike2y'].append(interp_y(tsp2_in))
-                    pass_dict['spike2angle'].append(interp_angle(tsp2_in))
-                    pass_dict['num_spikes2'].append(num_spikes2)
-                    pass_dict['infield2'].append(infield2)
-
-                    pass_dict['tsp_pair'].append(tsp_pair)
-                    pass_dict['num_spikes_pair'].append(num_spikes_pair)
-
-            else:  # If all speed is above threshold and no further spilting is needed
-                chunkid = 0
-                x_in = self.x[pid1:pid2]
-                y_in = self.y[pid1:pid2]
-                t_in = self.t[pid1:pid2]
-                v_in = self.speed[pid1:pid2]
-                angle_in = self.angle[pid1:pid2]
-
-                if t_in.shape[0] < 2:
-                    continue
-
-                # Spike count threshold
-                tsp1_in = tsp1[(tsp1 < t_in.max()) & (tsp1 >= t_in.min())]
-                tsp2_in = tsp2[(tsp2 < t_in.max()) & (tsp2 >= t_in.min())]
-                num_spikes1 = tsp1_in.shape[0]
-                num_spikes2 = tsp2_in.shape[0]
-
-                # Paired spikes
-                tsp1_idx, tsp2_idx = find_pair_times(tsp1_in, tsp2_in)
-                tsp_pair = np.concatenate([tsp1_in[tsp1_idx], tsp2_in[tsp2_idx]])
-                num_spikes_pair = tsp_pair.shape[0]
-
-                # Straightness constraint
-                straightrank = compute_straightness(angle_in)
-
-                # Minimum duration constraint
-                duration = t_in.max() - t_in.min()
-
-
-                # Border crossing
-                infield1 = tok1[pid1:pid2]
-                infield2 = tok2[pid1:pid2]
-                loc, direction = ThetaEstimator.find_direction(infield1, infield2)
-                cross1 = np.sum(np.abs(np.diff(infield1)))
-                cross2 = np.sum(np.abs(np.diff(infield2)))
-                if (cross1 > 1) or (cross2 > 1):
-                    direction = None
-
-
-                pass_dict['x'].append(x_in)
-                pass_dict['y'].append(y_in)
-                pass_dict['t'].append(t_in)
-                pass_dict['v'].append(v_in)
-                pass_dict['angle'].append(angle_in)
-                pass_dict['passidx'].append((pid1, pid2))
-                pass_dict['straightrank'].append(straightrank)
-                pass_dict['chunked'].append(chunkid)
-                pass_dict['direction'].append(direction)
-                pass_dict['duration'].append(duration)
-
-                pass_dict['tsp1'].append(tsp1_in)
-                pass_dict['spike1x'].append(interp_x(tsp1_in))
-                pass_dict['spike1y'].append(interp_y(tsp1_in))
-                pass_dict['spike1angle'].append(interp_angle(tsp1_in))
-                pass_dict['num_spikes1'].append(num_spikes1)
-                pass_dict['infield1'].append(infield1)
-
-                pass_dict['tsp2'].append(tsp2_in)
-                pass_dict['spike2x'].append(interp_x(tsp2_in))
-                pass_dict['spike2y'].append(interp_y(tsp2_in))
-                pass_dict['spike2angle'].append(interp_angle(tsp2_in))
-                pass_dict['num_spikes2'].append(num_spikes2)
-                pass_dict['infield2'].append(infield2)
-
-                pass_dict['tsp_pair'].append(tsp_pair)
-                pass_dict['num_spikes_pair'].append(num_spikes_pair)
-        pass_df = pd.DataFrame(pass_dict)
-        return pass_df
 
 
     def rejection_singlefield(self, tsp, t_in, angle_in):
@@ -1894,12 +1513,39 @@ def cal_hd(x, y):
     hd = torch.cat([hd, hd[[-1]]])
     return hd
 
+def cal_hd_np(x, y):
+    hd = np.angle(np.diff(x) + 1j * np.diff(y))  # angle is converted to (-pi, pi)
+    hd = np.concatenate([hd, hd[[-1]]])
+    return hd
+
 def get_nidx(x, y, a, xxtun, yytun, aatun):
     nidx = torch.argmin((xxtun - x) ** 2 + (yytun - y) ** 2 + (aatun - a) ** 2)
     return nidx.item()
 
+def get_nidx_np(x, y, a, xxtun, yytun, aatun):
+    nidx = np.argmin((xxtun - x) ** 2 + (yytun - y) ** 2 + (aatun - a) ** 2)
+    return nidx
+
+def get_nidx_1d_np(x, a, xtun, atun):
+    nidx = np.argmin((xtun - x) ** 2 + (atun - a) ** 2)
+    return nidx
+
 def fr_transfer(I):
-    """for alpha = 1, In-place operation
+    """for alpha = 1
     """
-    I[I <= 4] = torch.log(1 + torch.exp(I[I <= 4]))
-    return I
+    outI = I.clone()
+    outI[I <= 4] = torch.log(1 + torch.exp(I[I <= 4]))
+    return outI
+
+
+def poisson_sampling(rates, dt, refrac=0, seed=None):
+    if seed:
+        np.random.seed(seed)
+    tidxsp = np.where(np.random.rand(rates.shape[0]) < (rates * dt))[0]
+    if refrac > 0:
+        refrac_idx = np.where(np.diff(tidxsp)>=refrac)[0]
+        tidxsp = tidxsp[refrac_idx]
+    return tidxsp
+
+def transfer_expo(x):
+    return 30 - 30*np.exp(-x/4)

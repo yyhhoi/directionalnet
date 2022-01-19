@@ -22,7 +22,7 @@ def fdr_bh_correction(pvals):
     return qvals.squeeze().tolist()
 
 def stat_record(fn, overwrite, *args):
-    rootdir = 'writting/stats_allchunk'
+    rootdir = 'writting/stats'
     os.makedirs(rootdir, exist_ok=True)
     pth = os.path.join(rootdir, fn)
 

@@ -1,13 +1,10 @@
 import pickle
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from os.path import join
 import torch
-from scipy.interpolate import interp1d
-from pycircstat.descriptive import cdiff, mean as circmean
-from library.linear_circular_r import rcc
-from library.comput_utils import cal_hd, get_nidx, fr_transfer
+from pycircstat.descriptive import cdiff
+from library.comput_utils import fr_transfer, transfer_expo
 
 # # Load trajectory
 test_traj_dir = 'data/test_traj'
@@ -36,12 +33,12 @@ traj_hd = torch.from_numpy(trajdf['angle'].to_numpy())
 traj = torch.stack([traj_x, traj_y, traj_hd])
 
 # # Positional & directional input
-Ipos_max, Ipos_sd = 10, 0.6 / np.pi * 40  # in T-maze, moving task
-Iangle_max, Iangle_sd = 10, 1.25
+Ipos_max, Ipos_sd = 10, 0.6 / np.pi * 40
+Iangle_max, Iangle_sd = 5, 1.25
 
 # # Excitatory synapse
-wmax_ex = 400  # 66.67
-wmax_offset = 300  # 50
+wmax_ex = 500  # 66.67
+wmax_offset = 375  # 50
 w_ex_pos_sd = 0.5 / np.pi * 40  # 0.3/pi*40
 postun = torch.stack([xxtun1d, yytun1d]).T
 postun_repeatrows = torch.stack([postun] * n_total)
@@ -115,7 +112,8 @@ for tidx in range(t_s.shape[0]):
 NeuronDF = pd.DataFrame(dict(neuronx=xxtun1d, neurony=yytun1d, neurona=aatun1d))
 BehDF = pd.DataFrame(indata_dict)
 simdata = dict(NeuronDF=NeuronDF, BehDF=BehDF, Weights=w_ex, Activity=allm.numpy(),
+               ExpoActivity=transfer_expo(allm.numpy()),
                theta_freq=theta_freq)
 
-with open(join('data/simulated.pickle'), 'wb') as fh:
+with open(join('data/simulated_Idirect-5.pickle'), 'wb') as fh:
     pickle.dump(simdata, fh)

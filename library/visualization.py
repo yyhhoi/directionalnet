@@ -10,7 +10,7 @@ from library.utils import load_pickle
 from library.stattests import p2str
 from library.comput_utils import dist_overlap, correlate, smooth_xy, \
     normsig, linear_circular_gauss_density, circular_density_1d, linear_density_1d, fisherexact, midedges, ranksums
-from library.correlogram import Crosser, ThetaEstimator, Bootstrapper
+from library.correlogram import Crosser, ThetaEstimator
 from pycircstat.tests import watson_williams, rayleigh
 
 from scipy import interpolate

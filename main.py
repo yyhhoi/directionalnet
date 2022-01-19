@@ -349,5 +349,5 @@ def params_search(save_pth):
 save_dir = 'plots/ECstf_start0_end2_tau1_squared'
 os.makedirs(save_dir, exist_ok=True)
 save_pth = join(save_dir, 'Imax7_Iangle15_Isd1_STDw3_Ustd0f375.png')
-
+params_search(save_pth)
 

@@ -1,8 +1,7 @@
-# The code contains the latest result, described as below:
-# Environment: 1D track, EC-STF, CA3-STD, STP-Tau=0.5s
-# Results: precession exists for CH, IB, RS, all with ~0.5 rad phase difference
-# in marginal phase means and onsets between best and and worst angles
+# 1D track, EC-STF, CA3-STD, STP-Tau=0.5s, precession exists for CH, IB, RS
+# parameters are tuned for spike delay 4ms, but 2ms also works
 from os.path import join
+
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl

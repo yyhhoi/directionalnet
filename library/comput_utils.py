@@ -1530,6 +1530,11 @@ def get_nidx_1d_np(x, a, xtun, atun):
     nidx = np.argmin((xtun - x) ** 2 + (atun - a) ** 2)
     return nidx
 
+def get_nidx_xy_np(x, y, xxtun, yytun):
+    nidx = np.argmin((xxtun - x) ** 2 + (yytun - y) ** 2)
+    return nidx
+
+
 def fr_transfer(I):
     """for alpha = 1
     """

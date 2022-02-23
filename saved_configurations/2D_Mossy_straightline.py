@@ -4,7 +4,6 @@
 # Results: Both-worst direction is more intrinsic than Both-best
 # Changing I3-6 to I4-8 will make the above intrinsic trend more apparent
 
-
 from os.path import join
 import time
 import numpy as np
@@ -55,14 +54,14 @@ save_dir = 'plots/BoxEC_newGraph_Mos_I%d-%d_WCA3-%d_Wmos-%d-%d-%d'%(Ipos_max, Ia
 os.makedirs(save_dir, exist_ok=True)
 # Parameter Scan
 mos_shifts = ((4, 0, "Same"), (-4, 0, 'Opp'))
-wmax_biMosIns = [0, 140]
-# wmax_biMosIns = [0, 10]
+wmax_biMosIns = [0, 60, 140]
+
 for wmax_biMosIn in wmax_biMosIns:
     wmax_inMos = wmax_biMosIn
     wmax_Mosin = wmax_biMosIn
     mos_corr_dict = dict()
     for mos_xshift, mos_yshift, mos_label in mos_shifts:
-        save_pth = join(save_dir, 'BoxEC_MosX%dY%d_WMosIn-%d_WinMos-%d.pdf'%(mos_xshift, mos_yshift, wmax_Mosin, wmax_inMos))
+        save_pth = join(save_dir, 'BoxEC_MosX%dY%d_WMosIn-%d_WinMos-%d.png'%(mos_xshift, mos_yshift, wmax_Mosin, wmax_inMos))
         print(save_pth)
         # if os.path.exists(save_pth):
         #     print('Exists. Skipped')
@@ -316,7 +315,7 @@ for wmax_biMosIn in wmax_biMosIns:
             nidx = np.argmin(np.square(run_x - xxtun1d_ca3) + np.square(run_y - yytun1d_ca3))
             all_nidx[i] = nidx
         all_nidx = np.unique(all_nidx).astype(int)
-        egnidxs = all_nidx[[13, 19, 24]]
+        egnidxs = all_nidx[[13, 19]]
         eg_cs = ['r', 'darkgreen']
         bestpair_nidxs = all_nidx[[13, 13+8]]
         worstpair_nidxs = all_nidx[[19, 19+8]]
@@ -357,13 +356,13 @@ for wmax_biMosIn in wmax_biMosIns:
         for i in theta_cutidx:
             axbig.axvline(t[i], c='gray', linewidth=0.75, alpha=0.5)
 
-        axbig.annotate('direction\nGray lines = Theta phase 0\nEC phase shift = %d deg'%(360-np.rad2deg(EC_phase)),
+        axbig.annotate('Mossy vec (%d, %d)\nGray lines = Theta phase 0\nEC phase shift = %d deg'%(mos_xshift, mos_yshift, 360-np.rad2deg(EC_phase)),
                        xy=(0.02, 0.75), xycoords='axes fraction', fontsize=12)
         axbig.tick_params(labelsize=legendsize)
         cbar = fig.colorbar(mappable, ax=axbig, ticks=[0, 1, 2], shrink=0.5)
         cbar.set_label('Syn Efficacy', rotation=90, fontsize=legendsize)
 
-        for axid, egnidx in enumerate(egnidxs[:2]):
+        for axid, egnidx in enumerate(egnidxs):
 
             # Phase precession
             tidxsp_eg = SpikeDF.loc[SpikeDF['neuronid']==egnidx, 'tidxsp'].to_numpy()
@@ -409,18 +408,39 @@ for wmax_biMosIn in wmax_biMosIns:
 
             else:
                 # ax[1, 3+axid].axis('off')
-                nidx_mostmp = np.argmin(np.square(-25 - xxtun1d_mos) + np.square(25 - yytun1d_mos))
-                nidx_mos = endidx_ca3 + nidx_mostmp
-                w_mosplot = w[:endidx_ca3, nidx_mos].reshape(*xxtun2d_ca3.shape)
-                ax[1, 3+axid].pcolormesh(xxtun2d_ca3, yytun2d_ca3, w_mosplot, shading='auto', cmap='Greens')
-                ax[1, 3+axid].scatter(xxtun1d[nidx_mos], yytun1d[nidx_mos], marker='x', color='red', label='Presynaptic Mos example')
+                for egnidxtmp, egaxidx, egtimes in zip(egnidxs, [0, 1], [(5000, 6000), (8000, 9000)]):
+                    tidxstart, tidxend = egtimes  # in index = 0.1ms
+                    tslice, Isynslice = t[tidxstart:tidxend], Isyn_pop[tidxstart:tidxend, egnidxtmp]
 
-                ax[1, 3+axid].arrow(traj_x[0], traj_y[0], traj_x.max() - traj_x.min(), traj_y.max() - traj_y.min(), color='k', label='Trajectory', head_width=2)
-                ax[1, 3+axid].arrow(0, 10, mos_xshift, mos_yshift, color='green', label='Mossy direction', head_width=2)
-                ax[1, 3+axid].set_xlim(xmin, xmax)
-                ax[1, 3+axid].set_ylim(ymin, ymax)
-                customlegend(ax[1, 3+axid], fontsize=legendsize)
-                ax[1, 3+axid].set_title('Mos postsyn weight heatmap\n(same direction at all (x,y) locations)', fontsize=legendsize)
+                    ax[1, 3+axid].plot(tslice-tslice.min(), Isynslice, color=eg_cs[egaxidx], linewidth=0.5)
+                    mask_tmp = (SpikeDF['neuronid']==egnidxtmp) & (SpikeDF['tidxsp']>tidxstart) & (SpikeDF['tidxsp']<=tidxend)
+                    tidxsp_eg_tmp = SpikeDF.loc[mask_tmp, 'tidxsp'].to_numpy()
+                    tsp_offset = t[tidxsp_eg_tmp]-tslice.min()
+                    aver_freq = tsp_offset.shape[0] / (tsp_offset.max() - tsp_offset.min()) * (1e3)
+
+                    ax[1, 3+axid].eventplot(tsp_offset, lineoffsets=Isynslice.max()*1.1, linelengths=1, linewidths=0.5, color=eg_cs[egaxidx], label='freq=%0.2fHz'%(aver_freq))
+                    ax[1, 3+axid].set_xticks(np.arange(0, 101, 10))
+                    ax[1, 3+axid].set_xticks(np.arange(0, 101, 5), minor=True)
+                    ax[1, 3+axid].set_ylim(0, Isynslice.max()*1.3)
+                    customlegend(ax[1, 3+axid], fontsize=legendsize)
+
+
+
+
+
+
+                # nidx_mostmp = np.argmin(np.square(-25 - xxtun1d_mos) + np.square(25 - yytun1d_mos))
+                # nidx_mos = endidx_ca3 + nidx_mostmp
+                # w_mosplot = w[:endidx_ca3, nidx_mos].reshape(*xxtun2d_ca3.shape)
+                # ax[1, 3+axid].pcolormesh(xxtun2d_ca3, yytun2d_ca3, w_mosplot, shading='auto', cmap='Greens')
+                # ax[1, 3+axid].scatter(xxtun1d[nidx_mos], yytun1d[nidx_mos], marker='x', color='red', label='Presynaptic Mos example')
+                #
+                # ax[1, 3+axid].arrow(traj_x[0], traj_y[0], traj_x.max() - traj_x.min(), traj_y.max() - traj_y.min(), color='k', label='Trajectory', head_width=2)
+                # ax[1, 3+axid].arrow(0, 10, mos_xshift, mos_yshift, color='green', label='Mossy direction', head_width=2)
+                # ax[1, 3+axid].set_xlim(xmin, xmax)
+                # ax[1, 3+axid].set_ylim(ymin, ymax)
+                # customlegend(ax[1, 3+axid], fontsize=legendsize)
+                # ax[1, 3+axid].set_title('Mos postsyn weight heatmap\n(same direction at all (x,y) locations)', fontsize=legendsize)
 
 
 

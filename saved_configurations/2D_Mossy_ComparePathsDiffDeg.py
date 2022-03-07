@@ -1,5 +1,5 @@
-# Different STD across different post-synaptic neurons
-
+# Current addition: Interference of multiple mossy paths
+# Parameters not yet tuned
 from os.path import join
 import time
 import numpy as np
@@ -67,7 +67,6 @@ mos_endx180, mos_endy180 = mos_startx180 - projl_MosCA3, mos_starty180
 mos_configs = (
     (mos_startx0, mos_starty0, mos_endx0, mos_endy0, 0, 'x'),
     (mos_startx180, mos_starty180, mos_endx180, mos_endy180, 180, 'x'),
-    (mos_startx0, mos_starty0, mos_endx0, mos_endy0, 999, 'x'),
 )
 
 # Constant
@@ -84,13 +83,13 @@ izhi_a_in = 0.02  # LTS
 izhi_b_in = 0.25
 izhi_c_in = -65
 izhi_d_in = 2
-U_stdx = 0.35
+U_stdx = 0.7
 # wmax_ca3ca3 = 0  # 120
 wmax_mosmos = 100  # 100
-wmax_ca3mos = 1000  # 600
-wmax_mosca3 = 1000  # 600
-wmax_Mosin = 300
-wmax_inMos = 10
+wmax_ca3mos = 1500  # 600
+wmax_mosca3 = 1500  # 600
+wmax_Mosin = 100
+wmax_inMos = 6
 wmax_CA3in = 100
 wmax_inCA3 = 6
 wmax_inin = 0  # 0
@@ -103,17 +102,18 @@ os.makedirs(save_dir, exist_ok=True)
 # Ipos_maxs = np.arange(0.5, 5.5, 0.5)
 # for Ipos_max in Ipos_maxs:
 #     Iangle_diff = Ipos_max * 2
-for wmax_ca3ca3 in [400, 600, 800]:
-    mos_corr_dict = dict()
-    for mos_startx1, mos_starty1, mos_endx1, mos_endy1, mosproj_deg1, sortby1 in mos_configs:
+for wmax_ca3ca3 in [400, 500, 600, 680]:
+
+    for mos_startx2, mos_starty2, mos_endx2, mos_endy2, mosproj_deg2, sortby2 in mos_configs:
+        mos_startx1, mos_starty1, mos_endx1, mos_endy1, mosproj_deg1, sortby1 = mos_configs[0]
 
         # pthtxt = 'I%0.2f-%0.2f.png'%(Ipos_max, Iangle_diff)
-        pthtxt = 'deg-%d_WCA3CA3_%d.png'%(mosproj_deg1, wmax_ca3ca3)
+        pthtxt = 'deg-%d_WCA3CA3_%d.png'%(mosproj_deg2, wmax_ca3ca3)
         save_pth = join(save_dir, pthtxt)
         print(save_pth)
-        # if os.path.exists(save_pth):
-        #     print('Exists. Skipped')
-        #     continue
+        if os.path.exists(save_pth):
+            print('Exists. Skipped')
+            continue
 
         # Environment & agent
         dt = 0.1 # 0.1ms
@@ -210,20 +210,16 @@ for wmax_ca3ca3 in [400, 600, 800]:
         w_mosmos = gaufunc2d(xxtun1d_mos.reshape(1, nn_mos), xxtun1d_mos.reshape(nn_mos, 1), yytun1d_mos.reshape(1, nn_mos), yytun1d_mos.reshape(nn_mos, 1), wsd_mosmos, wmax_mosmos)
 
         # Mos to CA3
-        mos_startpos = np.stack([mos_startx1, mos_starty1]).T
-        mos_endpos = np.stack([mos_endx1, mos_endy1]).T
+        mos_startpos = np.stack([np.concatenate([mos_startx1, mos_startx2]), np.concatenate([mos_starty1, mos_starty2])]).T
+        mos_endpos = np.stack([np.concatenate([mos_endx1, mos_endx2]), np.concatenate([mos_endy1, mos_endy2])]).T
         w_mosca3 = np.zeros((xxtun1d_ca3.shape[0], xxtun1d_mos.shape[0], mos_startpos.shape[0]))
-        if mosproj_deg1 != 999:
-
-            mos_act = np.zeros((posvec_mos.shape[0], mos_startpos.shape[0]))
-            for i in range(mos_startpos.shape[0]):
-                print('\rConstructing Weight matrix %d/%d'%(i, mos_startpos.shape[0]), flush=True, end='')
-                w_mosca3[:, :, i], mos_act[:, i] = createMosProjMat_p2p(mos_startpos[i, :], mos_endpos[i, :], posvec_mos, posvec_CA3, wmax_mosca3, wsd_mosca3)
-            print()
-            w_mosca3 = np.max(w_mosca3, axis=2)
-        else:
-            w_mosca3 = w_mosca3[:, :, 0]
-            print('No Mos.')
+        mos_act = np.zeros((posvec_mos.shape[0], mos_startpos.shape[0]))
+        for i in range(mos_startpos.shape[0]):
+            print('\rConstructing Weight matrix %d/%d'%(i, mos_startpos.shape[0]), flush=True, end='')
+            w_mosca3[:, :, i], mos_act[:, i] = createMosProjMat_p2p(mos_startpos[i, :], mos_endpos[i, :], posvec_mos, posvec_CA3, wmax_mosca3, wsd_mosca3)
+        print()
+        w_mosca3 = np.max(w_mosca3, axis=2)
+        mos_act = np.max(mos_act, axis=1).reshape(*xxtun2d_mos.shape) * wmax_mosca3
 
         # Inhibitory weights
         np.random.seed(0)
@@ -316,6 +312,9 @@ for wmax_ca3ca3 in [400, 600, 800]:
 
 
             # Total Input
+            # Itheta_arr = np.ones(nn) * Itheta[i]
+            # Itheta_arr[endidx_mos:] = 0
+            # Itotal = Isyn + Isen_fac - Itheta_arr
             Itotal = Isyn + Isen_fac - Itheta[i]
 
             # Izhikevich
@@ -410,7 +409,6 @@ for wmax_ca3ca3 in [400, 600, 800]:
         bestpair_c, worstpair_c = 'm', 'gold'
 
         # Raster plot - CA3 pyramidal
-        tsp_ras_ca3_list = []
         dxtun = xxtun1d[1] - xxtun1d[0]
         tt, traj_xx = np.meshgrid(t, xxtun1d[all_nidx])
         mappable = axbig.pcolormesh(tt, traj_xx, syneff_pop[:, all_nidx].T, shading='auto', vmin=0, vmax=2, cmap='seismic')
@@ -429,18 +427,6 @@ for wmax_ca3ca3 in [400, 600, 800]:
             else:
                 ras_c = 'lime'
             axbig.eventplot(tsp_neuron, lineoffsets=neuronx, linelengths=dxtun, linewidths=0.75, color=ras_c)
-            if tidxsp_neuron.shape[0] < 1:
-                continue
-            tsp_ras_ca3_list.append(tsp_neuron)
-        if len(tsp_ras_ca3_list) > 0:
-            binsize = 5
-            tsp_rasCA3 = np.concatenate(tsp_ras_ca3_list)
-            count_bins, edges = np.histogram(tsp_rasCA3, bins=np.arange(t.min(), t.max(), binsize))
-            rate_bins = count_bins / len(tsp_ras_ca3_list) / binsize * 1000
-            ax_ca3rate = axbig.twinx()
-            ax_ca3rate.bar(edges[:-1], rate_bins, width=np.diff(edges), align='edge', facecolor='gray', alpha=0.5, zorder=0.1)
-            ax_ca3rate.tick_params(labelsize=legendsize)
-            ax_ca3rate.set_ylim(0, 600)
 
         # Raster plot - CA3 inhibitory population
         nn_in_startidx = nn_ca3+nn_mos
@@ -452,62 +438,48 @@ for wmax_ca3ca3 in [400, 600, 800]:
             plot_onset = neuron_in_xmin+(neuronid-nn_in_startidx) * dx_in
             axbig.eventplot(tsp_neuron, lineoffsets=plot_onset, linelengths=dx_in, linewidths=0.75, color='m')
         axbig.plot(t, traj_x, c='k', linewidth=0.75)
+        theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
+        for i in theta_cutidx:
+            axbig.axvline(t[i], c='gray', linewidth=0.75, alpha=0.5)
+
         axbig.annotate('Gray lines = Theta phase 0\nEC phase shift = %d deg'%(360-np.rad2deg(EC_phase)),
                        xy=(0.02, 0.80), xycoords='axes fraction', fontsize=12)
         axbig.tick_params(labelsize=legendsize)
         cbar = fig.colorbar(mappable, ax=axbig, ticks=[0, 1, 2], shrink=0.5)
         cbar.set_label('Syn Efficacy', rotation=90, fontsize=legendsize)
 
-        # # Raster plot for mossy neurons
-        all_nidx_mos = np.zeros(traj_x.shape[0])
-        for i in range(traj_x.shape[0]):
-            nidx_tmp = np.argmin(np.square(traj_x[i] - xxtun1d_mos) + np.square(traj_y[i] - yytun1d_mos))
-            all_nidx_mos[i] = nidx_tmp + endidx_ca3
-        all_nidx_mos = np.unique(all_nidx_mos).astype(int)
-        tsp_ras_list = []
-        dxtun = xxtun1d[1] - xxtun1d[0]
-        tt, traj_xx = np.meshgrid(t, xxtun1d[all_nidx_mos])
-        mappable = axbig2.pcolormesh(tt, traj_xx, syneff_pop[:, all_nidx_mos].T, shading='auto', vmin=0, vmax=2, cmap='seismic')
-        for neuronid in all_nidx_mos:
+        # # 2. Raster - Second Mos paths
+        # Indices along mossy projections
+        mos_projtraj_x = np.linspace(mos_startx2[0], mos_startx2[-1], 100)
+        mos_projtraj_y = np.linspace(mos_starty2[0], mos_starty2[-1], 100)
+        all_nidx_proj = np.zeros(mos_projtraj_x.shape[0])
+        for i in range(mos_projtraj_x.shape[0]):
+            run_x, run_y = mos_projtraj_x[i], mos_projtraj_y[i]
+            nidx = np.argmin(np.square(run_x - xxtun1d_ca3) + np.square(run_y - yytun1d_ca3))
+            all_nidx_proj[i] = nidx
+        all_nidx_proj = np.unique(all_nidx_proj).astype(int)
+
+        # Raster plot - CA3 pyramical cells along the second mossy path
+        if sortby2 == 'y':
+            dwtun = ytun_ca3[1] - ytun_ca3[0]
+            tt, traj_ww = np.meshgrid(t, yytun1d_ca3[all_nidx_proj])
+        elif sortby2 == 'x':
+            dwtun = xtun_ca3[1] - xtun_ca3[0]
+            tt, traj_ww = np.meshgrid(t, xxtun1d_ca3[all_nidx_proj])
+        mappable2 = axbig2.pcolormesh(tt, traj_ww, syneff_pop[:, all_nidx_proj].T, shading='auto', vmin=0, vmax=2, cmap='seismic')
+        for neuronid in all_nidx_proj:
             tidxsp_neuron = SpikeDF[SpikeDF['neuronid'] == neuronid]['tidxsp']
             tsp_neuron = t[tidxsp_neuron]
-            neuronx = xxtun1d[neuronid]
-            axbig2.eventplot(tsp_neuron, lineoffsets=neuronx, linelengths=dxtun, linewidths=0.75, color='lime')
-            if tidxsp_neuron.shape[0] < 1:
-                continue
-            tsp_ras_list.append(tsp_neuron)
-        axbig2.plot(t, traj_x, c='k', linewidth=0.75)
-        if len(tsp_ras_list) > 0:
-            binsize = 5
-            tsp_rasMos = np.concatenate(tsp_ras_list)
-            count_bins, edges = np.histogram(tsp_rasMos, bins=np.arange(t.min(), t.max(), binsize))
-            rate_bins = count_bins / len(tsp_ras_list) / binsize * 1000
-            ax_mosrate = axbig2.twinx()
-            ax_mosrate.bar(edges[:-1], rate_bins, width=np.diff(edges), align='edge', facecolor='gray', alpha=0.5, zorder=0.1)
-            ax_mosrate.tick_params(labelsize=legendsize)
-            ax_mosrate.set_ylim(0, 600)
-
-
-        # # 2. Raster plot for inhibitory neurons - Zoomed in
-        tsp_rasIn_list = []
-        inzoom_egtimes = (5000, 6000)
-        for neuronid in np.arange(nn_in_startidx, nn_in_startidx+nn_in, 1):
-            tidxsp_neuron = SpikeDF[(SpikeDF['neuronid'] == neuronid) & (SpikeDF['tidxsp'] <= inzoom_egtimes[1]) & (SpikeDF['tidxsp'] > inzoom_egtimes[0])]['tidxsp']
-            if tidxsp_neuron.shape[0] < 1:
-                continue
-            tsp_neuron = t[tidxsp_neuron]
-            tsp_rasIn_list.append(tsp_neuron)
-            ax[3, 3].eventplot(tsp_neuron, lineoffsets=neuronid-nn_in_startidx, linelengths=2, linewidths=2, color='m')
-        ax[3, 3].set_xlim(inzoom_egtimes[0]/10, inzoom_egtimes[1]/10)
-        if len(tsp_rasIn_list) > 0:
-            tsp_rasIn = np.concatenate(tsp_rasIn_list)
-            binsize = 2
-            count_bins, edges = np.histogram(tsp_rasIn, bins=np.arange(inzoom_egtimes[0]/10, inzoom_egtimes[1]/10+binsize, binsize))
-            rate_bins = count_bins / len(tsp_rasIn_list) / binsize * 1000
-            ax_inrate = ax[3, 3].twinx()
-            ax_inrate.bar(edges[:-1], rate_bins, width=np.diff(edges), align='edge', facecolor='gray', alpha=0.5, zorder=0.1)
-            ax_inrate.tick_params(labelsize=legendsize)
-            ax_inrate.set_ylim(0, 600)
+            if sortby2 == 'y':
+                neuronw = yytun1d[neuronid]
+            elif sortby2 == 'x':
+                neuronw = xxtun1d[neuronid]
+            axbig2.eventplot(tsp_neuron, lineoffsets=neuronw, linelengths=dwtun, linewidths=0.75, color='lime')
+        axbig2.tick_params(labelsize=legendsize)
+        cbar2 = fig.colorbar(mappable2, ax=axbig2, ticks=[0, 1, 2], shrink=0.5)
+        cbar2.set_label('Syn Efficacy', rotation=90, fontsize=legendsize)
+        for i in theta_cutidx:
+            axbig2.axvline(t[i], c='gray', linewidth=0.75, alpha=0.5)
 
         # # 3. 4. Phase precession for two example cells
         for axid, egnidx in enumerate(egnidxs):
@@ -552,25 +524,47 @@ for wmax_ca3ca3 in [400, 600, 800]:
         axsyneff.set_ylim(-0.1, 2.1)
         axsyneff.eventplot(tsp_eg, lineoffsets = 1.8, linelength=0.1, linewidths=0.5, color='r')
         customlegend(axsyneff, fontsize=legendsize)
+        theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
+        for i in theta_cutidx:
+            ax[2, 3].axvline(t[i], c='gray', linewidth=0.75, alpha=0.5)
         axsyneff.tick_params(labelsize=legendsize)
 
         # # 6. Input synaptic currents into neuron example 1
         egaxidx = 0
         egidx_in = egnidxs[0]
+        inzoom_egtimes = (5000, 6000)
         tidxstart, tidxend = inzoom_egtimes  # in index = 0.1ms
         tslice, IsynINslice = t[tidxstart:tidxend], IsynIN_pop[tidxstart:tidxend, egidx_in]
         Isynslice = Isyn_pop[tidxstart:tidxend, egidx_in]
         IsynEXslice = IsynEX_pop[tidxstart:tidxend, egidx_in]
         tslice_offset = tslice-tslice.min()
-        ax[0, 4].plot(tslice_offset, Isynslice, color='gray', linewidth=0.5, alpha=0.7)
-        ax[0, 4].plot(tslice_offset, IsynEXslice, color='b', linewidth=0.5, alpha=0.7)
-        ax[0, 4].plot(tslice_offset, IsynINslice, color=eg_cs[egaxidx], linewidth=0.5, alpha=0.7)
-        ax[0, 4].set_xticks(np.arange(0, 101, 10))
-        ax[0, 4].set_xticks(np.arange(0, 101, 5), minor=True)
+        ax[3, 3].plot(tslice_offset, Isynslice, color='gray', linewidth=0.5, alpha=0.7)
+        ax[3, 3].plot(tslice_offset, IsynEXslice, color='b', linewidth=0.5, alpha=0.7)
+        ax[3, 3].plot(tslice_offset, IsynINslice, color=eg_cs[egaxidx], linewidth=0.5, alpha=0.7)
+        ax[3, 3].set_xticks(np.arange(0, 101, 10))
+        ax[3, 3].set_xticks(np.arange(0, 101, 5), minor=True)
 
+        # # 7. Raster plot for inhibitory neurons - Zoomed in
+        tsp_rasIn_list = []
+        for neuronid in np.arange(nn_in_startidx, nn_in_startidx+nn_in, 1):
+            tidxsp_neuron = SpikeDF[(SpikeDF['neuronid'] == neuronid) & (SpikeDF['tidxsp'] <= inzoom_egtimes[1]) & (SpikeDF['tidxsp'] > inzoom_egtimes[0])]['tidxsp']
+            if tidxsp_neuron.shape[0] < 1:
+                continue
+            tsp_neuron = t[tidxsp_neuron]
+            tsp_rasIn_list.append(tsp_neuron)
+            ax[0, 4].eventplot(tsp_neuron, lineoffsets=neuronid-nn_in_startidx, linelengths=2, linewidths=2, color='m')
+        ax[0, 4].set_xlim(inzoom_egtimes[0]/10, inzoom_egtimes[1]/10)
+        if len(tsp_rasIn_list) > 0:
+            tsp_rasIn = np.concatenate(tsp_rasIn_list)
+            binsize = 2
+            count_bins, edges = np.histogram(tsp_rasIn, bins=np.arange(inzoom_egtimes[0]/10, inzoom_egtimes[1]/10+binsize, binsize))
+            rate_bins = count_bins / len(tsp_rasIn_list) / binsize * 1000
+            ax_inrate = ax[0, 4].twinx()
+            ax_inrate.bar(edges[:-1], rate_bins, width=np.diff(edges), align='edge', facecolor='gray', alpha=0.5, zorder=0.1)
+            ax_inrate.tick_params(labelsize=legendsize)
+            ax_inrate.set_ylim(0, 600)
 
-
-        # # 7. ISI in frequency
+        # # 8. ISI in frequency
         isi_dict = dict(ca3=[], mos=[], inca3=[], inmos=[])
         isi_c = dict(ca3='r', mos='g', inca3='purple', inmos='teal')
         for neuronid in np.arange(nn):
@@ -601,7 +595,7 @@ for wmax_ca3ca3 in [400, 600, 800]:
         ax[1, 4].tick_params(axis='both', labelsize=legendsize)
 
 
-        # # 8. Correlograms
+        # # 9. Correlograms
         besttidxsp_eg1 = SpikeDF.loc[SpikeDF['neuronid']==bestpair_nidxs[0], 'tidxsp'].to_numpy()
         besttsp_eg1 = t[besttidxsp_eg1]
         besttidxsp_eg2 = SpikeDF.loc[SpikeDF['neuronid']==bestpair_nidxs[1], 'tidxsp'].to_numpy()
@@ -617,37 +611,14 @@ for wmax_ca3ca3 in [400, 600, 800]:
             legend_txt = 'Best' if egc=='m' else 'Worst'
             bins, _, _ = ax[2, 4].hist(tsp_diff, bins=edges, histtype='step', color=egc, label=legend_txt)
             ax[2, 4].set_title('Spike correlation', fontsize=legendsize)
-            mos_corr_dict['%d%s'%(mosproj_deg1, legend_txt)] = bins
         customlegend(ax[2, 4], fontsize=legendsize)
 
-        if mosproj_deg1 == 180:
-            samebest_bins, oppbest_bins = mos_corr_dict['0Best'], mos_corr_dict['180Best']
-            sameworst_bins, oppworst_bins = mos_corr_dict['0Worst'], mos_corr_dict['180Worst']
 
-            best_ex_tmp, _ = pearsonr(samebest_bins, oppbest_bins)
-            worst_ex_tmp, _ = pearsonr(sameworst_bins, oppworst_bins)
-            best_in_tmp, _ = pearsonr(samebest_bins, oppbest_bins[::-1])
-            worst_in_tmp, _ = pearsonr(sameworst_bins, oppworst_bins[::-1])
-            best_ex = (best_ex_tmp + 1)/2
-            worst_ex = (worst_ex_tmp + 1)/2
-            best_in = (best_in_tmp + 1)/2
-            worst_in = (worst_in_tmp + 1)/2
-            ax[2, 4].annotate('Best Ex(%0.2f)-In(%0.2f)\n= %0.2f\nWorst Ex(%0.2f)-In(%0.2f)\n= %0.2f'%(best_ex, best_in, best_ex - best_in, worst_ex, worst_in, worst_ex - worst_in),
-                              xy=(0.45, 0.55), xycoords='axes fraction', fontsize=legendsize)
-
-
-        # # All plot setting / Save
-        theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
-        for ax_each in [ax[2, 3], axbig, axbig2]:
-            for i in theta_cutidx:
-                ax_each.axvline(t[i], c='gray', linewidth=0.75, alpha=0.5)
+        # # Save
         for ax_each in ax.ravel():
             ax_each.tick_params(labelsize=legendsize)
         for ax_each in [axbig2]:
             ax_each.tick_params(labelsize=legendsize)
-
-
-
         fig.savefig(save_pth, dpi=150)
         plt.close()
 

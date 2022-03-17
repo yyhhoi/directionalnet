@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import random
 
-import torch
 from scipy.interpolate import interp1d
 from scipy.special import comb
 from scipy.stats import pearsonr, vonmises, norm, ranksums, f as fdist, fisher_exact
@@ -1508,19 +1507,10 @@ def fisherexact(arr):
     return p
 
 
-def cal_hd(x, y):
-    hd = torch.angle(torch.diff(x) + 1j * np.diff(y))  # angle is converted to (-pi, pi)
-    hd = torch.cat([hd, hd[[-1]]])
-    return hd
-
 def cal_hd_np(x, y):
     hd = np.angle(np.diff(x) + 1j * np.diff(y))  # angle is converted to (-pi, pi)
     hd = np.concatenate([hd, hd[[-1]]])
     return hd
-
-def get_nidx(x, y, a, xxtun, yytun, aatun):
-    nidx = torch.argmin((xxtun - x) ** 2 + (yytun - y) ** 2 + (aatun - a) ** 2)
-    return nidx.item()
 
 def get_nidx_np(x, y, a, xxtun, yytun, aatun):
     nidx = np.argmin((xxtun - x) ** 2 + (yytun - y) ** 2 + (aatun - a) ** 2)
@@ -1534,13 +1524,6 @@ def get_nidx_xy_np(x, y, xxtun, yytun):
     nidx = np.argmin((xxtun - x) ** 2 + (yytun - y) ** 2)
     return nidx
 
-
-def fr_transfer(I):
-    """for alpha = 1
-    """
-    outI = I.clone()
-    outI[I <= 4] = torch.log(1 + torch.exp(I[I <= 4]))
-    return outI
 
 
 def poisson_sampling(rates, dt, refrac=0, seed=None):

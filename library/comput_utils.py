@@ -1537,3 +1537,39 @@ def poisson_sampling(rates, dt, refrac=0, seed=None):
 
 def transfer_expo(x):
     return 30 - 30*np.exp(-x/4)
+
+
+def gaufunc2d(x, mux, y, muy, sd, outmax):
+    return outmax * np.exp(-(np.square(x - mux) + np.square(y - muy))/(2*sd**2))
+
+def gaufunc2d_angles(x, mux, y, muy, a, mua, sd, outmax, w_adiff, w_akappa):
+    outmax_angled = outmax + w_adiff * np.exp(w_akappa * (np.cos(a - mua) - 1))
+    return outmax_angled * np.exp(-(np.square(x - mux) + np.square(y - muy))/(2*sd**2))
+
+def circgaufunc(x, loc, kappa, outmax):
+    return outmax * np.exp(kappa * (np.cos(x - loc) - 1))
+
+def boxfunc2d(x, mux, y, muy, sd, outmax):
+
+    dist = np.sqrt( np.square(x-mux) + np.square(y-muy))
+    out = np.ones(dist.shape) * outmax
+    out[dist > sd] = 0
+    return out
+
+def get_tspdiff(SpikeDF, t, nidx1, nidx2):
+    tidxsp1 = SpikeDF.loc[SpikeDF['neuronid'] == nidx1, 'tidxsp'].to_numpy()
+    tidxsp2 = SpikeDF.loc[SpikeDF['neuronid'] == nidx2, 'tidxsp'].to_numpy()
+    tsp1 = t[tidxsp1]
+    tsp2 = t[tidxsp2]
+    tsp_diff = pair_diff(tsp1, tsp2).flatten()
+    tsp_diff = tsp_diff[np.abs(tsp_diff) < 100]
+    return tsp_diff
+
+def calc_exin_samepath(samebins, oppbins):
+    # This function can only be used when the pass remains the same while the mossy projection is opposite
+    samebins_norm, oppbins_norm = samebins/samebins.sum(), oppbins/oppbins.sum()
+    ex_val_tmp, _ = pearsonr(samebins_norm, oppbins_norm)
+    in_val_tmp, _ = pearsonr(samebins_norm, np.flip(oppbins_norm))
+    ex_val, in_val = (ex_val_tmp + 1)/2, (in_val_tmp + 1)/2
+    ex_bias = ex_val - in_val
+    return ex_val, in_val, ex_bias

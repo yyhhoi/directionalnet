@@ -18,6 +18,9 @@ def load_pickle(fp):
         f_dict = pickle.load(f)
     return f_dict
 
+def save_pickle(fp, data):
+    with open(fp, 'wb') as handle:
+        pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def mat2direction(loc):

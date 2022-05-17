@@ -79,7 +79,7 @@ config_dict['asym_flag'] = False
 # CA3-Mos and Mos-CA3
 config_dict['wmax_ca3mos'] = 0
 config_dict['wmax_mosca3'] = 0
-config_dict['wmax_ca3mosca3_adiff'] = 3000
+config_dict['wmax_ca3mosca3_adiff'] = 3500  # 3000
 config_dict['mos_exist'] = True
 config_dict['w_ca3mosca3_akappa'] = 1
 

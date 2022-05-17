@@ -18,6 +18,7 @@ from pycircstat.descriptive import resultant_vector_length, center, cdiff
 from pycircstat.descriptive import mean as circmean
 
 from library.correlogram import ThetaEstimator
+from library.linear_circular_r import rcc
 
 
 def dist_overlap(rate_map1, rate_map2, mask1, mask2):
@@ -1573,3 +1574,14 @@ def calc_exin_samepath(samebins, oppbins):
     ex_val, in_val = (ex_val_tmp + 1)/2, (in_val_tmp + 1)/2
     ex_bias = ex_val - in_val
     return ex_val, in_val, ex_bias
+
+
+
+def rcc_wrapper(dsp, phasesp, abound=(-1., 1.)):
+    dspmin, dsprange = dsp.min(), dsp.max() - dsp.min()
+    dsp_norm = (dsp-dspmin)/dsprange
+    regress = rcc(dsp_norm, phasesp, abound=abound)
+    onset, slope = regress['phi0'], regress['aopt'] * 2 * np.pi
+    xdum = np.linspace(dsp_norm.min(), dsp_norm.max(), 100)
+    ydum = xdum * slope + onset
+    return (dsp_norm, phasesp), (onset, slope), (xdum, ydum)

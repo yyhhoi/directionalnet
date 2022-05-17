@@ -8,13 +8,13 @@ from pycircstat import cdiff, mean as cmean
 from library.comput_utils import pair_diff
 from library.shared_vars import total_figw
 from library.utils import save_pickle, load_pickle
-from library.visualization import customlegend
+from library.visualization import customlegend, plot_phase_precession, plot_popras
 from library.linear_circular_r import rcc
 from library.simulation import createMosProjMat_p2p, directional_tuning_tile, simulate_SNN
 
 
 # ====================================== Global params and paths ==================================
-legendsize = 7
+legendsize = 8
 load_dir = 'sim_results/fig1'
 save_dir = 'plots/fig1/'
 os.makedirs(save_dir, exist_ok=True)
@@ -31,8 +31,7 @@ ylift_12 = 0.04
 ylift_3 = 0.02
 wgap = 0.02
 wgap_corr = 0.05
-fontsize = 6
-fig = plt.figure(figsize=(figw, figh), facecolor='white')
+fig = plt.figure(figsize=(figw, figh))
 
 ax_trajs = [
     fig.add_axes([ax_w * 1.5 + wgap/2, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
@@ -95,13 +94,13 @@ ax_list = [ax_trajs, ax_ras_in, ax_precess_in, ax_corr_in, ax_ras_ex, ax_precess
 ax_all = np.concatenate(ax_list)
 
 for ax_each in ax_all:
-    ax_each.tick_params(labelsize=fontsize)
+    ax_each.tick_params(labelsize=legendsize)
     ax_each.spines['top'].set_visible(False)
     ax_each.spines['right'].set_visible(False)
 
 # ======================================Analysis and plotting ==================================
 
-BehDF_degpairs = [(0, 180), (90, 270), (45, 225)]
+BehDF_degpairs = [(0, 180), (45, 225), (90, 270)]
 trajxshift = {0:0, 180:0, 90:-5, 270:5, 45:-5, 225:5}
 trajyshift = {0:5, 180:-5, 90:0, 270:0, 45:5, 225:-5}
 direct_c = ['darkorange', 'mediumspringgreen']
@@ -175,20 +174,7 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
 
             # Raster plot - CA3 pyramidal
             rowid2, colid2 = 1+exin_id*3, 0 + Behdeg_pairid*2 + Behdeg_id
-            tsp_ras_ca3_list = []
-            dxtun = xxtun1d[1] - xxtun1d[0]
-            tt, traj_xx = np.meshgrid(t, xxtun1d[all_nidx])
-            for counti, neuronid in enumerate(all_nidx):
-                tidxsp_neuron = SpikeDF[SpikeDF['neuronid'] == neuronid]['tidxsp']
-                tsp_neuron = t[tidxsp_neuron]
-                neuronx = xxtun1d[neuronid]
-                if neuronid == all_egnidxs[1]:
-                    ras_c = direct_c[Behdeg_id]
-                else:
-                    ras_c = 'gray'
-                ax_list[rowid2][colid2].eventplot(tsp_neuron, lineoffsets=counti, linelengths=1, linewidths=0.5, color=ras_c)
-                if tidxsp_neuron.shape[0] < 1:
-                    continue
+            plot_popras(ax_list[rowid2][colid2], SpikeDF, t, all_nidx, all_egnidxs[0], all_egnidxs[1], 'gray', direct_c[Behdeg_id])
             ax_list[rowid2][colid2].set_ylim(8, 32)
             ax_list[rowid2][colid2].set_xlim(t.max()/2-400, t.max()/2+400)
             ax_list[rowid2][colid2].set_xticks([])
@@ -206,30 +192,8 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
             tidxsp_eg = SpikeDF.loc[SpikeDF['neuronid'] == egnidx, 'tidxsp'].to_numpy()
             tsp_eg, phasesp_eg = t[tidxsp_eg], theta_phase[tidxsp_eg]
             dsp_eg = traj_d[tidxsp_eg]
-            mean_phasesp = cmean(phasesp_eg)
-            dspmin, dsprange = dsp_eg.min(), dsp_eg.max() - dsp_eg.min()
-            dsp_norm_eg = (dsp_eg-dspmin)/dsprange
-            regress = rcc(dsp_norm_eg, phasesp_eg, abound=(-1., 1.))
-            rcc_c, rcc_slope_rad = regress['phi0'], regress['aopt'] * 2 * np.pi
-            xdum = np.linspace(dsp_norm_eg.min(), dsp_norm_eg.max(), 100)
-            ydum = xdum * rcc_slope_rad + rcc_c
-            rate = tsp_eg.shape[0]/((tsp_eg.max() - tsp_eg.min())/1000)
-            precess_txt = 'y= %0.2fx + %0.2f'%(rcc_slope_rad, rcc_c)
-            ax_list[rowid3][colid3].scatter(dsp_norm_eg, phasesp_eg, marker='.', s=4, c=direct_c[Behdeg_id])
-            ax_list[rowid3][colid3].axhline(mean_phasesp, xmin=0, xmax=0.3, linewidth=1, c='gray')
-            ax_list[rowid3][colid3].plot(xdum, ydum, linewidth=0.75, c='gray')
-            ax_list[rowid3][colid3].annotate(precess_txt, xy=(0.1, 0.8), xycoords='axes fraction', fontsize=legendsize-3)
-            ax_list[rowid3][colid3].annotate('%0.2fHz' % (rate), xy=(0.1, 0.06), xycoords='axes fraction', fontsize=legendsize-2)
-            ax_list[rowid3][colid3].set_xticks(np.arange(0, 1.1, 1))
-            ax_list[rowid3][colid3].set_xticks(np.arange(0, 1, 0.1), minor=True)
-            ax_list[rowid3][colid3].tick_params(axis="x", pad=2)
-            ax_list[rowid3][colid3].tick_params(which='minor', axis="x", pad=2)
-            ax_list[rowid3][colid3].set_xlabel('Position', fontsize=legendsize, labelpad=-4)
-            ax_list[rowid3][colid3].set_ylim(0, 2*np.pi)
-            ax_list[rowid3][colid3].set_yticks([0, np.pi/2, np.pi, np.pi*3/2, 2*np.pi])
-            ax_list[rowid3][colid3].set_yticks(np.arange(0, 2*np.pi, np.pi/8), minor=True)
-            ax_list[rowid3][colid3].set_yticklabels(['0', '', '$\pi$', '', '$2\pi$'])
-
+            plot_phase_precession(ax_list[rowid3][colid3], dsp_eg, phasesp_eg, s=4, c=direct_c[Behdeg_id],
+                                  fontsize=legendsize, plotmeanphase=False, statxy=(0.27, 0.7))
 
             # Correlation
             rowid4, colid4 = 3 + exin_id*3, Behdeg_pairid
@@ -254,11 +218,14 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
             ax_list[rowid4][colid4].hist(all_tsp_diff, bins=corr_bins, histtype='step', color=direct_c[Behdeg_id], linewidth=0.75, density=True)
             ax_list[rowid4][colid4].spines['right'].set_visible(False)
             ax_list[rowid4][colid4].spines['top'].set_visible(False)
-            ax_list[rowid4][colid4].set_xlim(-100, 100)
-            ax_list[rowid4][colid4].set_xticks(np.arange(-100, 101, 50))
-            ax_list[rowid4][colid4].set_xticks(np.arange(-100, 101, 25), minor=True)
-            # if exin_id == 0:
+            ax_list[rowid4][colid4].set_xticks((-100, -50, 0, 50, 100))
+            ax_list[rowid4][colid4].set_xticklabels(('-100', '', '0', '', '100'))
+            ax_list[rowid4][colid4].set_xticks(np.arange(-100, 101, 10), minor=True)
             ax_list[rowid4][colid4].set_xlabel('Time lag (ms)', fontsize=legendsize, labelpad=0)
+            ax_list[rowid4][colid4].set_yticks([0, 0.02])
+            ax_list[rowid4][colid4].ticklabel_format(axis='y', style='sci', scilimits=(0, 0), useMathText=True)
+            ax_list[rowid4][colid4].yaxis.get_offset_text().set_y(-0.4)
+            ax_list[rowid4][colid4].yaxis.get_offset_text().set_fontsize(legendsize)
 
 
             del simdata
@@ -268,8 +235,8 @@ for i in range(6):
         ax_precess_in[i].set_yticklabels([])
         ax_precess_ex[i].set_yticklabels([])
 
-ax_precess_in[0].set_ylabel('Phase (rad)', fontsize=legendsize)
-ax_precess_ex[0].set_ylabel('Phase (rad)', fontsize=legendsize)
+ax_precess_in[0].set_ylabel('Phase (rad)', fontsize=legendsize, labelpad=0)
+ax_precess_ex[0].set_ylabel('Phase (rad)', fontsize=legendsize, labelpad=0)
 
 for j in range(3):
     ax_corr_in[j].set_ylim(0, 0.035)
@@ -278,8 +245,8 @@ for j in range(3):
     if j > 0:
         ax_corr_in[j].set_yticklabels([])
         ax_corr_ex[j].set_yticklabels([])
-ax_corr_in[0].set_ylabel('Spike density', fontsize=legendsize)
-ax_corr_ex[0].set_ylabel('Spike density', fontsize=legendsize)
+ax_corr_in[0].set_ylabel('Spike density', fontsize=legendsize, labelpad=0)
+ax_corr_ex[0].set_ylabel('Spike density', fontsize=legendsize, labelpad=0)
 
 
 
@@ -288,22 +255,3 @@ fig.savefig(save_pth + '.eps')
 fig.savefig(save_pth + '.pdf')
 plt.close(fig)
 
-
-# # Plot CA3-CA3 Weight matrix
-# egnidx = np.argmin(np.square(0 - xxtun1d_ca3) + np.square(0 - yytun1d_ca3) + np.square(0 - aatun1d_ca3))
-# w2d_preeg = w_ca3ca3[:, egnidx]
-# fig_config, ax_config = plt.subplots(figsize=(6, 4))
-# im = ax_config.scatter(xxtun1d_ca3, yytun1d_ca3, c=w2d_preeg, cmap='Blues', s=150)
-# plt.colorbar(im, ax=ax_config)
-# arrow_alpha = w2d_preeg/w2d_preeg.max()
-# ax_config.quiver(xxtun1d_ca3, yytun1d_ca3, np.cos(aatun1d_ca3), np.sin(aatun1d_ca3), scale=15, alpha=arrow_alpha, headwidth=10)
-# ax_config.set_xlim(-6, 5)
-# ax_config.set_ylim(-5, 6)
-# ax_config.set_xlabel('x (cm)', fontsize=legendsize+2)
-# ax_config.set_ylabel('y (cm)', fontsize=legendsize+2)
-# ax_config.set_xticks(np.arange(-6, 5, 2))
-# ax_config.set_yticks(np.arange(-4, 6, 2))
-# ax_config.tick_params(labelsize=legendsize+2)
-# ax_config.set_title('$W_{i, j}$ from cell at (0, 0) to (x, y)', fontsize=legendsize+2)
-# fig_config.savefig(join(save_dir, 'CA3-CA3_Weights_Intrinsic.png'), dpi=300)
-# plt.close(fig_config)

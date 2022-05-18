@@ -66,7 +66,7 @@ config_dict['nn_inmos'] = 250
 config_dict['tau_gex'] = 12
 config_dict['tau_gin'] = 10
 config_dict['U_stdx_CA3'] = 0.7  # 0.7
-config_dict['U_stdx_mos'] = 0.7  # 0.7
+config_dict['U_stdx_mos'] = 0  # 0.7
 config_dict['tau_stdx'] = 0.5e3
 
 # # Weights
@@ -79,7 +79,7 @@ config_dict['asym_flag'] = False
 # CA3-Mos and Mos-CA3
 config_dict['wmax_ca3mos'] = 0
 config_dict['wmax_mosca3'] = 0
-config_dict['wmax_ca3mosca3_adiff'] = 3500  # 3000
+config_dict['wmax_ca3mosca3_adiff'] = 3000  # 3000
 config_dict['mos_exist'] = True
 config_dict['w_ca3mosca3_akappa'] = 1
 

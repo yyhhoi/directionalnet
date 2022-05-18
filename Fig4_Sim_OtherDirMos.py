@@ -125,16 +125,16 @@ mosdegdict['endx'][90], mosdegdict['endy'][90] = mosdegdict['startx'][90], mosde
 mosdegdict['starty'][270] = np.arange(20, -21, -2)  # 270 degree
 mosdegdict['startx'][270] = np.zeros(mosdegdict['starty'][270].shape[0])
 mosdegdict['endx'][270], mosdegdict['endy'][270] = mosdegdict['startx'][270], mosdegdict['starty'][270] - projl_MosCA3
+#
+# mosdegdict['startx'][135] = np.arange(20, -21, -2)  # 135 degree
+# mosdegdict['starty'][135] = np.arange(-20, 21, 2)
+# mosdegdict['endx'][135], mosdegdict['endy'][135] = mosdegdict['startx'][135] - projl_MosCA3, mosdegdict['starty'][135] + projl_MosCA3
+#
+# mosdegdict['startx'][315] = np.arange(-20, 21, 2)  # 315 degree
+# mosdegdict['starty'][315] = np.arange(20, -21, -2)
+# mosdegdict['endx'][315], mosdegdict['endy'][315] = mosdegdict['startx'][315] + projl_MosCA3, mosdegdict['starty'][315] - projl_MosCA3
 
-mosdegdict['startx'][135] = np.arange(20, -21, -2)  # 135 degree
-mosdegdict['starty'][135] = np.arange(-20, 21, 2)
-mosdegdict['endx'][135], mosdegdict['endy'][135] = mosdegdict['startx'][135] - projl_MosCA3, mosdegdict['starty'][135] + projl_MosCA3
-
-mosdegdict['startx'][315] = np.arange(-20, 21, 2)  # 315 degree
-mosdegdict['starty'][315] = np.arange(20, -21, -2)
-mosdegdict['endx'][315], mosdegdict['endy'][315] = mosdegdict['startx'][315] + projl_MosCA3, mosdegdict['starty'][315] - projl_MosCA3
-
-
+config_dict['U_stdx_mos'] = 0  # 0.7
 for mosdeg in (45, 225, 90, 270):
 
     config_dict['mos_startpos'] = np.stack([mosdegdict['startx'][mosdeg], mosdegdict['starty'][mosdeg]]).T

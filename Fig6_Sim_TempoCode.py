@@ -142,9 +142,11 @@ BehDF0 = pd.DataFrame(dict(t=traj_t_all, traj_x=traj_x_all, traj_y=traj_y_all, t
 
 # # ============================ Parameter notes =====================================
 # Below is for WITHOUT directional tuning
+config_dict['Ipos_max'] = 7  # 5
+config_dict['Iangle_diff'] = 0  # 0
 config_dict['wmax_ca3ca3'] = 500
-config_dict['wmax_ca3mos'] = 500
-config_dict['wmax_mosca3'] = 500
+config_dict['wmax_ca3mos'] = 750
+config_dict['wmax_mosca3'] = 750
 
 
 

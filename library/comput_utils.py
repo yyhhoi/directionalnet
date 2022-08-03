@@ -1585,3 +1585,11 @@ def rcc_wrapper(dsp, phasesp, abound=(-1., 1.)):
     xdum = np.linspace(dsp_norm.min(), dsp_norm.max(), 100)
     ydum = xdum * slope + onset
     return (dsp_norm, phasesp), (onset, slope), (xdum, ydum)
+
+
+
+def acc_metrics(Y, Y_pred):
+    ACC = np.mean(Y_pred == Y)
+    TPR = np.mean(Y_pred[Y] == Y[Y])
+    TNR = np.mean(Y_pred[~Y] == Y[~Y])
+    return ACC, TPR, TNR

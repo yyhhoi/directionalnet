@@ -21,6 +21,9 @@ from library.simulation import createMosProjMat_p2p, directional_tuning_tile, si
 config_dict = dict()
 config_dict['dt'] = 0.1
 # # Izhikevich's model
+config_dict['izhi_c1'] = 0.04
+config_dict['izhi_c2'] = 5
+config_dict['izhi_c3'] = 140
 config_dict['izhi_a_ex'] = 0.035
 config_dict['izhi_b_ex'] = 0.2
 config_dict['izhi_c_ex'] = -60
@@ -33,7 +36,7 @@ config_dict['V_ex'] = 0
 config_dict['V_in'] = -80
 config_dict['V_thresh'] = 30
 config_dict['spdelay'] = int(2/config_dict['dt'])
-config_dict['I_noiseSD'] = 0.01
+config_dict['noise_rate'] = 0
 
 # # Theta inhibition
 config_dict['theta_amp'] = 7

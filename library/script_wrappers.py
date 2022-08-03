@@ -10,7 +10,7 @@ from pycircstat.tests import rayleigh
 from scipy.interpolate import interp1d
 from pycircstat.descriptive import mean as cmean, cdiff, resultant_vector_length
 
-from library.comput_utils import rcc_wrapper, get_tspdiff, calc_exin_samepath
+from library.comput_utils import rcc_wrapper, get_tspdiff, calc_exin_samepath, acc_metrics
 from library.linear_circular_r import rcc
 
 
@@ -141,3 +141,98 @@ def exin_analysis(SpikeDF1, SpikeDF2, t, all_nidx, xxtun1d, yytun1d, aatun1d, so
         exin_statdict[pairtype]['ex_bias_mu'] = np.mean(exindf_tmp['ex_bias'])
 
     return exindf, exin_statdict
+
+
+def find_nidx_along_traj(traj_x, traj_y, xxtun1d, yytun1d):
+    # Unique neuron indices along the trajectory
+    # Sorted accordig to the first encounter
+    all_nidx = np.zeros(traj_x.shape[0])
+    for i in range(traj_x.shape[0]):
+        run_x, run_y = traj_x[i], traj_y[i]
+        nidx = np.argmin(np.square(run_x - xxtun1d) + np.square(run_y - yytun1d))
+        all_nidx[i] = nidx
+    all_nidx = all_nidx[np.sort(np.unique(all_nidx, return_index=True)[1])]
+    all_nidx = all_nidx.astype(int)
+    return all_nidx
+
+
+def datagen_jitter(X, Y, trajtype, jitter_num, theta_T, jitter_ms=2.5):
+
+    M = len(X)
+    N = len(X[0])
+    new_X = []
+    new_Y = []
+    new_trajtype = []
+    for mi in range(M):
+
+        tsp_Mtmp = np.concatenate(X[mi])
+        jitfront, jitend = tsp_Mtmp.min(), theta_T - tsp_Mtmp.max()
+        for jitter_i in range(jitter_num):
+            new_X_eachM = []
+            jit_amount = np.random.uniform(-jitfront, jitend)
+            for nj in range(N):
+                tsp_ori = X[mi][nj]
+
+                # Jittering
+                if tsp_ori.shape[0] > 0:
+
+                    tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms)
+                else:
+                    tsp_jittered = tsp_ori
+                new_X_eachM.append(tsp_jittered)
+
+            new_X.append(new_X_eachM)
+            new_Y.append(Y[mi])
+            new_trajtype.append(trajtype[mi])
+
+    return np.array(new_X, dtype=object), np.array(new_Y), np.array(new_trajtype)
+
+
+def directional_acc_metrics(Y, Y_pred, trajtype, num_trajtypes):
+    """
+
+    Parameters
+    ----------
+    Y : ndarray
+        Ground true labels. One-dimensional boolean array with shape (M, ) where M = number of samples.
+    Y_pred : ndarray
+        Boolean array of predicted labels with shape (M, ).
+    trajtype : ndarray
+        Integer array with shape (M, ). Trajectory types in range [0, NT) where NT = num_trajtypes-1
+    num_trajtypes : int
+        Total number of trajectory types in the daya
+
+    Returns
+    -------
+    Accuracy, true positive rate, true negative rate : ndarray
+        Metrics for each trajectory type. Each with shape (NT, )
+    Standard errors of ACC, TPR and TNR : ndarray
+        Standard errors of the above 3 metrics for each trajectory type. Each with shape (NT, )
+    """
+
+    trajtype_ax = np.arange(num_trajtypes)
+    acc_pera = np.zeros(num_trajtypes)
+    acc_se_pera = np.zeros(num_trajtypes)
+    tpr_pera = np.zeros(num_trajtypes)
+    tpr_se_pera = np.zeros(num_trajtypes)
+    tnr_pera = np.zeros(num_trajtypes)
+    tnr_se_pera = np.zeros(num_trajtypes)
+    for trajtype_i in trajtype_ax:
+        mask = trajtype == trajtype_i
+        masked_num = mask.sum()
+        if masked_num < 1:
+            acc, tpr, tnr = None, None, None
+            acc_se, tpr_se, tnr_se = None, None, None
+        else:
+            acc, tpr, tnr = acc_metrics(Y[mask], Y_pred[mask])
+            acc_se = np.sqrt(acc * (1-acc) / masked_num)
+            tpr_se = np.sqrt(tpr * (1-tpr) / masked_num)
+            tnr_se = np.sqrt(tnr * (1-tnr) / masked_num)
+        acc_pera[trajtype_i] = acc
+        tpr_pera[trajtype_i] = tpr
+        tnr_pera[trajtype_i] = tnr
+        acc_se_pera[trajtype_i] = acc_se
+        tpr_se_pera[trajtype_i] = tpr_se
+        tnr_se_pera[trajtype_i] = tnr_se
+
+    return (acc_pera, tpr_pera, tnr_pera), (acc_se_pera, tpr_se_pera, tnr_se_pera)

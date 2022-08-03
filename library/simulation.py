@@ -64,7 +64,7 @@ def directional_tuning_tile(N, M, atun_seeds, start_seed=0):
     return aatun2d
 
 
-def simulate_SNN(BehDF, config_dict):
+def simulate_SNN(BehDF, config_dict, store_Activity=True, store_w=True):
 
     # ============================================================================================
     # ======================================== Parameters ========================================
@@ -77,6 +77,9 @@ def simulate_SNN(BehDF, config_dict):
     traj_a = BehDF['traj_a'].to_numpy()
 
     # # Izhikevich's model
+    izhi_c1 = config_dict['izhi_c1']
+    izhi_c2 = config_dict['izhi_c2']
+    izhi_c3 = config_dict['izhi_c3']
     izhi_a_ex = config_dict['izhi_a_ex']
     izhi_b_ex = config_dict['izhi_b_ex']
     izhi_c_ex = config_dict['izhi_c_ex']
@@ -89,7 +92,7 @@ def simulate_SNN(BehDF, config_dict):
     V_in = config_dict['V_in']
     V_thresh = config_dict['V_thresh']
     spdelay = config_dict['spdelay']
-    I_noiseSD = config_dict['I_noiseSD']
+    noise_rate = config_dict['noise_rate']
 
     # # Theta inhibition
     theta_amp = config_dict['theta_amp']
@@ -122,9 +125,9 @@ def simulate_SNN(BehDF, config_dict):
 
     # # Weights
     # CA3-CA3
-    wmax_ca3ca3 = config_dict['wmax_ca3ca3']  # 120
-    wmax_ca3ca3_adiff = config_dict['wmax_ca3ca3_adiff']  # 3000
-    w_ca3ca3_akappa = config_dict['w_ca3ca3_akappa']  # 2
+    wmax_ca3ca3 = config_dict['wmax_ca3ca3']
+    wmax_ca3ca3_adiff = config_dict['wmax_ca3ca3_adiff']
+    w_ca3ca3_akappa = config_dict['w_ca3ca3_akappa']
     asym_flag = config_dict['asym_flag']  # False: No asymmetry. True: rightward
 
     # CA3-Mos and Mos-CA3
@@ -157,6 +160,8 @@ def simulate_SNN(BehDF, config_dict):
     # ======================================== Initialization ====================================
     # ============================================================================================
 
+    numt = t.shape[0]
+
     # # Theta Inhibition
     theta_T = 1/theta_f * 1e3
     theta_phase = np.mod(t, theta_T)/theta_T * 2*np.pi
@@ -166,6 +171,7 @@ def simulate_SNN(BehDF, config_dict):
     # # Positional drive
     Ipos_max_compen = Ipos_max + (np.cos(EC_phase) + 1)/2 * theta_amp
     config_dict['Ipos_max_compen'] = Ipos_max_compen
+
 
     # # Sensory tuning
     nn_in = nn_inca3 + nn_inmos
@@ -198,6 +204,10 @@ def simulate_SNN(BehDF, config_dict):
 
     # Constructing weights CA3-CA3
     w_ca3ca3 = gaufunc2d_angles(xxtun1d_ca3.reshape(1, nn_ca3), xxtun1d_ca3.reshape(nn_ca3, 1), yytun1d_ca3.reshape(1, nn_ca3), yytun1d_ca3.reshape(nn_ca3, 1), aatun1d_ca3.reshape(1, nn_ca3), aatun1d_ca3.reshape(nn_ca3, 1), wsd_ca3ca3, wmax_ca3ca3, wmax_ca3ca3_adiff, w_ca3ca3_akappa)
+    # w_ca3ca3noiseexp = gaufunc2d(xxtun1d_ca3.reshape(1, nn_ca3), xxtun1d_ca3.reshape(nn_ca3, 1), yytun1d_ca3.reshape(1, nn_ca3), yytun1d_ca3.reshape(nn_ca3, 1), wsd_ca3ca3, 1)
+    # np.random.seed(32)
+    # w_ca3ca3noise = (np.random.uniform(0, 1, size=(nn_ca3, nn_ca3)) < 0.2) * wmax_ca3ca3_noise
+
     if asym_flag:
         w_ca3ca3[pair_diff(xxtun1d_ca3, xxtun1d_ca3) < 0] = 0
 
@@ -267,24 +277,29 @@ def simulate_SNN(BehDF, config_dict):
     ECstfx = np.ones(nn) * ECstf_rest
     fidx_buffer = []
     SpikeDF_dict = dict(neuronid=[], tidxsp=[])
-    v_pop = np.zeros((t.shape[0], nn))
-    Isen_pop = np.zeros((t.shape[0], nn))
-    Isen_fac_pop = np.zeros((t.shape[0], nn))
-    Isyn_pop = np.zeros((t.shape[0], nn))
-    IsynIN_pop = np.zeros((t.shape[0], nn))
-    IsynEX_pop = np.zeros((t.shape[0], nn))
-    Itotal_pop = np.zeros((t.shape[0], nn))
-    syneff_pop = np.zeros((t.shape[0], nn))
-    ECstfx_pop = np.zeros((t.shape[0], nn))
+    if store_Activity:
+        v_pop = np.zeros((numt, nn))
+        Isen_pop = np.zeros((numt, nn))
+        Isen_fac_pop = np.zeros((numt, nn))
+        Isyn_pop = np.zeros((numt, nn))
+        Itotal_pop = np.zeros((numt, nn))
+        syneff_pop = np.zeros((numt, nn))
+        ECstfx_pop = np.zeros((numt, nn))
+
+    # Spike arrival noise
+    np.random.seed(10)
+    insta_r = noise_rate/1000 * dt
+    sp_noise = np.zeros((numt, nn))
+    sp_noise[:, :nn_ca3] = np.random.poisson(insta_r, size=(numt, nn_ca3))
 
     # ============================================================================================
     # ======================================== Simulation Runtime ================================
     # ============================================================================================
-    numt = t.shape[0]
     t1 = time.time()
 
     for i in range(numt):
-        print('\rSimulation %d/%d'%(i, numt), flush=True, end='')
+        if i % 100 == 0:
+            print('\rSimulation %d/%d'%(i, numt), flush=True, end='')
         # Behavioural
         run_x, run_y, run_a = traj_x[i], traj_y[i], traj_a[i]
 
@@ -299,10 +314,10 @@ def simulate_SNN(BehDF, config_dict):
 
         # Total Input
         np.random.seed(i)
-        Itotal = Isyn + Isen_fac + np.random.normal(0, I_noiseSD, size=nn) - Itheta[i]
+        Itotal = Isyn + Isen_fac - Itheta[i]
 
         # Izhikevich
-        v += (0.04*v**2 + 5*v + 140 - u + Itotal) * dt
+        v += (izhi_c1*v**2 + izhi_c2*v + izhi_c3 - u + Itotal) * dt
         u += izhi_a * (izhi_b * v - u) * dt
         fidx = np.where(v > V_thresh)[0]
         v[fidx] = izhi_c[fidx]
@@ -324,11 +339,14 @@ def simulate_SNN(BehDF, config_dict):
             delayed_fidx_ex = delayed_fidx[delayed_fidx < endidx_mos]
             delayed_fidx_in = delayed_fidx[delayed_fidx >= endidx_mos]
 
+            # Synaptic noise
+            noisethis = sp_noise[i, :]
+
             # Synaptic input (Excitatory)
             spike2ca3_sum = np.sum(stdx2ca3[delayed_fidx_ex].reshape(1, -1) * w[:endidx_ca3, delayed_fidx_ex], axis=1) / endidx_mos
             spike2mos_sum = np.sum(stdx2mos[delayed_fidx_ex].reshape(1, -1) * w[endidx_ca3:endidx_mos, delayed_fidx_ex], axis=1) / endidx_mos
             spike2in_sum = np.sum(stdx2ca3[delayed_fidx_ex].reshape(1, -1) * w[endidx_mos:, delayed_fidx_ex], axis=1) / endidx_mos
-            gex += (-gex/tau_gex + np.concatenate([spike2ca3_sum, spike2mos_sum, spike2in_sum])) * dt
+            gex += (-gex/tau_gex + np.concatenate([spike2ca3_sum, spike2mos_sum, spike2in_sum]) + noisethis) * dt
             Isyn_ex = gex * (V_ex - v)
 
             # Synaptic input (Inhibitory)
@@ -341,15 +359,14 @@ def simulate_SNN(BehDF, config_dict):
         SpikeDF_dict['neuronid'].extend(list(fidx))
         SpikeDF_dict['tidxsp'].extend([i] * len(fidx))
 
-        v_pop[i, :] = v
-        Isen_pop[i, :] = Isen
-        Isen_fac_pop[i, :] = Isen_fac
-        Isyn_pop[i, :] = Isyn
-        IsynIN_pop[i, :] = Isyn_in
-        IsynEX_pop[i, :] = Isyn_ex
-        Itotal_pop[i, :] = Itotal
-        syneff_pop[i, :] = stdx2ca3
-        ECstfx_pop[i, :] = ECstfx
+        if store_Activity:
+            v_pop[i, :] = v
+            Isen_pop[i, :] = Isen
+            Isen_fac_pop[i, :] = Isen_fac
+            Isyn_pop[i, :] = Isyn
+            Itotal_pop[i, :] = Itotal
+            syneff_pop[i, :] = stdx2ca3
+            ECstfx_pop[i, :] = ECstfx
 
     print('\nSimulation time = %0.2fs'%(time.time()-t1))
 
@@ -364,9 +381,13 @@ def simulate_SNN(BehDF, config_dict):
     NeuronDF = pd.DataFrame(dict(neuronid=np.arange(nn), neuronx=xxtun1d, neurony=yytun1d, neurona=aatun1d,
                                  neurontype=["CA3"]*nn_ca3 + ['Mos']*nn_mos + ['In']*nn_in))
 
-    ActivityData = dict(v=v_pop, Isen=Isen_pop, Isyn=Isyn_pop, Isen_fac=Isen_fac_pop,
-                        Itotal=Itotal_pop, syneff=syneff_pop, ECstf=ECstfx_pop)
-
+    if store_Activity:
+        ActivityData = dict(v=v_pop, Isen=Isen_pop, Isen_fac=Isen_fac_pop, Isyn=Isyn_pop,
+                            Itotal=Itotal_pop, syneff=syneff_pop, ECstf=ECstfx_pop)
+    else:
+        ActivityData = None
+    if ~store_w:
+        w = None
     MetaData = dict(nn=nn, nn_ca3=nn_ca3, nn_mos=nn_mos, nn_in=nn_in, w=w, EC_phase=EC_phase)
 
     alldata =dict(

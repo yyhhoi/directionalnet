@@ -10,9 +10,9 @@ from library.utils import save_pickle, load_pickle
 
 # ====================================== Global params and paths ==================================
 legendsize = 8
-project_tag = '1lr'
-data_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas/' + project_tag
-save_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas/' + project_tag
+project_tag = 'Jit100_5ms'
+data_dir = 'sim_results/fig6_TrainStandType-1_ECTrainNoAngle_Whas_exStay_Icompen3/' + project_tag
+save_dir = 'sim_results/fig6_TrainStandType-1_ECTrainNoAngle_Whas_exStay_Icompen3/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 
 # ====================================== Train & Test ==================================
@@ -23,21 +23,26 @@ fig_metrics, ax_metrics = plt.subplots(24, 2, figsize=(12, 30), dpi=200, facecol
 fig_enditer, ax_enditer = plt.subplots(2, 1, figsize=(12, 12), dpi=200, facecolor='w', sharex=True, sharey=True,
                                        constrained_layout=True)
 
+
+
 for exinid, exintag in enumerate(exintags):
     print(exintag)
     dataset = load_pickle(join(data_dir, 'data_train_test_%s_%s.pickle'%(project_tag, exintag)))
-    X_train_ori = dataset['X_train_ori']
     X_test_ori = dataset['X_test_ori']
-    Y_train_ori = dataset['Y_train_ori']
     Y_test_ori = dataset['Y_test_ori']
-    trajtype_train_ori = dataset['trajtype_train_ori']
     trajtype_test_ori = dataset['trajtype_test_ori']
-    X_train = dataset['X_train']
     X_test = dataset['X_test']
-    Y_train = dataset['Y_train']
     Y_test = dataset['Y_test']
-    trajtype_train = dataset['trajtype_train']
     trajtype_test = dataset['trajtype_test']
+    # if exintag == 'ex':
+    #     dataset = load_pickle(join(data_dir, 'data_train_test_%s_%s.pickle' % (project_tag, 'in')))
+    X_train_ori = dataset['X_train_ori']
+    Y_train_ori = dataset['Y_train_ori']
+    trajtype_train_ori = dataset['trajtype_train_ori']
+    X_train = dataset['X_train']
+    Y_train = dataset['Y_train']
+    trajtype_train = dataset['trajtype_train']
+
     train_M = X_train.shape[0]
     test_M = X_test.shape[0]
     N = len(X_train[0])
@@ -105,21 +110,23 @@ for exinid, exintag in enumerate(exintags):
     # #  Plot accuracy per iteration
     iter_ax = np.arange(ACCse_train.shape[0]) + 1
     deg_ax_half = np.array([deg_ax[i] for i in range(0, num_trajtypes, 2)])
-    for deg_i in range(ax_metrics.shape[0]):
-        trajdeg = deg_ax[deg_i]
+    for deg_i in range(-1, ax_metrics.shape[0]):  # -1 is the training set
 
-        if deg_i == 0:
-            ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TPR_train[:, deg_i], yerr=TPRse_train[:, deg_i], label='TPR')
-            ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TNR_train[:, deg_i], yerr=TNRse_train[:, deg_i], label='TNR')
-            ax_metrics[deg_i, exinid].set_ylabel('Train %d deg'%(trajdeg))
+
+        if deg_i == -1:
+            ax_metrics[0, exinid].errorbar(x=iter_ax, y=TPR_train[:, deg_i], yerr=TPRse_train[:, deg_i], label='Train TPR', color='r')
+            ax_metrics[0, exinid].errorbar(x=iter_ax, y=TNR_train[:, deg_i], yerr=TNRse_train[:, deg_i], label='Train TNR', color='b')
+
         else:
-            ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TPR_test[:, deg_i], yerr=TPRse_test[:, deg_i], label='TPR')
-            ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TNR_test[:, deg_i], yerr=TNRse_test[:, deg_i], label='TNR')
-            ax_metrics[deg_i, exinid].set_ylabel('Test %d deg'%(trajdeg))
-        ax_metrics[deg_i, exinid].legend()
-        ax_metrics[deg_i, exinid].set_yticks(np.arange(0, 1.1, 0.2))
-        ax_metrics[deg_i, exinid].set_yticks(np.arange(0, 1.1, 0.2), minor=True)
-        ax_metrics[deg_i, exinid].grid()
+            trajdeg = deg_ax[deg_i]
+            ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TPR_test[:, deg_i], yerr=TPRse_test[:, deg_i], label='Test TPR', color='lightcoral')
+            ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TNR_test[:, deg_i], yerr=TNRse_test[:, deg_i], label='Test TNR', color='skyblue')
+            ax_metrics[deg_i, exinid].set_ylabel('Test %d deg'%(deg_ax[deg_i]))
+            ax_metrics[deg_i, exinid].set_yticks(np.arange(0, 1.1, 0.2))
+            ax_metrics[deg_i, exinid].set_yticks(np.arange(0, 1.1, 0.2), minor=True)
+            ax_metrics[deg_i, exinid].grid()
+    ax_metrics[0, exinid].legend()
+
 
     # # Plot accuracy at the end iteration
     ax_enditer[0].errorbar(x=deg_ax, y=TPR_test[-1, :], yerr=TPRse_test[-1, :], label=exintag)

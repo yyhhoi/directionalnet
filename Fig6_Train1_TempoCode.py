@@ -14,9 +14,9 @@ from library.visualization import plot_popras
 exintag = sys.argv[1]
 
 # ====================================== Global params and paths ==================================
-project_tag = '1lr'
-data_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas'
-save_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas/' + project_tag
+project_tag = 'Jit100_5ms'
+data_dir = 'sim_results/fig6_TrainStandType-1_ECTrainNoAngle_Whas_exStay_Icompen3'
+save_dir = 'sim_results/fig6_TrainStandType-1_ECTrainNoAngle_Whas_exStay_Icompen3/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,
@@ -140,7 +140,7 @@ print()
 data_M = np.array(data_M, dtype=object)
 trajtype = np.array(trajtype)
 labels = np.array(label_M)
-train_idx = np.where(trajtype == 0)[0].astype(int)
+train_idx = np.where(trajtype == -1)[0].astype(int)
 test_idx = np.setdiff1d(np.arange(trajtype.shape[0]), train_idx)
 X_train_ori = data_M[train_idx]
 X_test_ori = data_M[test_idx]
@@ -151,8 +151,10 @@ trajtype_test_ori = trajtype[test_idx]
 theta_bounds = np.stack(theta_bounds)
 
 # # Jittering
-X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, 20, theta_T, jitter_ms=2.5)
-X_test, Y_test, trajtype_test = datagen_jitter(X_test_ori, Y_test_ori, trajtype_test_ori, 20, theta_T, jitter_ms=2.5)
+jitter_times = 100
+jitter_ms = 5
+X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, jitter_times, theta_T, jitter_ms=jitter_ms)
+X_test, Y_test, trajtype_test = datagen_jitter(X_test_ori, Y_test_ori, trajtype_test_ori, jitter_times, theta_T, jitter_ms=jitter_ms)
 
 print('Training data beforing jittering = %d'%(X_train_ori.shape[0]))
 print('True = %d \nFalse = %d'%(Y_train_ori.sum(), Y_train_ori.shape[0]-Y_train_ori.sum()))

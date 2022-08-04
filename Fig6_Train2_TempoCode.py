@@ -11,8 +11,8 @@ from library.utils import save_pickle, load_pickle
 # ====================================== Global params and paths ==================================
 legendsize = 8
 project_tag = '1lr'
-data_dir = 'sim_results/fig6_NoAngle/' + project_tag
-save_dir = 'sim_results/fig6_NoAngle/' + project_tag
+data_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas/' + project_tag
+save_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 
 # ====================================== Train & Test ==================================
@@ -104,7 +104,7 @@ for exinid, exintag in enumerate(exintags):
 
     # #  Plot accuracy per iteration
     iter_ax = np.arange(ACCse_train.shape[0]) + 1
-    deg_ax_half = np.array([deg_ax[i] for i in range(0, 24, 2)])
+    deg_ax_half = np.array([deg_ax[i] for i in range(0, num_trajtypes, 2)])
     for deg_i in range(ax_metrics.shape[0]):
         trajdeg = deg_ax[deg_i]
 

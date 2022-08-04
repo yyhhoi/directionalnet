@@ -102,6 +102,7 @@ def simulate_SNN(BehDF, config_dict, store_Activity=True, store_w=True):
     EC_phase = np.deg2rad(config_dict['EC_phase_deg'])
     Ipos_max = config_dict['Ipos_max']
     Iangle_diff = config_dict['Iangle_diff']
+    Iangle_compen = config_dict['Iangle_compen']
     Ipos_sd = config_dict['Ipos_sd']
     Iangle_kappa = config_dict['Iangle_kappa']
     ECstf_rest = config_dict['ECstf_rest']
@@ -268,8 +269,6 @@ def simulate_SNN(BehDF, config_dict, store_Activity=True, store_w=True):
     v = np.ones(nn) * izhi_c
     u = np.zeros(nn)
     Isyn = np.zeros(nn)
-    Isyn_in = np.zeros(nn)
-    Isyn_ex = np.zeros(nn)
     gex = np.zeros(nn)
     gin = np.zeros(nn)
     stdx2ca3 = np.ones(nn)
@@ -304,7 +303,10 @@ def simulate_SNN(BehDF, config_dict, store_Activity=True, store_w=True):
         run_x, run_y, run_a = traj_x[i], traj_y[i], traj_a[i]
 
         # Sensory input
-        Iangle = circgaufunc(run_a, aatun1d, Iangle_kappa, Iangle_diff)
+        if np.isnan(run_a):
+            Iangle = Iangle_compen
+        else:
+            Iangle = circgaufunc(run_a, aatun1d, Iangle_kappa, Iangle_diff)
         ECtheta = (np.cos(theta_phase[i] + EC_phase) + 1)/2
         Isen = boxfunc2d(run_x, xxtun1d, run_y, yytun1d, Ipos_sd, Ipos_max_compen+Iangle) * ECtheta
         Isen[nn_ca3:] = 0

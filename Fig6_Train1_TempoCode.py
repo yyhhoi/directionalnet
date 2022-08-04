@@ -15,8 +15,8 @@ exintag = sys.argv[1]
 
 # ====================================== Global params and paths ==================================
 project_tag = '1lr'
-data_dir = 'sim_results/fig6_NoAngle'
-save_dir = 'sim_results/fig6_NoAngle/' + project_tag
+data_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas'
+save_dir = 'sim_results/fig6_TrainStand_ECTrainNoAngle_Whas/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,

@@ -3,18 +3,11 @@
 from os.path import join
 import time
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 import os
 import pandas as pd
-from scipy.stats import vonmises, pearsonr, circmean
-from pycircstat import cdiff, mean as cmean
-from library.comput_utils import cal_hd_np, pair_diff, gaufunc2d, gaufunc2d_angles, circgaufunc, boxfunc2d
-from library.shared_vars import total_figw
+from library.comput_utils import cal_hd_np
 from library.utils import save_pickle, load_pickle
-from library.visualization import customlegend
-from library.linear_circular_r import rcc
-from library.simulation import createMosProjMat_p2p, directional_tuning_tile, simulate_SNN
+from library.simulation import simulate_SNN
 
 
 # # ================================= Network Parameters ==========================================
@@ -46,6 +39,7 @@ config_dict['theta_f'] = 10
 config_dict['EC_phase_deg'] = 290
 config_dict['Ipos_max'] = 2
 config_dict['Iangle_diff'] = 6
+config_dict['Iangle_compen'] = 2
 config_dict['Ipos_sd'] = 5
 config_dict['Iangle_kappa'] = 1
 config_dict['ECstf_rest'] = 0
@@ -114,14 +108,19 @@ dt = config_dict['dt']
 
 traj_r = 10
 traj_t_each = 1e3  # 1s, 1000ms
-traj_angles = np.arange(24)/24 * (2*np.pi)
+max_num_trajtypes = 24
+traj_angles = np.arange(max_num_trajtypes)/max_num_trajtypes * (2*np.pi)
 xlist, ylist, tlist, alist = [], [], [], []
 typelist = []
 traj_t_start, traj_t_end = 0, traj_t_each
 for traji, traj_angle in enumerate(traj_angles):
     traj_vec = np.array([np.cos(traj_angle), np.sin(traj_angle)])
-    start_pt = -traj_r * traj_vec
-    end_pt = traj_r * traj_vec
+    if traji == 0:
+        start_pt = np.array([0, 0])
+        end_pt = np.array([0, 0])
+    else:
+        start_pt = -traj_r * traj_vec
+        end_pt = traj_r * traj_vec
     traj_t = np.arange(traj_t_start, traj_t_end, dt)
     traj_x = np.linspace(start_pt[0], end_pt[0], traj_t.shape[0])
     traj_y = np.linspace(start_pt[1], end_pt[1], traj_t.shape[0])
@@ -142,21 +141,26 @@ BehDF0 = pd.DataFrame(dict(t=traj_t_all, traj_x=traj_x_all, traj_y=traj_y_all, t
 
 # # ============================ Parameter notes =====================================
 # Below is for WITHOUT directional tuning
-config_dict['Ipos_max'] = 7  # 5
-config_dict['Iangle_diff'] = 0  # 0
-config_dict['wmax_ca3ca3'] = 500
-config_dict['wmax_ca3mos'] = 750
-config_dict['wmax_mosca3'] = 750
+# config_dict['Ipos_max'] = 2  # 5
+# config_dict['Iangle_diff'] = 6  # 0
+# config_dict['wmax_ca3ca3'] = 500
+# config_dict['wmax_ca3mos'] = 750
+# config_dict['wmax_mosca3'] = 750
 
 
 
 # Below is for WITH directional tuning
-# config_dict['wmax_ca3ca3_adiff'] = 1500  # 1500
-# config_dict['wmax_ca3mosca3_adiff'] = 4500  # 3000
+config_dict['wmax_ca3ca3_adiff'] = 1500  # 1500
+config_dict['wmax_ca3mosca3_adiff'] = 4500  # 3000
 
+# Uncomment below if you do not want EC directionality in Training
+config_dict['Ipos_max'] = 2
+config_dict['Iangle_compen'] = 2
+BehDF0.loc[BehDF0['traj_type'] == 0, 'traj_a'] = np.nan
+# BehDF0['traj_a'] = np.nan
 
 # # ============================ Simulation =====================================
-save_dir = join('sim_results', 'fig6_NoAngle')
+save_dir = join('sim_results', 'fig6_TrainStand_ECTrainNoAngle_Whas')
 os.makedirs(save_dir, exist_ok=True)
 
 # Along the DG pathway

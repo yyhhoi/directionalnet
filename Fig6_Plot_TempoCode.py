@@ -1,26 +1,14 @@
-import time
+import os
 from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import os
+import matplotlib.cm as cm
 import pandas as pd
-from pycircstat import cdiff, mean as cmean
-from library.comput_utils import pair_diff, circgaufunc, get_tspdiff, calc_exin_samepath
-from library.correlogram import ThetaEstimator
-from library.script_wrappers import best_worst_analysis, exin_analysis
-from library.shared_vars import total_figw
+from library.Tempotron import Tempotron
 from library.utils import save_pickle, load_pickle
-from library.visualization import customlegend, plot_popras, plot_phase_precession, plot_sca_onsetslope, \
-    plot_marginal_phase, plot_exin_bestworst_simdissim
-from library.linear_circular_r import rcc
-from library.simulation import createMosProjMat_p2p, directional_tuning_tile, simulate_SNN
 
 # ====================================== Global params and paths ==================================
-
-load_dir = 'sim_results/fig6'
-save_dir = 'plots/fig6/'
-os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,
@@ -28,110 +16,122 @@ plt.rcParams.update({'font.size': legendsize,
                      'axes.titlepad': 0,
                      'xtick.major.pad': 0,
                      'ytick.major.pad': 0,
+                     'axes.facecolor': 'w',
 
                      })
-# ====================================== Figure initialization ==================================
+project_tag = 'Jit100_3ms'
+simdata_dir = 'sim_results/fig6_TrainStand_Icompen2'
+data_dir = join(simdata_dir, project_tag)
+# ====================================== Organize data  ==================================
+for exintag in ['in', 'ex']:
+    dataset = load_pickle(join(data_dir, 'data_train_test_%s_%s.pickle'%(project_tag, exintag)))
+    temNw =  np.load(join(data_dir, 'w_%s_%s.npy'%(project_tag, exintag)))
+    simdata = load_pickle(join(simdata_dir, 'fig6_%s.pkl'%(exintag)))
 
-fig, ax = plt.subplots(3, 1, figsize=(9, 9))
+    X_test_ori = dataset['X_test_ori']
+    Y_test_ori = dataset['Y_test_ori']
+    trajtype_test_ori = dataset['trajtype_test_ori']
+    theta_bounds = dataset['theta_bounds']
+    all_nidx = dataset['all_nidx']
+    X_train_ori = dataset['X_train_ori']
+    Y_train_ori = dataset['Y_train_ori']
+    trajtype_train_ori = dataset['trajtype_train_ori']
 
+    N = len(X_train_ori[0])
+    num_trajtypes = trajtype_test_ori.max()+1
+    trajtype_ax = np.arange(num_trajtypes)
+    a_ax = trajtype_ax/num_trajtypes*2*np.pi
+    deg_ax = np.around(np.rad2deg(a_ax), 0).astype(int)
 
-for ax_each in ax:
-    ax_each.tick_params(labelsize=legendsize)
-    ax_each.spines['top'].set_visible(False)
-    ax_each.spines['right'].set_visible(False)
-
-# ======================================Analysis and plotting ==================================
-direct_c = ['tomato', 'royalblue']
-all_nidx_dict = dict()
-
-simdata_ctrl = load_pickle(join(load_dir, 'fig6_Ctrl.pkl'))
-simdata_onlyin = load_pickle(join(load_dir, 'fig6_OnlyIn.pkl'))
-simdata_full = load_pickle(join(load_dir, 'fig6_Full.pkl'))
-
-ctrl_nsp = simdata_ctrl['SpikeDF'].shape[0]
-onlyin_nsp = simdata_onlyin['SpikeDF'].shape[0]
-full_nsp = simdata_full['SpikeDF'].shape[0]
-
-nsp_min = min(ctrl_nsp, onlyin_nsp, full_nsp)
-samp_frac_all = [nsp_min/ctrl_nsp, nsp_min/onlyin_nsp, nsp_min/full_nsp]
-simdata_all = [simdata_ctrl, simdata_onlyin, simdata_full]
-labels_all = ['Ctrl', 'OnlyIn', 'Full']
-
-
-for tagi in range(3):
-
-    simdata = simdata_all[tagi]
-    label = labels_all[tagi]
-    samp_frac = samp_frac_all[tagi]
-    patternlabel = labels_all[tagi]
-
-
-    # ======================== Get data =================
-    BehDF = simdata['BehDF']
-    SpikeDF = simdata['SpikeDF'].sample(frac=samp_frac, random_state=1).reset_index(drop=True)
     NeuronDF = simdata['NeuronDF']
-    ActivityData = simdata['ActivityData']
-    MetaData = simdata['MetaData']
-    config_dict = simdata['Config']
-
-    theta_phase_plot = BehDF['theta_phase_plot']
-    traj_x = BehDF['traj_x'].to_numpy()
-    traj_y = BehDF['traj_y'].to_numpy()
-    t = BehDF['t'].to_numpy()
-    theta_phase = BehDF['theta_phase']
-
-    nn_ca3 = MetaData['nn_ca3']
-    w = MetaData['w']
-
     xxtun1d = NeuronDF['neuronx'].to_numpy()
     yytun1d = NeuronDF['neurony'].to_numpy()
     aatun1d = NeuronDF['neurona'].to_numpy()
 
-    Isen = ActivityData['Isen']
-    Isen_fac = ActivityData['Isen_fac']
+    # ====================================== Tempotron prediction  ==================================
 
-    w_ca3ca3 = w[:nn_ca3, :nn_ca3]
-    xxtun1d_ca3 = xxtun1d[:nn_ca3]
-    yytun1d_ca3 = yytun1d[:nn_ca3]
-    aatun1d_ca3 = aatun1d[:nn_ca3]
-    nx_ca3, ny_ca3 = config_dict['nx_ca3'], config_dict['ny_ca3']
-    xxtun2d_ca3 = xxtun1d_ca3.reshape(nx_ca3, nx_ca3)  # Assuming nx = ny
-    yytun2d_ca3 = yytun1d_ca3.reshape(nx_ca3, nx_ca3)  # Assuming nx = ny
-    aatun2d_ca3 = aatun1d_ca3.reshape(nx_ca3, nx_ca3)  # Assuming nx = ny
 
-    Ipos_max_compen = config_dict['Ipos_max_compen']
-    Iangle_diff = config_dict['Iangle_diff']
-    Iangle_kappa = config_dict['Iangle_kappa']
-    xmin, xmax, ymin, ymax = config_dict['xmin'], config_dict['xmax'], config_dict['ymin'], config_dict['ymax']
-    theta_f = config_dict['theta_f']
-    traj_d = np.append(0, np.cumsum(np.sqrt(np.diff(traj_x)**2 + np.diff(traj_y)**2)))
+    Vthresh = 2
+    temN_tax = np.arange(0, 100, 1)
+    temN = Tempotron(N=N, lr=0.01, Vthresh=Vthresh, tau=5, tau_s=5/4, w_seed=0)
+    temN.w = temNw
+    Y_train_ori_pred, kout_train_ori, tspout_train_ori = temN.predict(X_train_ori, temN_tax)
+    Y_test_ori_pred, kout_test_ori, tspout_test_ori = temN.predict(X_test_ori, temN_tax)
 
-    # # Population raster CA3
-    # Indices along the trajectory
-    all_nidx = np.zeros(traj_x.shape[0])
-    for i in range(traj_x.shape[0]):
-        run_x, run_y = traj_x[i], traj_y[i]
-        nidx = np.argmin(np.square(run_x - xxtun1d_ca3) + np.square(run_y - yytun1d_ca3))
-        all_nidx[i] = nidx
-    all_nidx = all_nidx[np.sort(np.unique(all_nidx, return_index=True)[1])]
-    all_nidx = all_nidx.astype(int)
+    # ====================================== Plot 2D weights  ==================================
 
-    all_egnidxs = all_nidx[[13, 19]]
-    best_nidx, worst_nidx = all_egnidxs[0], all_egnidxs[1]
+    wmin, wmax = temNw.min(), temNw.max()
+    abswmax = max(np.abs(wmin), np.abs(wmax))
+    norm = mpl.colors.Normalize(vmin=-abswmax, vmax=abswmax)
+    val2cmap = cm.ScalarMappable(norm=norm, cmap=cm.jet)
+    fig, ax = plt.subplots(facecolor='w')
+    im = ax.scatter(xxtun1d[all_nidx], yytun1d[all_nidx], c=temNw, cmap=cm.jet, vmin=-abswmax, vmax=abswmax)
 
-    # ======================== Plotting =================
-    # Population Raster
-    plot_popras(ax[tagi], SpikeDF, t, all_nidx, all_egnidxs[0], all_egnidxs[1], direct_c[0], direct_c[1])
-    # ax[tagi].set_ylim(10, 30)
-    # ax[tagi].set_xlim(t.max()/2-600, t.max()/2+600)
-    # ax[tagi].set_xticks([500, 1000, 1500])
-    # ax[tagi].set_xticklabels(['500', '', '1500'])
-    # ax[tagi].set_xticks(np.arange(400, 1601, 100), minor=True)
-    ax[tagi].set_xlabel('Time (ms)', fontsize=legendsize, labelpad=-6)
-    theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
-    for i in theta_cutidx:
-        ax[tagi].axvline(t[i], c='gray', linewidth=0.25)
-    ax[tagi].set_title(labels_all[tagi])
-fig.savefig(join(save_dir, 'fig6.png'), dpi=300)
-# fig.savefig(join(save_dir, 'fig3.pdf'), dpi=300)
-# fig.savefig(join(save_dir, 'fig3.eps'), dpi=300)
+    plt.colorbar(im, ax=ax)
+    fig.savefig(join(data_dir, 'w_%s_%s.png'%(project_tag, exintag)), dpi=200)
+
+
+    # ====================================== Plot detailed traces  ==================================
+
+    def plot_tempotron_traces(ax, N, X, Y, Y_pred, temNw, all_nidx, yytun1d, kout_all, tspout_all, val2cmap, traj_deg):
+
+        M = ax.shape[0]
+        w_yax = np.arange(N)
+        for Mi in range(M):
+
+            ysep_NiList = []
+            for Ni in range(N):
+                tsp = X[Mi, Ni]
+                ax[Mi].eventplot(tsp, lineoffsets=Ni, linelengths=1, color=val2cmap.to_rgba(temNw[Ni]))
+
+                if (Ni % 20 ) == 0:
+                    ax[Mi].axhline(Ni+0.5, linewidth=1, color='gray')
+                    ysep_NiList.append(Ni)
+
+            ysep_ax = np.array(ysep_NiList) + 0.5
+            ax[Mi].set_yticks(ysep_ax)
+            ax[Mi].set_yticklabels(np.around(yytun1d[all_nidx[ysep_NiList]], 1).astype(str))
+            ax[Mi].set_xlim(0, 100)
+            ax[Mi].set_ylim(w_yax.min()-1, w_yax.max()+1)
+            ax[Mi].set_title('Train#%d, %d deg, Label: %s, Pred: %s'% (Mi+1, traj_deg, Y[Mi], Y_pred[Mi]))
+            if Y[Mi]:
+                ax[Mi].set_facecolor('0.95')
+
+            # Plot weights
+            left, bottom, width, height = ax[Mi].get_position().bounds
+            ax_w = fig.add_axes([left+0.05, bottom, 0.01, height])
+            ax_w.barh(w_yax, temNw, color=val2cmap.to_rgba(temNw))
+            ax_w.axvline(0, color='gray')
+            ax_w.set_yticks(np.around(np.arange(N), 2))
+            ax_w.axis('off')
+            ax_w.set_ylim(w_yax.min()-1, w_yax.max()+1)
+
+            # Plot voltage trace
+            ax_trace_height = 0.05
+            ax_trace = fig.add_axes([left, bottom-ax_trace_height, width, ax_trace_height])
+            ax_trace.plot(temN_tax, kout_all[Mi], color='gray')
+            ax_trace.eventplot(tspout_all[Mi], lineoffsets=2.2, linelengths=0.2, color='r')
+            ax_trace.set_xlim(0, 100)
+            ax_trace.set_ylim(None, 3)
+            ax_trace.axhline(Vthresh, color='k')
+
+    fig, ax = plt.subplots(1, 9, figsize=(36, 12), facecolor='w')
+    plot_tempotron_traces(ax, N, X=X_train_ori, Y=Y_train_ori, Y_pred=Y_train_ori_pred, temNw=temNw, all_nidx=all_nidx,
+                          yytun1d=yytun1d, kout_all=kout_train_ori, tspout_all=tspout_train_ori,
+                          val2cmap=val2cmap, traj_deg=0)
+    fig.savefig(join(data_dir, 'AllNeurons_train_%s_%s.png'%(project_tag, exintag)), dpi=200)
+
+
+    for traj_deg in [0, 90, 180]:
+        chosen_trajtype = trajtype_ax[deg_ax==traj_deg].squeeze()
+        mask = trajtype_test_ori == chosen_trajtype
+        X_test_chosen = X_test_ori[mask]
+        Y_test_chosen = Y_test_ori[mask]
+        Y_test_ori_pred_chosen = Y_test_ori_pred[mask]
+        kout_test_chosen = kout_test_ori[mask]
+        tspout_test_chosen = tspout_test_ori[mask]
+        fig, ax = plt.subplots(1, 10, figsize=(40, 12), facecolor='w')
+        plot_tempotron_traces(ax, N, X=X_test_chosen, Y=Y_test_chosen, Y_pred=Y_test_ori_pred_chosen, temNw=temNw,
+                              all_nidx=all_nidx, yytun1d=yytun1d, kout_all=kout_test_chosen, tspout_all=tspout_test_chosen,
+                              val2cmap=val2cmap, traj_deg=180)
+        fig.savefig(join(data_dir, 'AllNeurons_Test%d_%s_%s.png'%(traj_deg, project_tag, exintag)), dpi=200)

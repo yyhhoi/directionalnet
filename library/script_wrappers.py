@@ -165,20 +165,18 @@ def datagen_jitter(X, Y, trajtype, jitter_num, theta_T, jitter_ms=2.5):
     new_trajtype = []
     for mi in range(M):
 
-        tsp_Mtmp = np.concatenate(X[mi])
-        jitfront, jitend = tsp_Mtmp.min(), theta_T - tsp_Mtmp.max()
         for jitter_i in range(jitter_num):
             new_X_eachM = []
-            jit_amount = np.random.uniform(-jitfront, jitend)
             for nj in range(N):
                 tsp_ori = X[mi][nj]
 
                 # Jittering
-                if tsp_ori.shape[0] > 0:
+                num_spikes = tsp_ori.shape[0]
+                if num_spikes > 0:
 
-                    tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms)
+                    tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms, size=num_spikes)
                 else:
-                    tsp_jittered = tsp_ori
+                    tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms)
                 new_X_eachM.append(tsp_jittered)
 
             new_X.append(new_X_eachM)

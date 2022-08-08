@@ -48,7 +48,7 @@ yshift_r7 = 0.02
 xgap_exin = 0.03
 
 
-fig = plt.figure(figsize=(figw, figh))
+fig = plt.figure(figsize=(5.2, 5.5))
 
 ax_45 = [
     fig.add_axes([ax_w * 0 + wgap/2, 1 - ax_h + hgap/2, ax_w * 1 - wgap, ax_h - hgap]),

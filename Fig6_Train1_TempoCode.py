@@ -11,11 +11,11 @@ from library.utils import save_pickle, load_pickle
 from library.visualization import plot_popras
 
 # ====================================== Global params and paths ==================================
-jitter_times = 100
-jitter_ms = 3
-project_tag = 'Jit100_3ms'
-data_dir = 'sim_results/fig6_TrainStand_Icompen2'
-save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
+jitter_times = 200
+jitter_ms = 5
+project_tag = 'TrainNoJit_Jit200_5ms'
+data_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2'
+save_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,
@@ -150,8 +150,9 @@ for exintag in exintags:
     theta_bounds = np.stack(theta_bounds)
 
     # # Jittering
+    # X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, jitter_times, theta_T, jitter_ms=jitter_ms)
+    X_train, Y_train, trajtype_train = X_train_ori, Y_train_ori, trajtype_train_ori
 
-    X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, jitter_times, theta_T, jitter_ms=jitter_ms)
     X_test, Y_test, trajtype_test = datagen_jitter(X_test_ori, Y_test_ori, trajtype_test_ori, jitter_times, theta_T, jitter_ms=jitter_ms)
 
     print('Training data beforing jittering = %d'%(X_train_ori.shape[0]))

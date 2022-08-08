@@ -27,10 +27,9 @@ plt.rcParams.update({'font.size': legendsize,
                      'xtick.major.pad': 0,
                      'ytick.major.pad': 0,
                      'lines.linewidth': 1,
+                     'figure.figsize': (5.2, 5.5)
                      })
 # ====================================== Figure initialization ==================================
-figw = 5.2
-figh = 5.5
 
 ax_h = 1/6
 ax_w = 1/4

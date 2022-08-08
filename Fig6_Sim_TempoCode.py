@@ -142,12 +142,20 @@ BehDF_ori = pd.DataFrame(dict(t=traj_t_all, traj_x=traj_x_all, traj_y=traj_y_all
                               traj_type=typelist))
 
 BehDF_in = BehDF_ori.copy()
-BehDF_in['traj_y'] = BehDF_ori['traj_y'] + 20
-
 BehDF_ex = BehDF_ori.copy()
-# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_x'] = xlist[1]
-# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_y'] = ylist[1]
-# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = alist[1]
+
+# # # Un-comment to replace traj_type -1 (Standing at center in training) as 0 (Running at 0 deg in training)
+# # Ex
+BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_x'] = xlist[1]
+BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_y'] = ylist[1]
+BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = alist[1]
+# In
+BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_x'] = xlist[1]
+BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_y'] = ylist[1]
+BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = alist[1]
+
+# Offset trajectory vertically to y=+20 (intrinsic center) and y=-20 (Extrinsic center)
+BehDF_in['traj_y'] = BehDF_ori['traj_y'] + 20
 BehDF_ex['traj_y'] = BehDF_ori['traj_y'] - 20
 
 # # ============================ Parameter notes =====================================
@@ -159,7 +167,6 @@ BehDF_ex['traj_y'] = BehDF_ori['traj_y'] - 20
 # config_dict['wmax_mosca3'] = 750
 
 
-
 # Below is for WITH directional tuning
 config_dict['wmax_ca3ca3_adiff'] = 1500  # 1500
 config_dict['wmax_ca3mosca3_adiff'] = 4500  # 3000
@@ -169,10 +176,10 @@ config_dict['Ipos_max'] = 2
 config_dict['Iangle_compen'] = 2
 BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = np.nan
 BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = np.nan
-# BehDF0['traj_a'] = np.nan
+# BehDF0['traj_a'] = np.nan  # Turn off ALL EC sensory directionality
 
 # # ============================ Simulation =====================================
-save_dir = join('sim_results', 'fig6_TrainStand_Icompen2')
+save_dir = join('sim_results', 'fig6_TrainStand_ExInRun_Icompen2')
 os.makedirs(save_dir, exist_ok=True)
 
 # Along the DG pathway

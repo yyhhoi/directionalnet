@@ -18,9 +18,9 @@ plt.rcParams.update({'font.size': legendsize,
                      'ytick.major.pad': 0,
 
                      })
-project_tag = 'Jit100_3ms'
-data_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
-save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
+project_tag = 'TrainNoJit_Jit200_5ms'
+data_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2/' + project_tag
+save_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 
 pred_perIter = False

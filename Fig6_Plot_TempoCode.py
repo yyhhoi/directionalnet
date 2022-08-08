@@ -19,10 +19,11 @@ plt.rcParams.update({'font.size': legendsize,
                      'axes.facecolor': 'w',
 
                      })
-project_tag = 'Jit100_3ms'
-simdata_dir = 'sim_results/fig6_TrainStand_Icompen2'
+project_tag = 'TrainNoJit_Jit200_5ms'
+simdata_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2'
 data_dir = join(simdata_dir, project_tag)
 # ====================================== Organize data  ==================================
+print('Plotting')
 for exintag in ['in', 'ex']:
     dataset = load_pickle(join(data_dir, 'data_train_test_%s_%s.pickle'%(project_tag, exintag)))
     temNw =  np.load(join(data_dir, 'w_%s_%s.npy'%(project_tag, exintag)))
@@ -84,7 +85,7 @@ for exintag in ['in', 'ex']:
                 tsp = X[Mi, Ni]
                 ax[Mi].eventplot(tsp, lineoffsets=Ni, linelengths=1, color=val2cmap.to_rgba(temNw[Ni]))
 
-                if (Ni % 20 ) == 0:
+                if (Ni % 20) == 0:
                     ax[Mi].axhline(Ni+0.5, linewidth=1, color='gray')
                     ysep_NiList.append(Ni)
 
@@ -135,3 +136,50 @@ for exintag in ['in', 'ex']:
                               all_nidx=all_nidx, yytun1d=yytun1d, kout_all=kout_test_chosen, tspout_all=tspout_test_chosen,
                               val2cmap=val2cmap, traj_deg=180)
         fig.savefig(join(data_dir, 'AllNeurons_Test%d_%s_%s.png'%(traj_deg, project_tag, exintag)), dpi=200)
+
+
+    # Plot phase_tuning graph
+    chosen_trajtype = trajtype_ax[deg_ax==90].squeeze()
+    mask = trajtype_test_ori == chosen_trajtype
+    X_test_90 = X_test_ori[mask]
+    chosen_trajtype = trajtype_ax[deg_ax==180].squeeze()
+    mask = trajtype_test_ori == chosen_trajtype
+    X_test_180 = X_test_ori[mask]
+
+    Xnames = ['Train 0 deg', 'Test 90 deg', 'Test 180 deg']
+    Xs = [X_train_ori, X_test_90, X_test_180]
+    fig, ax = plt.subplots(3, 1, figsize=(4, 12), facecolor='w', sharex=True, sharey=True)
+    bins_phase = np.arange(0, 370, 10)
+    bins_widx = np.arange(-180, 190, 10)
+    for Xi in range(3):
+        X = Xs[Xi]
+
+        alltsp = []
+        allwidx = []
+
+        M = X.shape[0]
+        N = X.shape[1]
+
+        for Ni in range(N):
+            tsp_allM = []
+            for Mi in range(M):
+
+                tsp = X[Mi, Ni]
+
+                tsp_allM.extend(list(tsp))
+
+
+            alltsp.append(np.asarray(tsp_allM))
+            allwidx.append(np.ones(len(tsp_allM)) * aatun1d[all_nidx[Ni]])
+
+
+        alltsp = np.concatenate(alltsp)
+        allphasesp = np.rad2deg(alltsp / 100 * 2 * np.pi)
+        allwidx = np.rad2deg(np.concatenate(allwidx))
+        #
+        ax[Xi].hist2d(allwidx, allphasesp, bins=(bins_widx, bins_phase))
+        ax[Xi].set_title(Xnames[Xi])
+        ax[Xi].set_xlabel('Neuron')
+        ax[Xi].set_ylabel('Spike phase (deg)')
+
+    fig.savefig(join(data_dir, 'PhaseVS_Weights_%s_%s.png'%(project_tag, exintag)), dpi=200)

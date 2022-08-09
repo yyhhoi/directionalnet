@@ -137,12 +137,14 @@ for exintag in exintags:
 
         cycle_i += 1
     print()
-
-
-    # # Separate train/test set
+    theta_bounds = np.stack(theta_bounds)
     data_M = np.array(data_M, dtype=object)
     trajtype = np.array(trajtype)
     labels = np.array(label_M)
+    # # ==============================================================================================
+    # # ==================== Train on Deg 0 or Standing, test on all degs ===========================
+    # # ==============================================================================================
+    # # Separate train/test set
     train_idx = np.where(trajtype == -1)[0].astype(int)
     test_idx = np.setdiff1d(np.arange(trajtype.shape[0]), train_idx)
     X_train_ori = data_M[train_idx]
@@ -151,13 +153,11 @@ for exintag in exintags:
     Y_test_ori = labels[test_idx]
     trajtype_train_ori = trajtype[train_idx]
     trajtype_test_ori = trajtype[test_idx]
-    theta_bounds = np.stack(theta_bounds)
-
     # # Jittering
     X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, jitter_times, jitter_ms=jitter_ms, startseed=0)
     # X_train, Y_train, trajtype_train = X_train_ori, Y_train_ori, trajtype_train_ori
-
     X_test, Y_test, trajtype_test = datagen_jitter(X_test_ori, Y_test_ori, trajtype_test_ori, jitter_times, jitter_ms=jitter_ms, startseed=0)
+    # # ==============================================================================================
 
     print('Training data beforing jittering = %d'%(X_train_ori.shape[0]))
     print('True = %d \nFalse = %d'%(Y_train_ori.sum(), Y_train_ori.shape[0]-Y_train_ori.sum()))

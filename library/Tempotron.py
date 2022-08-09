@@ -93,7 +93,10 @@ class Tempotron:
         vtraces = self.kern.getk(t.reshape(-1, 1), alltspallm.reshape(1, -1))
         spdf = pd.DataFrame(dict(tsp=flat_tsp_list, M=M_list, N=N_list))
 
+        num_correct = 0
         for iter_i in range(num_iter):
+            if num_correct >= MX:
+                break
             all_spikeFlags = np.zeros(MX)
             num_correct = 0
             for mi in range(MX):
@@ -140,8 +143,7 @@ class Tempotron:
                             self.w[synid] = self.w[synid] - dw_alltsp[nidices_inmax == synid].sum()
             if progress:
                 print('\r Iter %d/%d: Correct trials %d/%d = %0.3f'%(iter_i+1, num_iter, num_correct, MX, num_correct/MX), end='', flush=True)
-            if num_correct >= MX:
-                break
+
 
             yield all_spikeFlags, self.w.copy()
 

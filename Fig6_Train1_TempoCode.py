@@ -11,11 +11,11 @@ from library.utils import save_pickle, load_pickle
 from library.visualization import plot_popras
 
 # ====================================== Global params and paths ==================================
-jitter_times = 200
-jitter_ms = 5
-project_tag = 'TrainNoJit_Jit200_5ms'
-data_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2'
-save_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2/' + project_tag
+jitter_times = 100
+jitter_ms = 2
+project_tag = 'Jit100_2ms_gau'
+data_dir = 'sim_results/fig6_TrainStand_Icompen2'
+save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,
@@ -123,6 +123,10 @@ for exintag in exintags:
             label = True
         else:
             label = False
+
+        # traj_mask = (np.abs(traj_x[t_intheta]-center_x) <= overlap_r) & (np.abs(traj_y[t_intheta]-center_y) <= overlap_r)
+        # label = np.median(traj_mask).astype(bool)
+
         label_M.append(label)
 
         # Traj type
@@ -150,10 +154,10 @@ for exintag in exintags:
     theta_bounds = np.stack(theta_bounds)
 
     # # Jittering
-    # X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, jitter_times, theta_T, jitter_ms=jitter_ms)
-    X_train, Y_train, trajtype_train = X_train_ori, Y_train_ori, trajtype_train_ori
+    X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, jitter_times, jitter_ms=jitter_ms, startseed=0)
+    # X_train, Y_train, trajtype_train = X_train_ori, Y_train_ori, trajtype_train_ori
 
-    X_test, Y_test, trajtype_test = datagen_jitter(X_test_ori, Y_test_ori, trajtype_test_ori, jitter_times, theta_T, jitter_ms=jitter_ms)
+    X_test, Y_test, trajtype_test = datagen_jitter(X_test_ori, Y_test_ori, trajtype_test_ori, jitter_times, jitter_ms=jitter_ms, startseed=0)
 
     print('Training data beforing jittering = %d'%(X_train_ori.shape[0]))
     print('True = %d \nFalse = %d'%(Y_train_ori.sum(), Y_train_ori.shape[0]-Y_train_ori.sum()))
@@ -173,9 +177,19 @@ for exintag in exintags:
                     X_train=X_train, X_test=X_test, Y_train=Y_train, Y_test=Y_test,
                     trajtype_train=trajtype_train, trajtype_test=trajtype_test, all_nidx=all_nidx, theta_bounds=theta_bounds)
 
-
+    savedata_ori = dict(
+        X_train_ori=X_train_ori,
+        Y_train_ori=Y_train_ori,
+        X_test_ori=X_test_ori,
+        Y_test_ori=Y_test_ori,
+        trajtype_train_ori=trajtype_train_ori,
+        trajtype_test_ori=trajtype_test_ori,
+        theta_bounds=theta_bounds,
+        all_nidx=all_nidx
+    )
 
     save_pickle(join(save_dir, 'data_train_test_%s_%s.pickle'%(project_tag, exintag)), savedata)
+    save_pickle(join(save_dir, 'data_train_test_ori_%s_%s.pickle'%(project_tag, exintag)), savedata_ori)
 
     del simdata
 

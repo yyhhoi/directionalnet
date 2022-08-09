@@ -18,9 +18,9 @@ plt.rcParams.update({'font.size': legendsize,
                      'ytick.major.pad': 0,
 
                      })
-project_tag = 'TrainNoJit_Jit200_5ms'
-data_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2/' + project_tag
-save_dir = 'sim_results/fig6_TrainStand_ExInRun_Icompen2/' + project_tag
+project_tag = 'Jit100_2ms_gau'
+data_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
+save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 
 pred_perIter = False
@@ -148,7 +148,6 @@ for exinid, exintag in enumerate(exintags):
         val_test, se_test = directional_acc_metrics(Y_test, Y_pred_test, trajtype_test, num_trajtypes=num_trajtypes)
         TPR_test_plot, TPRse_test_plot = val_test[1], se_test[1]
         TNR_test_plot, TNRse_test_plot = val_test[2], se_test[2]
-
     ax_enditer[0].errorbar(x=deg_ax, y=TPR_test_plot, yerr=TPRse_test_plot, label=exintag)
     ax_enditer[0].set_ylabel('TPR')
     ax_enditer[1].errorbar(x=deg_ax, y=TNR_test_plot, yerr=TNRse_test_plot, label=exintag)
@@ -167,6 +166,7 @@ if pred_perIter:
     ax_metrics[0, 0].set_title('Extrinsic')
     ax_metrics[0, 1].set_title('Intrinsic')
     fig_metrics.savefig(join(save_dir, 'Metrics_%s.png'%(project_tag)))
+
 fig_enditer.savefig(join(save_dir, 'ACC_%s.png'%(project_tag)))
 
 

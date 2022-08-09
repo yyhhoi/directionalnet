@@ -110,8 +110,8 @@ traj_t_each = 1e3  # 1s, 1000ms
 max_num_trajtypes = 24
 traj_types = np.arange(max_num_trajtypes)
 traj_angles = traj_types/max_num_trajtypes * (2*np.pi)
-xlist, ylist, tlist, alist = [], [], [], []
-typelist = []
+xlist, ylist, tlist, alist, typelist = [], [], [], [], []
+
 traj_t_start, traj_t_end = 0, traj_t_each
 for traji in range(-1, max_num_trajtypes):
     traj_type = traji
@@ -145,14 +145,14 @@ BehDF_in = BehDF_ori.copy()
 BehDF_ex = BehDF_ori.copy()
 
 # # # Un-comment to replace traj_type -1 (Standing at center in training) as 0 (Running at 0 deg in training)
-# # Ex
-BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_x'] = xlist[1]
-BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_y'] = ylist[1]
-BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = alist[1]
-# In
-BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_x'] = xlist[1]
-BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_y'] = ylist[1]
-BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = alist[1]
+# # # Ex
+# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_x'] = xlist[1]
+# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_y'] = ylist[1]
+# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = alist[1]
+# # In
+# BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_x'] = xlist[1]
+# BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_y'] = ylist[1]
+# BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = alist[1]
 
 # Offset trajectory vertically to y=+20 (intrinsic center) and y=-20 (Extrinsic center)
 BehDF_in['traj_y'] = BehDF_ori['traj_y'] + 20
@@ -179,7 +179,7 @@ BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = np.nan
 # BehDF0['traj_a'] = np.nan  # Turn off ALL EC sensory directionality
 
 # # ============================ Simulation =====================================
-save_dir = join('sim_results', 'fig6_TrainStand_ExInRun_Icompen2')
+save_dir = join('sim_results', 'fig6_TrainStand_Icompen2')
 os.makedirs(save_dir, exist_ok=True)
 
 # Along the DG pathway

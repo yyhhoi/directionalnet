@@ -156,13 +156,15 @@ def find_nidx_along_traj(traj_x, traj_y, xxtun1d, yytun1d):
     return all_nidx
 
 
-def datagen_jitter(X, Y, trajtype, jitter_num, theta_T, jitter_ms=2.5):
+def datagen_jitter(X, Y, trajtype, jitter_num, jitter_ms=2.5, startseed=None):
 
     M = len(X)
     N = len(X[0])
     new_X = []
     new_Y = []
     new_trajtype = []
+    seed = startseed if startseed else None
+
     for mi in range(M):
 
         for jitter_i in range(jitter_num):
@@ -172,12 +174,13 @@ def datagen_jitter(X, Y, trajtype, jitter_num, theta_T, jitter_ms=2.5):
 
                 # Jittering
                 num_spikes = tsp_ori.shape[0]
-                if num_spikes > 0:
-
-                    tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms, size=num_spikes)
-                else:
-                    tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms)
+                if seed:
+                    np.random.seed(seed)
+                    seed += 1
+                # tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms, size=num_spikes)
+                tsp_jittered = tsp_ori + np.random.normal(0, jitter_ms, size=num_spikes)
                 new_X_eachM.append(tsp_jittered)
+
 
             new_X.append(new_X_eachM)
             new_Y.append(Y[mi])

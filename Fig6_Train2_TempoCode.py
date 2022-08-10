@@ -18,9 +18,9 @@ plt.rcParams.update({'font.size': legendsize,
                      'ytick.major.pad': 0,
 
                      })
-project_tag = 'Jit200_1ms_gau'
-data_dir = 'sim_results/fig6_TrainRun_Icompen2a4/' + project_tag
-save_dir = 'sim_results/fig6_TrainRun_Icompen2a4/' + project_tag
+project_tag = 'Jit100_2ms_gau'
+data_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
+save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 
 pred_perIter = False
@@ -93,7 +93,7 @@ for exinid, exintag in enumerate(exintags):
 
         # Test result per iteration
         if pred_perIter:
-            Y_pred_test, _, _, = temN.predict(X_test, temN_tax)
+            Y_pred_test, _, _, _ = temN.predict(X_test, temN_tax)
             val_test, se_test = directional_acc_metrics(Y_test, Y_pred_test, trajtype_test, num_trajtypes=num_trajtypes)
             ACC_test_list.append(val_test[0])
             ACCse_test_list.append(se_test[0])
@@ -141,11 +141,13 @@ for exinid, exintag in enumerate(exintags):
 
     # # Plot accuracy at the end iteration
     if pred_perIter:
+        ACC_test_plot, ACCse_test_plot = ACC_test[-1, :], ACCse_test[-1, :]
         TPR_test_plot, TPRse_test_plot = TPR_test[-1, :], TPRse_test[-1, :]
         TNR_test_plot, TNRse_test_plot = TNR_test[-1, :], TNRse_test[-1, :]
     else:
-        Y_pred_test, _, _, = temN.predict(X_test, temN_tax)
+        Y_pred_test, _, _, _ = temN.predict(X_test, temN_tax)
         val_test, se_test = directional_acc_metrics(Y_test, Y_pred_test, trajtype_test, num_trajtypes=num_trajtypes)
+        ACC_test_plot, ACCse_test_plot = val_test[0], se_test[0]
         TPR_test_plot, TPRse_test_plot = val_test[1], se_test[1]
         TNR_test_plot, TNRse_test_plot = val_test[2], se_test[2]
     ax_enditer[0].errorbar(x=deg_ax, y=TPR_test_plot, yerr=TPRse_test_plot, label=exintag)
@@ -161,6 +163,11 @@ for exinid, exintag in enumerate(exintags):
         ax_enditer[ax_i].set_yticks(np.arange(0, 1.1, 0.1), minor=True)
         ax_enditer[ax_i].grid()
 
+    save_pickle(join(save_dir, 'ACC_%s.pickle'%(exintag)), dict(
+        ACC_test=ACC_test_plot, ACCse_test=ACCse_test_plot,
+        TPR_test=TPR_test_plot, TPRse_test=TPRse_test_plot,
+        TNR_test=TNR_test_plot, TNRse_test=TNRse_test_plot,
+    ))
 
 if pred_perIter:
     ax_metrics[0, 0].set_title('Extrinsic')

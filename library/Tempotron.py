@@ -181,17 +181,31 @@ class Tempotron:
         M_arr = np.array(M_list)
         N_arr = np.array(N_list)
         vtraces = self.kern.getk(t.reshape(-1, 1), alltspallm.reshape(1, -1))
+        spdf = pd.DataFrame(dict(tsp=flat_tsp_list, M=M_list, N=N_list))
 
         Y_pred = []
         kout_list = []
+        koutori_list = []
         tspout_list = []
+
         for mi in range(MX):
-            M_indices = np.where(M_arr == mi)[0]
-            psp = vtraces[:, M_indices] * self.w[N_arr[M_indices]].reshape(1, -1)
-            kout = psp.sum(axis=1)
+            M_mask = spdf['M'] == mi
+            nidices = spdf.loc[M_mask, 'N']
+            alltsp = spdf.loc[M_mask, 'tsp']
+            allkout = vtraces[:, M_mask] * self.w[nidices].reshape(1, -1)
+            kout = allkout.sum(axis=1)
             thresh_idxs = np.where(kout > self.Vthresh)[0]
+            koutori_list.append(kout)
+
             if thresh_idxs.shape[0] > 0:
                 Y_this = True
+
+                t_thresh = t[thresh_idxs[0]]
+                mask_thresh = alltsp < t_thresh
+                nidices_inthresh = nidices[mask_thresh]
+                kout_recalctmp = vtraces[:, mask_thresh[mask_thresh].index] * self.w[nidices_inthresh].reshape(1, -1)
+                kout = kout_recalctmp.sum(axis=1)
+
             else:
                 Y_this = False
             Y_pred.append(Y_this)
@@ -200,6 +214,7 @@ class Tempotron:
 
         Y_pred = np.array(Y_pred)
         kout_all = np.stack(kout_list)
+        koutori_all = np.stack(koutori_list)
         tspout_all = np.array(tspout_list, dtype=object)
-        return Y_pred, kout_all, tspout_all
+        return Y_pred, koutori_all, tspout_all, kout_all
 

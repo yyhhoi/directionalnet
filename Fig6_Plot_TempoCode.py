@@ -19,8 +19,8 @@ plt.rcParams.update({'font.size': legendsize,
                      'axes.facecolor': 'w',
 
                      })
-project_tag = 'Jit200_1ms_gau'
-simdata_dir = 'sim_results/fig6_TrainRun_Icompen2a4'
+project_tag = 'Jit100_2ms_gau'
+simdata_dir = 'sim_results/fig6_TrainStand_Icompen2'
 data_dir = join(simdata_dir, project_tag)
 # ====================================== Organize data  ==================================
 print('Plotting')
@@ -56,8 +56,8 @@ for exintag in ['in', 'ex']:
     temN_tax = np.arange(0, 100, 1)
     temN = Tempotron(N=N, lr=0.01, Vthresh=Vthresh, tau=5, tau_s=5/4, w_seed=0)
     temN.w = temNw
-    Y_train_ori_pred, kout_train_ori, tspout_train_ori = temN.predict(X_train_ori, temN_tax)
-    Y_test_ori_pred, kout_test_ori, tspout_test_ori = temN.predict(X_test_ori, temN_tax)
+    Y_train_ori_pred, kout_train_ori, tspout_train_ori, _ = temN.predict(X_train_ori, temN_tax)
+    Y_test_ori_pred, kout_test_ori, tspout_test_ori, _ = temN.predict(X_test_ori, temN_tax)
 
     # ====================================== Plot 2D weights  ==================================
 

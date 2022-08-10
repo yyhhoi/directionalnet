@@ -19,8 +19,8 @@ plt.rcParams.update({'font.size': legendsize,
                      'axes.facecolor': 'w',
 
                      })
-project_tag = 'Jit100_2ms_gau'
-simdata_dir = 'sim_results/fig6_TrainStand_Icompen2'
+project_tag = 'Jit200_1ms_gau'
+simdata_dir = 'sim_results/fig6_TrainRun_Icompen2a4'
 data_dir = join(simdata_dir, project_tag)
 # ====================================== Organize data  ==================================
 print('Plotting')

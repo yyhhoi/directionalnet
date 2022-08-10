@@ -11,11 +11,11 @@ from library.utils import save_pickle, load_pickle
 from library.visualization import plot_popras
 
 # ====================================== Global params and paths ==================================
-jitter_times = 100
-jitter_ms = 2
-project_tag = 'Jit100_2ms_gau'
-data_dir = 'sim_results/fig6_TrainStand_Icompen2'
-save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
+jitter_times = 200
+jitter_ms = 1
+project_tag = 'Jit200_1ms_gau'
+data_dir = 'sim_results/fig6_TrainRun_Icompen2a4'
+save_dir = 'sim_results/fig6_TrainRun_Icompen2a4/' + project_tag
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,

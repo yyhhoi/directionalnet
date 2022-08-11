@@ -19,8 +19,9 @@ plt.rcParams.update({'font.size': legendsize,
 
                      })
 project_tag = 'Jit100_2ms_gau'
-data_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
-save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
+sim_tag = 'fig6_TrainStand_Icompen2'
+data_dir = 'sim_results/%s/%s'% (sim_tag, project_tag)
+save_dir = 'sim_results/%s/%s'% (sim_tag, project_tag)
 os.makedirs(save_dir, exist_ok=True)
 
 pred_perIter = False
@@ -29,7 +30,7 @@ pred_perIter = False
 if pred_perIter:
     fig_metrics, ax_metrics = plt.subplots(24, 2, figsize=(12, 30), dpi=200, facecolor='w', sharex='col', sharey=True,
                                            constrained_layout=True)
-fig_enditer, ax_enditer = plt.subplots(2, 1, figsize=(12, 12), dpi=200, facecolor='w', sharex=True, sharey=True,
+fig_enditer, ax_enditer = plt.subplots(3, 1, figsize=(12, 12), dpi=200, facecolor='w', sharex=True, sharey=True,
                                        constrained_layout=True)
 
 
@@ -73,7 +74,7 @@ for exinid, exintag in enumerate(exintags):
     lr = 0.01
     temN_tax = np.arange(0, 100, 1)
     temN = Tempotron(N=N, lr=lr, Vthresh=Vthresh, tau=tau, tau_s=tau_s, w_seed=w_seed)
-    # temN.w = np.load(join(save_dir, 'w_%s_%s.npy'%(project_tag, exintag)))
+    # temN.w = np.load(join(data_dir, 'w_%s_%s.npy'%(project_tag, exintag)))
 
     ACC_train_list, TPR_train_list, TNR_train_list = [], [], []
     ACC_test_list, TPR_test_list, TNR_test_list = [], [], []
@@ -150,11 +151,13 @@ for exinid, exintag in enumerate(exintags):
         ACC_test_plot, ACCse_test_plot = val_test[0], se_test[0]
         TPR_test_plot, TPRse_test_plot = val_test[1], se_test[1]
         TNR_test_plot, TNRse_test_plot = val_test[2], se_test[2]
-    ax_enditer[0].errorbar(x=deg_ax, y=TPR_test_plot, yerr=TPRse_test_plot, label=exintag)
-    ax_enditer[0].set_ylabel('TPR')
-    ax_enditer[1].errorbar(x=deg_ax, y=TNR_test_plot, yerr=TNRse_test_plot, label=exintag)
-    ax_enditer[1].set_ylabel('TNR')
-    for ax_i in [0, 1]:
+    ax_enditer[0].errorbar(x=deg_ax, y=ACC_test_plot, yerr=ACCse_test_plot, label=exintag)
+    ax_enditer[0].set_ylabel('ACC')
+    ax_enditer[1].errorbar(x=deg_ax, y=TPR_test_plot, yerr=TPRse_test_plot, label=exintag)
+    ax_enditer[1].set_ylabel('TPR')
+    ax_enditer[2].errorbar(x=deg_ax, y=TNR_test_plot, yerr=TNRse_test_plot, label=exintag)
+    ax_enditer[2].set_ylabel('TNR')
+    for ax_i in [0, 1, 2]:
         ax_enditer[ax_i].set_xlabel('Trajectory angle (deg)')
         ax_enditer[ax_i].set_xticks(deg_ax_half)
         ax_enditer[ax_i].set_xticklabels(deg_ax_half.astype(str))

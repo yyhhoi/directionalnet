@@ -12,10 +12,11 @@ from library.visualization import plot_popras
 
 # ====================================== Global params and paths ==================================
 jitter_times = 200
-jitter_ms = 1
+jitter_ms = 2
 project_tag = 'Jit100_2ms_gau'
-data_dir = 'sim_results/fig6_TrainStand_Icompen2'
-save_dir = 'sim_results/fig6_TrainStand_Icompen2/' + project_tag
+sim_tag = 'fig6_TrainStand_Icompen2'
+data_dir = 'sim_results/%s' % sim_tag
+save_dir = 'sim_results/%s/%s'% (sim_tag, project_tag)
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,

@@ -147,7 +147,7 @@ class Tempotron:
 
             yield all_spikeFlags, self.w.copy()
 
-    def predict(self, X, t):
+    def predict(self, X, t, shunt=False):
         """Given input pattern X, predict whether there is output spike
 
         Args:
@@ -199,12 +199,12 @@ class Tempotron:
 
             if thresh_idxs.shape[0] > 0:
                 Y_this = True
-
-                t_thresh = t[thresh_idxs[0]]
-                mask_thresh = alltsp < t_thresh
-                nidices_inthresh = nidices[mask_thresh]
-                kout_recalctmp = vtraces[:, mask_thresh[mask_thresh].index] * self.w[nidices_inthresh].reshape(1, -1)
-                kout = kout_recalctmp.sum(axis=1)
+                if shunt:
+                    t_thresh = t[thresh_idxs[0]]
+                    mask_thresh = alltsp < t_thresh
+                    nidices_inthresh = nidices[mask_thresh]
+                    kout_recalctmp = vtraces[:, mask_thresh[mask_thresh].index] * self.w[nidices_inthresh].reshape(1, -1)
+                    kout = kout_recalctmp.sum(axis=1)
 
             else:
                 Y_this = False

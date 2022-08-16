@@ -218,22 +218,21 @@ def directional_acc_metrics(Y, Y_pred, trajtype, num_trajtypes):
     tpr_se_pera = np.zeros(num_trajtypes)
     tnr_pera = np.zeros(num_trajtypes)
     tnr_se_pera = np.zeros(num_trajtypes)
+    firepercent_pera = np.zeros(num_trajtypes)
+
     for trajtype_i in trajtype_ax:
         mask = trajtype == trajtype_i
         masked_num = mask.sum()
         if masked_num < 1:
-            acc, tpr, tnr = None, None, None
-            acc_se, tpr_se, tnr_se = None, None, None
+            acc_pera[trajtype_i], tpr_pera[trajtype_i], tnr_pera[trajtype_i] = None, None, None
+            acc_se_pera[trajtype_i], tpr_se_pera[trajtype_i], tnr_se_pera[trajtype_i] = None, None, None
+            firepercent_pera[trajtype_i] = None
         else:
-            acc, tpr, tnr = acc_metrics(Y[mask], Y_pred[mask])
-            acc_se = np.sqrt(acc * (1-acc) / masked_num)
-            tpr_se = np.sqrt(tpr * (1-tpr) / masked_num)
-            tnr_se = np.sqrt(tnr * (1-tnr) / masked_num)
-        acc_pera[trajtype_i] = acc
-        tpr_pera[trajtype_i] = tpr
-        tnr_pera[trajtype_i] = tnr
-        acc_se_pera[trajtype_i] = acc_se
-        tpr_se_pera[trajtype_i] = tpr_se
-        tnr_se_pera[trajtype_i] = tnr_se
+            acc_pera[trajtype_i], tpr_pera[trajtype_i], tnr_pera[trajtype_i] = acc_metrics(Y[mask], Y_pred[mask])
+            acc_se_pera[trajtype_i] = np.sqrt(acc_pera[trajtype_i] * (1-acc_pera[trajtype_i]) / masked_num)
+            tpr_se_pera[trajtype_i] = np.sqrt(tpr_pera[trajtype_i] * (1-tpr_pera[trajtype_i]) / masked_num)
+            tnr_se_pera[trajtype_i] = np.sqrt(tnr_pera[trajtype_i] * (1-tnr_pera[trajtype_i]) / masked_num)
+            firepercent_pera[trajtype_i] = Y_pred[mask].mean()
 
-    return (acc_pera, tpr_pera, tnr_pera), (acc_se_pera, tpr_se_pera, tnr_se_pera)
+
+    return (acc_pera, tpr_pera, tnr_pera), (acc_se_pera, tpr_se_pera, tnr_se_pera), firepercent_pera

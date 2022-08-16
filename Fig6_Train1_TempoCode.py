@@ -14,7 +14,7 @@ from library.visualization import plot_popras
 jitter_times = 200
 jitter_ms = 2
 project_tag = 'Jit100_2ms_gau'
-sim_tag = 'fig6_TrainStand_Icompen2'
+sim_tag = 'fig6_TrainStand_Icompen2a4'
 data_dir = 'sim_results/%s' % sim_tag
 save_dir = 'sim_results/%s/%s'% (sim_tag, project_tag)
 os.makedirs(save_dir, exist_ok=True)

@@ -19,17 +19,13 @@ plt.rcParams.update({'font.size': legendsize,
 
                      })
 project_tag = 'Jit100_2ms_gau'
-sim_tag = 'fig6_TrainStand_Icompen2'
+sim_tag = 'fig6_TrainStand_Icompen2a4'
 data_dir = 'sim_results/%s/%s'% (sim_tag, project_tag)
 save_dir = 'sim_results/%s/%s'% (sim_tag, project_tag)
 os.makedirs(save_dir, exist_ok=True)
 
-pred_perIter = False
 # ====================================== Train & Test ==================================
 
-if pred_perIter:
-    fig_metrics, ax_metrics = plt.subplots(24, 2, figsize=(12, 30), dpi=200, facecolor='w', sharex='col', sharey=True,
-                                           constrained_layout=True)
 fig_enditer, ax_enditer = plt.subplots(3, 1, figsize=(12, 12), dpi=200, facecolor='w', sharex=True, sharey=True,
                                        constrained_layout=True)
 
@@ -84,7 +80,7 @@ for exinid, exintag in enumerate(exintags):
 
 
     for Y_pred_train, wTMP in temN.train(X_train, Y_train, temN_tax, num_iter=num_iter, progress=True):
-        val_train, se_train = directional_acc_metrics(Y_train, Y_pred_train, trajtype_train, num_trajtypes=num_trajtypes)
+        val_train, se_train, firepercent_train = directional_acc_metrics(Y_train, Y_pred_train, trajtype_train, num_trajtypes=num_trajtypes)
         ACC_train_list.append(val_train[0])
         ACCse_train_list.append(se_train[0])
         TPR_train_list.append(val_train[1])
@@ -92,17 +88,6 @@ for exinid, exintag in enumerate(exintags):
         TNR_train_list.append(val_train[2])
         TNRse_train_list.append(se_train[2])
 
-        # Test result per iteration
-        if pred_perIter:
-            Y_pred_test, _, _, _ = temN.predict(X_test, temN_tax)
-            val_test, se_test = directional_acc_metrics(Y_test, Y_pred_test, trajtype_test, num_trajtypes=num_trajtypes)
-            ACC_test_list.append(val_test[0])
-            ACCse_test_list.append(se_test[0])
-            TPR_test_list.append(val_test[1])
-            TPRse_test_list.append(se_test[1])
-            TNR_test_list.append(val_test[2])
-            TNRse_test_list.append(se_test[2])
-            w_train_list.append(wTMP)
     np.save(join(save_dir, 'w_%s_%s.npy'%(project_tag, exintag)), temN.w)
 
     ACC_train = np.stack(ACC_train_list)
@@ -112,45 +97,13 @@ for exinid, exintag in enumerate(exintags):
     TNR_train = np.stack(TNR_train_list)
     TNRse_train = np.stack(TNRse_train_list)
 
-    if pred_perIter:
-        ACC_test = np.stack(ACC_test_list)
-        ACCse_test = np.stack(ACCse_test_list)
-        TPR_test = np.stack(TPR_test_list)
-        TPRse_test = np.stack(TPRse_test_list)
-        TNR_test = np.stack(TNR_test_list)
-        TNRse_test = np.stack(TNRse_test_list)
-        all_w_train = np.stack(w_train_list)
-        # #  Plot accuracy per iteration
-        iter_ax = np.arange(ACCse_train.shape[0]) + 1
-
-        for deg_i in range(-1, ax_metrics.shape[0]):  # -1 is the training set
-
-            if deg_i == -1:
-                ax_metrics[0, exinid].errorbar(x=iter_ax, y=TPR_train[:, deg_i], yerr=TPRse_train[:, deg_i], label='Train TPR', color='r')
-                ax_metrics[0, exinid].errorbar(x=iter_ax, y=TNR_train[:, deg_i], yerr=TNRse_train[:, deg_i], label='Train TNR', color='b')
-
-            else:
-                trajdeg = deg_ax[deg_i]
-                ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TPR_test[:, deg_i], yerr=TPRse_test[:, deg_i], label='Test TPR', color='lightcoral')
-                ax_metrics[deg_i, exinid].errorbar(x=iter_ax, y=TNR_test[:, deg_i], yerr=TNRse_test[:, deg_i], label='Test TNR', color='skyblue')
-                ax_metrics[deg_i, exinid].set_ylabel('Test %d deg'%(deg_ax[deg_i]))
-                ax_metrics[deg_i, exinid].set_yticks(np.arange(0, 1.1, 0.2))
-                ax_metrics[deg_i, exinid].set_yticks(np.arange(0, 1.1, 0.2), minor=True)
-                ax_metrics[deg_i, exinid].grid()
-        ax_metrics[0, exinid].legend()
-
 
     # # Plot accuracy at the end iteration
-    if pred_perIter:
-        ACC_test_plot, ACCse_test_plot = ACC_test[-1, :], ACCse_test[-1, :]
-        TPR_test_plot, TPRse_test_plot = TPR_test[-1, :], TPRse_test[-1, :]
-        TNR_test_plot, TNRse_test_plot = TNR_test[-1, :], TNRse_test[-1, :]
-    else:
-        Y_pred_test, _, _, _ = temN.predict(X_test, temN_tax)
-        val_test, se_test = directional_acc_metrics(Y_test, Y_pred_test, trajtype_test, num_trajtypes=num_trajtypes)
-        ACC_test_plot, ACCse_test_plot = val_test[0], se_test[0]
-        TPR_test_plot, TPRse_test_plot = val_test[1], se_test[1]
-        TNR_test_plot, TNRse_test_plot = val_test[2], se_test[2]
+    Y_pred_test, _, _ = temN.predict(X_test, temN_tax)
+    val_test, se_test, firepercent_test = directional_acc_metrics(Y_test, Y_pred_test, trajtype_test, num_trajtypes=num_trajtypes)
+    ACC_test_plot, ACCse_test_plot = val_test[0], se_test[0]
+    TPR_test_plot, TPRse_test_plot = val_test[1], se_test[1]
+    TNR_test_plot, TNRse_test_plot = val_test[2], se_test[2]
     ax_enditer[0].errorbar(x=deg_ax, y=ACC_test_plot, yerr=ACCse_test_plot, label=exintag)
     ax_enditer[0].set_ylabel('ACC')
     ax_enditer[1].errorbar(x=deg_ax, y=TPR_test_plot, yerr=TPRse_test_plot, label=exintag)
@@ -170,12 +123,8 @@ for exinid, exintag in enumerate(exintags):
         ACC_test=ACC_test_plot, ACCse_test=ACCse_test_plot,
         TPR_test=TPR_test_plot, TPRse_test=TPRse_test_plot,
         TNR_test=TNR_test_plot, TNRse_test=TNRse_test_plot,
+        firepercent_test=firepercent_test,
     ))
-
-if pred_perIter:
-    ax_metrics[0, 0].set_title('Extrinsic')
-    ax_metrics[0, 1].set_title('Intrinsic')
-    fig_metrics.savefig(join(save_dir, 'Metrics_%s.png'%(project_tag)))
 
 fig_enditer.savefig(join(save_dir, 'ACC_%s.png'%(project_tag)))
 

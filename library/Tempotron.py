@@ -178,14 +178,11 @@ class Tempotron:
                 M_list.extend([mi] * tsp_len)
                 N_list.extend([ni] * tsp_len)
         alltspallm = np.array(flat_tsp_list)
-        M_arr = np.array(M_list)
-        N_arr = np.array(N_list)
         vtraces = self.kern.getk(t.reshape(-1, 1), alltspallm.reshape(1, -1))
         spdf = pd.DataFrame(dict(tsp=flat_tsp_list, M=M_list, N=N_list))
 
         Y_pred = []
         kout_list = []
-        koutori_list = []
         tspout_list = []
 
         for mi in range(MX):
@@ -195,7 +192,6 @@ class Tempotron:
             allkout = vtraces[:, M_mask] * self.w[nidices].reshape(1, -1)
             kout = allkout.sum(axis=1)
             thresh_idxs = np.where(kout > self.Vthresh)[0]
-            koutori_list.append(kout)
 
             if thresh_idxs.shape[0] > 0:
                 Y_this = True
@@ -214,7 +210,6 @@ class Tempotron:
 
         Y_pred = np.array(Y_pred)
         kout_all = np.stack(kout_list)
-        koutori_all = np.stack(koutori_list)
         tspout_all = np.array(tspout_list, dtype=object)
-        return Y_pred, koutori_all, tspout_all, kout_all
+        return Y_pred, kout_all, tspout_all
 

@@ -2,35 +2,25 @@
 import os
 from os.path import join
 import numpy as np
-import matplotlib.pyplot as plt
 import pandas as pd
-
-from library.script_wrappers import find_nidx_along_traj, datagen_jitter
+from library.Tempotron import Tempotron
+from library.script_wrappers import datagen_jitter
 from library.utils import save_pickle, load_pickle
 
-from library.visualization import plot_popras
-
 # ====================================== Global params and paths ==================================
-jitter_times = 200
+jitter_times = 100
 jitter_ms = 2
 project_tag = 'Jit100_2ms_gau'
 sim_tag = 'fig6_TrainStand_Icompen2a4'
 data_dir = 'sim_results/%s' % sim_tag
-save_dir = 'sim_results/%s/%s'% (sim_tag, project_tag)
+save_dir = 'sim_results/%s/%s' % (sim_tag, project_tag)
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
-plt.rcParams.update({'font.size': legendsize,
-                     "axes.titlesize": legendsize,
-                     'axes.labelpad': 0,
-                     'axes.titlepad': 0,
-                     'xtick.major.pad': 0,
-                     'ytick.major.pad': 0,
-
-                     })
 # ======================== Construct training and testing set =================
 exintags = ['ex', 'in']
 
 for exintag in exintags:
+    print(exintag)
     if exintag == 'in':
         center_x, center_y = 0, 20
     elif exintag == 'ex':
@@ -38,8 +28,7 @@ for exintag in exintags:
     else:
         raise ValueError
 
-    simdata = load_pickle(join(data_dir, 'fig6_%s.pkl'%(exintag)))
-
+    simdata = load_pickle(join(data_dir, 'fig6_%s.pkl' % exintag))
 
     BehDF = simdata['BehDF']
     SpikeDF = simdata['SpikeDF']
@@ -60,7 +49,6 @@ for exintag in exintags:
     yytun1d = NeuronDF['neurony'].to_numpy()
     aatun1d = NeuronDF['neurona'].to_numpy()
 
-
     xxtun1d_ca3 = xxtun1d[:nn_ca3]
     yytun1d_ca3 = yytun1d[:nn_ca3]
     aatun1d_ca3 = aatun1d[:nn_ca3]
@@ -74,32 +62,31 @@ for exintag in exintags:
     Iangle_kappa = config_dict['Iangle_kappa']
     xmin, xmax, ymin, ymax = config_dict['xmin'], config_dict['xmax'], config_dict['ymin'], config_dict['ymax']
     theta_f = config_dict['theta_f']  # in Hz
-    theta_T = 1/theta_f * 1e3  # in ms
+    theta_T = 1 / theta_f * 1e3  # in ms
     dt = config_dict['dt']
-    traj_d = np.append(0, np.cumsum(np.sqrt(np.diff(traj_x)**2 + np.diff(traj_y)**2)))
+    traj_d = np.append(0, np.cumsum(np.sqrt(np.diff(traj_x) ** 2 + np.diff(traj_y) ** 2)))
 
     # Find all the neurons in the input space
-    all_nidx = np.where((np.abs(xxtun1d_ca3-center_x) < 10)  & (np.abs(yytun1d_ca3-center_y) < 10))[0]
+    all_nidx = np.where((np.abs(xxtun1d_ca3 - center_x) < 10) & (np.abs(yytun1d_ca3 - center_y) < 10))[0]
     all_nidx = np.sort(all_nidx)
 
     # Trim down SpikeDF
-    SpikeDF['tsp'] = SpikeDF['tidxsp'].apply(lambda x : t[x])
+    SpikeDF['tsp'] = SpikeDF['tidxsp'].apply(lambda x: t[x])
     spdftmplist = []
     for nidx in all_nidx:
         spdftmplist.append(SpikeDF[SpikeDF['neuronid'] == nidx])
     SpikeDF_subset = pd.concat(spdftmplist, ignore_index=True)
 
-
     # Loop for theta cycles (patterns)
     data_M = []
     label_M = []
-    trajtype= []
+    trajtype = []
     theta_bounds = []
     tmax = t.max()
     overlap_r = 2
     cycle_i = 0
     while (cycle_i * theta_T) < tmax:
-        print('\rCurrent cycle %d'%(cycle_i), end='', flush=True)
+        print('\rCurrent cycle %d' % cycle_i, end='', flush=True)
 
         # Create input data - spikes
         theta_tstart, theta_tend = cycle_i * theta_T, (cycle_i + 1) * theta_T
@@ -118,16 +105,12 @@ for exintag in exintags:
         data_M.append(data_MN)
 
         # Create Labels
-        traj_r = np.sqrt((traj_x[t_intheta]-center_x)** 2 + (traj_y[t_intheta]-center_y)** 2)
+        traj_r = np.sqrt((traj_x[t_intheta] - center_x) ** 2 + (traj_y[t_intheta] - center_y) ** 2)
         r05 = np.median(traj_r)
         if r05 < overlap_r:
             label = True
         else:
             label = False
-
-        # traj_mask = (np.abs(traj_x[t_intheta]-center_x) <= overlap_r) & (np.abs(traj_y[t_intheta]-center_y) <= overlap_r)
-        # label = np.median(traj_mask).astype(bool)
-
         label_M.append(label)
 
         # Traj type
@@ -142,9 +125,7 @@ for exintag in exintags:
     data_M = np.array(data_M, dtype=object)
     trajtype = np.array(trajtype)
     labels = np.array(label_M)
-    # # ==============================================================================================
-    # # ==================== Train on Deg 0 or Standing, test on all degs ===========================
-    # # ==============================================================================================
+
     # # Separate train/test set
     train_idx = np.where(trajtype == -1)[0].astype(int)
     test_idx = np.setdiff1d(np.arange(trajtype.shape[0]), train_idx)
@@ -154,46 +135,73 @@ for exintag in exintags:
     Y_test_ori = labels[test_idx]
     trajtype_train_ori = trajtype[train_idx]
     trajtype_test_ori = trajtype[test_idx]
+
     # # Jittering
-    X_train, Y_train, trajtype_train = datagen_jitter(X_train_ori, Y_train_ori, trajtype_train_ori, jitter_times, jitter_ms=jitter_ms, startseed=0)
-    # X_train, Y_train, trajtype_train = X_train_ori, Y_train_ori, trajtype_train_ori
-    X_test, Y_test, trajtype_test = datagen_jitter(X_test_ori, Y_test_ori, trajtype_test_ori, jitter_times, jitter_ms=jitter_ms, startseed=0)
-    # # ==============================================================================================
+    X_train, Y_train, trajtype_train, Marr_train, jitbatch_train = datagen_jitter(X_train_ori, Y_train_ori,
+                                                                                  trajtype_train_ori, jitter_times,
+                                                                                  jitter_ms, 0)
+    X_test, Y_test, trajtype_test, Marr_test, jitbatch_test = datagen_jitter(X_test_ori, Y_test_ori,
+                                                                             trajtype_test_ori, jitter_times, jitter_ms,
+                                                                             0)
 
-    print('Training data beforing jittering = %d'%(X_train_ori.shape[0]))
-    print('True = %d \nFalse = %d'%(Y_train_ori.sum(), Y_train_ori.shape[0]-Y_train_ori.sum()))
+    print('Training data = %d' % (X_train_ori.shape[0]))
+    print('True = %d \nFalse = %d' % (Y_train_ori.sum(), Y_train_ori.shape[0] - Y_train_ori.sum()))
 
-    print('Testing data beforing jittering = %d'%(X_test_ori.shape[0]))
-    print('True = %d \nFalse = %d'%(Y_test_ori.sum(), Y_test_ori.shape[0]-Y_test_ori.sum()))
+    print('Testing data = %d' % (X_test_ori.shape[0]))
+    print('True = %d \nFalse = %d' % (Y_test_ori.sum(), Y_test_ori.shape[0] - Y_test_ori.sum()))
 
+    print('Training data after jittering = %d' % (X_train.shape[0]))
+    print('True = %d \nFalse = %d' % (Y_train.sum(), Y_train.shape[0] - Y_train.sum()))
 
-    print('Training data after jittering = %d'%(X_train.shape[0]))
-    print('True = %d \nFalse = %d'%(Y_train.sum(), Y_train.shape[0]-Y_train.sum()))
-
-    print('Testing data after jittering  = %d'%(X_test.shape[0]))
-    print('True = %d \nFalse = %d'%(Y_test.sum(), Y_test.shape[0]-Y_test.sum()))
-
-    savedata = dict(X_train_ori=X_train_ori, X_test_ori=X_test_ori, Y_train_ori=Y_train_ori, Y_test_ori=Y_test_ori,
-                    trajtype_train_ori=trajtype_train_ori, trajtype_test_ori=trajtype_test_ori,
-                    X_train=X_train, X_test=X_test, Y_train=Y_train, Y_test=Y_test,
-                    trajtype_train=trajtype_train, trajtype_test=trajtype_test, all_nidx=all_nidx, theta_bounds=theta_bounds)
-
-    savedata_ori = dict(
-        X_train_ori=X_train_ori,
-        Y_train_ori=Y_train_ori,
-        X_test_ori=X_test_ori,
-        Y_test_ori=Y_test_ori,
-        trajtype_train_ori=trajtype_train_ori,
-        trajtype_test_ori=trajtype_test_ori,
-        theta_bounds=theta_bounds,
-        all_nidx=all_nidx
-    )
-
-    save_pickle(join(save_dir, 'data_train_test_%s_%s.pickle'%(project_tag, exintag)), savedata)
-    save_pickle(join(save_dir, 'data_train_test_ori_%s_%s.pickle'%(project_tag, exintag)), savedata_ori)
+    print('Testing data after jittering  = %d' % (X_test.shape[0]))
+    print('True = %d \nFalse = %d' % (Y_test.sum(), Y_test.shape[0] - Y_test.sum()))
 
     del simdata
 
+    # ======================== Training and testing =====================================
+    N = len(X_train[0])
+    num_iter = 500
+    Vthresh = 2
+    tau = 5
+    tau_s = tau / 4
+    w_seed = 0
+    lr = 0.01
+    temN_tax = np.arange(0, 100, 1)
+    temN = Tempotron(N=N, lr=lr, Vthresh=Vthresh, tau=tau, tau_s=tau_s, w_seed=w_seed)
+    for Y_pred_train, wTMP in temN.train(X_train, Y_train, temN_tax, num_iter=num_iter, progress=True):
+        pass
+    print()
 
+    Y_pred_test, _, _ = temN.predict(X_test, temN_tax)
+    Y_pred_train_ori = temN.predict(X_train_ori, temN_tax)
+    Y_pred_test_ori = temN.predict(X_test_ori, temN_tax)
 
+    savedata_jit = dict(X_train=X_train, X_test=X_test, Y_train=Y_train, Y_test=Y_test,
+                        Y_pred_train=Y_pred_train, Y_pred_test=Y_pred_test,
+                        trajtype_train=trajtype_train, trajtype_test=trajtype_test, all_nidx=all_nidx,
+                        theta_bounds=theta_bounds)
+    savedata_ori = dict(
+        X_train_ori=X_train_ori,
+        Y_train_ori=Y_train_ori,
+        Y_pred_train_ori=Y_pred_train_ori,
+        X_test_ori=X_test_ori,
+        Y_test_ori=Y_test_ori,
+        Y_pred_test_ori=Y_pred_test_ori,
+        trajtype_train_ori=trajtype_train_ori,
+        trajtype_test_ori=trajtype_test_ori,
+        theta_bounds=theta_bounds,
+        all_nidx=all_nidx,
+    )
 
+    TrainResult = pd.DataFrame(dict(
+        Y_test=Y_test,
+        Y_pred_test=Y_pred_test,
+        trajtype_test=trajtype_test,
+        jitbatch_test=jitbatch_test,
+        Marr_test=Marr_test,
+    ))
+
+    np.save(join(save_dir, 'w_%s_%s.npy' % (project_tag, exintag)), temN.w)
+    save_pickle(join(save_dir, 'data_train_test_%s_%s.pickle' % (project_tag, exintag)), savedata_jit)
+    save_pickle(join(save_dir, 'data_train_test_ori_%s_%s.pickle' % (project_tag, exintag)), savedata_ori)
+    save_pickle(join(save_dir, 'TrainResult_%s_%s.pickle'% (project_tag, exintag)), TrainResult)

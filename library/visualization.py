@@ -172,3 +172,62 @@ def plot_exin_bestworst_simdissim(ax, exindf, exindict, direct_c, sim_c, dissim_
     ax[2].set_yticks(np.arange(0, 1, 0.1), minor=True)
     ax[2].set_yticklabels(['0', '', '1'])
     ax[2].set_ylim(0, np.max(np.concatenate([nbins1, nbins2, nbins3, nbins4]))*1.3)
+
+
+def plot_tempotron_traces(axRas, axTrace, axW1d, N, X, temN_tax, temNw, Vthresh, all_nidx, yytun1d, kout_all, tspout_all, val2cmap, exintag):
+
+    M = len(axRas)
+    w_yax = np.arange(N)
+    y_nidx = yytun1d[all_nidx[w_yax]]
+
+    if exintag == 'in':
+
+        ylim = (np.max(np.where(y_nidx <14.7)[0]), np.min(np.where(y_nidx > 25.8)[0]))
+    else:
+        ylim = (np.max(np.where(y_nidx <-24.8)[0]), np.min(np.where(y_nidx > -14.7)[0]))
+
+    for Mi in range(M):
+
+        for Ni in range(N):
+            tsp = X[Mi, Ni]
+            axRas[Mi].scatter(tsp, [Ni]*tsp.shape[0], marker='|', s=1.5, linewidths=1, color=val2cmap.to_rgba(temNw[Ni]))
+
+        ysep_NiList = np.arange(0, 400, 20).astype(int)
+        ysep_ax = np.arange(0, 400, 20) - 0.5
+        for ysep in ysep_ax:
+            axRas[Mi].axhline(ysep, color='gray', lw=0.5)
+        axRas[Mi].set_yticks(ysep_NiList + 10)
+        axRas[Mi].set_xlim(0, 100)
+        axRas[Mi].set_xticks([])
+        axRas[Mi].set_yticklabels(np.around(yytun1d[all_nidx[ysep_NiList + 10]], 0).astype(int).astype(str))
+        axRas[Mi].set_ylim(ylim[0], ylim[1])
+        if Mi > 0:
+            axRas[Mi].set_yticks([])
+        if Mi == 0:
+            axRas[Mi].set_ylabel('y (cm)')
+
+        # Plot voltage trace
+        axTrace[Mi].plot(temN_tax, kout_all[Mi], color='gray')
+        if tspout_all[Mi].shape[0] > 0:
+            axTrace[Mi].eventplot([tspout_all[Mi][0]], lineoffsets=2.5, linelengths=0.5, linewidths=1, color='r')
+        axTrace[Mi].set_xlim(0, 100)
+        axTrace[Mi].set_xticks([0, 100])
+        if exintag == 'ex':
+            axTrace[Mi].set_xticklabels([100*Mi, 100*(Mi+1)])
+        else:
+            axTrace[Mi].set_xticklabels([])
+        axTrace[Mi].set_ylim(0.1, 3)
+        axTrace[Mi].axhline(Vthresh, color='k', linewidth=0.1)
+        axTrace[Mi].set_yticks([])
+        axTrace[Mi].spines.left.set_visible(False)
+        if Mi > 0:
+            axTrace[Mi].set_yticks([])
+        if exintag=='in':
+            axTrace[Mi].set_xticks([])
+
+        # Plot flattened weights
+        axW1d.barh(w_yax, temNw, color=val2cmap.to_rgba(temNw))
+        axW1d.axvline(0, color='gray', lw=0.1)
+        axW1d.set_yticks(np.around(np.arange(N), 2))
+        axW1d.axis('off')
+        axW1d.set_ylim(ylim[0], ylim[1])

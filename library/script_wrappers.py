@@ -163,6 +163,8 @@ def datagen_jitter(X, Y, trajtype, jitter_num, jitter_ms=2.5, startseed=None):
     new_X = []
     new_Y = []
     new_trajtype = []
+    new_M = []
+    new_jitbatch = []
     seed = startseed if startseed else None
 
     for mi in range(M):
@@ -185,8 +187,10 @@ def datagen_jitter(X, Y, trajtype, jitter_num, jitter_ms=2.5, startseed=None):
             new_X.append(new_X_eachM)
             new_Y.append(Y[mi])
             new_trajtype.append(trajtype[mi])
+            new_M.append(mi)
+            new_jitbatch.append(jitter_i)
 
-    return np.array(new_X, dtype=object), np.array(new_Y), np.array(new_trajtype)
+    return np.array(new_X, dtype=object), np.array(new_Y), np.array(new_trajtype), np.array(new_M), np.array(new_jitbatch)
 
 
 def directional_acc_metrics(Y, Y_pred, trajtype, num_trajtypes):

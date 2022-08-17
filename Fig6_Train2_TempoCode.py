@@ -40,8 +40,6 @@ for exinid, exintag in enumerate(exintags):
     X_test = dataset['X_test']
     Y_test = dataset['Y_test']
     trajtype_test = dataset['trajtype_test']
-    # if exintag == 'ex':
-    #     dataset = load_pickle(join(data_dir, 'data_train_test_%s_%s.pickle' % (project_tag, 'in')))
     X_train_ori = dataset['X_train_ori']
     Y_train_ori = dataset['Y_train_ori']
     trajtype_train_ori = dataset['trajtype_train_ori']

@@ -6,12 +6,13 @@ import pandas as pd
 from library.Tempotron import Tempotron
 from library.script_wrappers import datagen_jitter
 from library.utils import save_pickle, load_pickle
+import sys
 
 # ====================================== Global params and paths ==================================
-jitter_times = 100
-jitter_ms = 2
-project_tag = 'Jit100_2ms_gau'
-sim_tag = 'fig6_TrainStand_Icompen2a4'
+jitter_times = int(sys.argv[1])
+jitter_ms = float(sys.argv[2])
+project_tag = 'Jit%d_%dms_gau'%(jitter_times, jitter_ms)
+sim_tag = 'fig6_TrainStand_Icompen2a6'
 data_dir = 'sim_results/%s' % sim_tag
 save_dir = 'sim_results/%s/%s' % (sim_tag, project_tag)
 os.makedirs(save_dir, exist_ok=True)
@@ -98,8 +99,6 @@ for exintag in exintags:
         for nidx in all_nidx:
             spdf_MN = spdf_M[spdf_M['neuronid'] == nidx]
             tsp = spdf_MN['tsp'].to_numpy() - theta_tstart
-            # if tsp.shape[0]>1:
-            #     tsp = np.array([tsp.min()])
             data_MN.append(tsp)
         t_intheta = (t > theta_tstart) & (t <= theta_tend)
         data_M.append(data_MN)
@@ -168,6 +167,7 @@ for exintag in exintags:
     lr = 0.01
     temN_tax = np.arange(0, 100, 1)
     temN = Tempotron(N=N, lr=lr, Vthresh=Vthresh, tau=tau, tau_s=tau_s, w_seed=w_seed)
+
     for Y_pred_train, wTMP in temN.train(X_train, Y_train, temN_tax, num_iter=num_iter, progress=True):
         pass
     print()

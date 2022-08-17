@@ -173,14 +173,14 @@ config_dict['wmax_ca3mosca3_adiff'] = 4500  # 3000
 
 # Uncomment below if you do not want EC directionality in Training
 config_dict['Ipos_max'] = 2
-config_dict['Iangle_diff'] = 4
+config_dict['Iangle_diff'] = 6
 config_dict['Iangle_compen'] = 2
 BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = np.nan
 BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = np.nan
 # BehDF0['traj_a'] = np.nan  # Turn off ALL EC sensory directionality
 
 # # ============================ Simulation =====================================
-save_dir = join('sim_results', 'fig6_TrainStand_Icompen2a4')
+save_dir = join('sim_results', 'fig6_TrainStand_Icompen2a6')
 os.makedirs(save_dir, exist_ok=True)
 
 # Along the DG pathway

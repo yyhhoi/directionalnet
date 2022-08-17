@@ -165,7 +165,11 @@ def datagen_jitter(X, Y, trajtype, jitter_num, jitter_ms=2.5, startseed=None):
     new_trajtype = []
     new_M = []
     new_jitbatch = []
-    seed = startseed if startseed else None
+    if startseed is None:
+        seed = None
+    else:
+        seed = startseed
+
 
     for mi in range(M):
 
@@ -176,7 +180,7 @@ def datagen_jitter(X, Y, trajtype, jitter_num, jitter_ms=2.5, startseed=None):
 
                 # Jittering
                 num_spikes = tsp_ori.shape[0]
-                if seed:
+                if seed is not None:
                     np.random.seed(seed)
                     seed += 1
                 # tsp_jittered = tsp_ori + np.random.uniform(-jitter_ms, jitter_ms, size=num_spikes)

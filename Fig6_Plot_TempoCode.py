@@ -8,7 +8,7 @@ from library.Tempotron import Tempotron
 from library.utils import load_pickle
 from library.visualization import plot_tempotron_traces, customlegend
 from library.script_wrappers import directional_acc_metrics
-
+import sys
 # ====================================== Global params and paths ==================================
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,
@@ -26,10 +26,13 @@ plt.rcParams.update({'font.size': legendsize,
 
                      })
 
-project_tag = 'Jit100_2ms_gau'
-simdata_dir = 'sim_results/fig6_TrainStand_Icompen2a4'
+jitter_times = int(sys.argv[1])
+jitter_ms = float(sys.argv[2])
+project_tag = 'Jit%d_%dms_gau'%(jitter_times, jitter_ms)
+simdata_dir = 'sim_results/fig6_TrainStand_Icompen2a6'
 data_dir = join(simdata_dir, project_tag)
-plot_dir = 'plots/fig6'
+# plot_dir = 'plots/fig6'
+plot_dir = data_dir
 os.makedirs(plot_dir, exist_ok=True)
 
 # ====================================== Plot setting ==================================
@@ -165,7 +168,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         ax_exinSeq[exin_i].scatter(tsp_train, [yi]*tsp_train.shape[0], s=1, lw=0.5, c=exin_c[exintag], marker='|')
     for thetai in range(0, 10):
         ax_exinSeq[exin_i].axvline(thetai * 100, c='k', lw=0.1)
-    ax_exinSeq[exin_i].set_xlim(0, 400)
+    ax_exinSeq[exin_i].set_xlim(200, 600)
     ax_exinSeq[exin_i].set_ylim(0, 20)
     ax_exinSeq[exin_i].axis('off')
 
@@ -231,7 +234,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         cbar = fig.colorbar(im, cax=ax_cbar, orientation='horizontal')
         cbar.ax.set_xticks([-0.06, 0, 0.06])
         cbar.ax.set_xticklabels(['', '0', ''])
-        cbar.ax.set_xlabel('Weight', labelpad=-22)
+        cbar.ax.set_xlabel('W', labelpad=-22)
 
     # # Plot 180 deg test traces for ex & in
     traj_deg = 180
@@ -291,5 +294,5 @@ ax_acc.set_ylabel('ACC', labelpad=-5)
 ax_acc.set_xlabel(r'$\varphi (\circ)$', labelpad=-5)
 
 fig.savefig(join(plot_dir, 'fig6.png'), dpi=300)
-fig.savefig(join(plot_dir, 'fig6.pdf'))
-fig.savefig(join(plot_dir, 'fig6.svg'))
+# fig.savefig(join(plot_dir, 'fig6.pdf'))
+# fig.savefig(join(plot_dir, 'fig6.svg'))

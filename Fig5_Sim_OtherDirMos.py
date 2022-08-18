@@ -38,6 +38,7 @@ config_dict['theta_f'] = 10
 config_dict['EC_phase_deg'] = 290
 config_dict['Ipos_max'] = 2
 config_dict['Iangle_diff'] = 6
+config_dict['Iangle_compen'] = 0
 config_dict['Ipos_sd'] = 5
 config_dict['Iangle_kappa'] = 1
 config_dict['ECstf_rest'] = 0
@@ -142,6 +143,6 @@ for mosdeg in (45, 225, 90, 270):
     print(save_pth)
     config_dict['mos_startpos'] = np.stack([mosdegdict['startx'][mosdeg], mosdegdict['starty'][mosdeg]]).T
     config_dict['mos_endpos'] = np.stack([mosdegdict['endx'][mosdeg], mosdegdict['endy'][mosdeg]]).T
-    simdata = simulate_SNN(BehDF0, config_dict)
+    simdata = simulate_SNN(BehDF0, config_dict, store_Activity=False, store_w=False)
     save_pickle(save_pth, simdata)
     del simdata

@@ -27,8 +27,12 @@ plt.rcParams.update({'font.size': legendsize,
                      'xtick.major.pad': 0,
                      'ytick.major.pad': 0,
                      'lines.linewidth': 1,
-                     'figure.figsize': (5.2, 5.5)
+                     'figure.figsize': (5.2, 5.5),
+                     'figure.dpi': 300,
+                     'axes.spines.top': False,
+                     'axes.spines.right': False,
                      })
+
 # ====================================== Figure initialization ==================================
 
 ax_h = 1/6
@@ -106,10 +110,6 @@ ax_exin2 = [
 ax_exin2[4].axis('off') # Not used
 ax = np.array([ax_45, ax_135, ax_exin1, ax_90, ax_270, ax_exin2])
 
-for ax_each in ax.ravel():
-    ax_each.spines['top'].set_visible(False)
-    ax_each.spines['right'].set_visible(False)
-
 # ======================================Analysis and plotting ==================================
 mosdeg_pairs = [(45, 225), (90, 270)]
 direct_c = ['tomato', 'royalblue']
@@ -137,16 +137,11 @@ for mospairid, (mosdeg1, mosdeg2) in enumerate(mosdeg_pairs):
         theta_phase = BehDF['theta_phase'].to_numpy()
 
         nn_ca3 = MetaData['nn_ca3']
-        w = MetaData['w']
 
         xxtun1d = NeuronDF['neuronx'].to_numpy()
         yytun1d = NeuronDF['neurony'].to_numpy()
         aatun1d = NeuronDF['neurona'].to_numpy()
 
-        Isen = ActivityData['Isen']
-        Isen_fac = ActivityData['Isen_fac']
-
-        w_ca3ca3 = w[:nn_ca3, :nn_ca3]
         xxtun1d_ca3 = xxtun1d[:nn_ca3]
         yytun1d_ca3 = yytun1d[:nn_ca3]
         aatun1d_ca3 = aatun1d[:nn_ca3]
@@ -325,5 +320,7 @@ for mospairid, (mosdeg1, mosdeg2) in enumerate(mosdeg_pairs):
 
 
 fig.savefig(join(save_dir, 'fig5.png'), dpi=300)
-fig.savefig(join(save_dir, 'fig5.eps'), dpi=300)
-fig.savefig(join(save_dir, 'fig5.pdf'), dpi=300)
+fig.savefig(join(save_dir, 'fig5.tiff'), dpi=300)
+fig.savefig(join(save_dir, 'fig5.eps'))
+fig.savefig(join(save_dir, 'fig5.pdf'))
+fig.savefig(join(save_dir, 'fig5.svg'))

@@ -1,7 +1,9 @@
 from os.path import join
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from library.correlogram import ThetaEstimator
+from library.script_wrappers import find_nidx_along_traj
 from library.utils import load_pickle
 from library.linear_circular_r import rcc
 
@@ -9,6 +11,7 @@ from library.linear_circular_r import rcc
 legendsize = 8
 load_dir = 'sim_results/fig4'
 save_dir = 'plots/fig4/'
+os.makedirs(save_dir, exist_ok=True)
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,
                      'axes.labelpad': 0,
@@ -16,10 +19,12 @@ plt.rcParams.update({'font.size': legendsize,
                      'xtick.major.pad': 0,
                      'ytick.major.pad': 0,
                      'lines.linewidth': 1,
+                     'figure.figsize': (3.5, 2),
+                     'figure.dpi': 300,
+                     'axes.spines.top': False,
+                     'axes.spines.right': False,
                      })
 # ====================================== Figure initialization ==================================
-figw = 3.5
-figh = 2
 
 ax_h = 1/2
 ax_w = 1/3
@@ -29,17 +34,17 @@ wgap = 0.1
 xshift_c0 = 0.04
 xshift_c1 = 0.08
 xshift_c2 = 0.04
-
+yshift_r0 = -0.04
 yshift_r1 = 0.05
 
 
-fig = plt.figure(figsize=(figw, figh))
+fig = plt.figure()
 
 ax_sen = fig.add_axes([ax_w * 0 + wgap/2 + xshift_c0, 1 - ax_h * 1.5 + hgap/2, ax_w * 1 - wgap, ax_h - hgap])
 
 ax_ctrl = np.array([
-    fig.add_axes([ax_w * 1 + wgap/2 + xshift_c1, 1 - ax_h + hgap/2, ax_w * 1 - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 2 + wgap/2 + xshift_c2, 1 - ax_h + hgap/2, ax_w * 1 - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2 + xshift_c1, 1 - ax_h + hgap/2 + yshift_r0, ax_w * 1 - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 2 + wgap/2 + xshift_c2, 1 - ax_h + hgap/2 + yshift_r0, ax_w * 1 - wgap, ax_h - hgap]),
 ])
 
 
@@ -81,16 +86,13 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
         theta_phase = BehDF['theta_phase'].to_numpy()
 
         nn_ca3 = MetaData['nn_ca3']
-        w = MetaData['w']
 
         xxtun1d = NeuronDF['neuronx'].to_numpy()
         yytun1d = NeuronDF['neurony'].to_numpy()
         aatun1d = NeuronDF['neurona'].to_numpy()
 
-        Isen = ActivityData['Isen']
         Isen_fac = ActivityData['Isen_fac']
 
-        w_ca3ca3 = w[:nn_ca3, :nn_ca3]
         xxtun1d_ca3 = xxtun1d[:nn_ca3]
         yytun1d_ca3 = yytun1d[:nn_ca3]
         aatun1d_ca3 = aatun1d[:nn_ca3]
@@ -107,22 +109,15 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
         xmin, xmax, ymin, ymax = config_dict['xmin'], config_dict['xmax'], config_dict['ymin'], config_dict['ymax']
         traj_d = np.append(0, np.cumsum(np.sqrt(np.diff(traj_x)**2 + np.diff(traj_y)**2)))
 
-        # # Population raster CA3
-        # Indices along the trajectory
-        all_nidx = np.zeros(traj_x.shape[0])
-        for i in range(traj_x.shape[0]):
-            run_x, run_y = traj_x[i], traj_y[i]
-            nidx = np.argmin(np.square(run_x - xxtun1d_ca3) + np.square(run_y - yytun1d_ca3))
-            all_nidx[i] = nidx
-        all_nidx = all_nidx[np.sort(np.unique(all_nidx, return_index=True)[1])]
-        all_nidx = all_nidx.astype(int)
 
-        all_egnidxs = all_nidx[[13, 19]]
-        best_nidx, worst_nidx = all_egnidxs[0], all_egnidxs[1]
-
-        # # Removing EC STF for Control case
+        # # Indices along the trajectory
         if mosdeg == 0:
-            egnidx = all_egnidxs[0]
+            all_nidx = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
+
+
+        # # Removing EC STF for Leison case
+        if mosdeg == 0:
+            egnidx = all_nidx[13]
             rel_dist = traj_x-xxtun1d_ca3[egnidx]
             ax_sen.plot(rel_dist, Isen_fac[:, egnidx], linewidth=0.5, color=dgcase_c[dgid])
             theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
@@ -134,9 +129,6 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
             ax_sen.set_xlim(-10, 10)
             ax_sen.set_xlabel('$\Delta x$ (cm)')
             ax_sen.set_ylabel('$I_{sen} (mA)$')
-            # ax_sen.set_yticks(np.arange(0, 31, 10))
-            # ax_sen.set_yticks(np.arange(0, 31, 5), minor=True)
-            # ax_sen.set_ylim(0, 30)
 
 
         # # Correlation lags for Control and DG Lesion
@@ -188,15 +180,21 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
         regress = rcc(allxdiff_fit/ctmp, allcorrlag_fit, abound=(-1, 1))
         xdum = np.linspace(0, 1, 100)
         ydum = regress['phi0'] + 2*np.pi*regress['aopt']*xdum
-        R, rho, p = regress['R'], regress['rho'], regress['p']
+        R, rho, p, aopt = regress['R'], regress['rho'], regress['p'], regress['aopt']
+
         ax_corr[dgid, mosdeg_id].scatter(allxdiff, allcorrlag, marker='.', s=1, color=dgcase_c[dgid])
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum, color='k', linewidth=0.75)
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum+2*np.pi, color='k', linewidth=0.75)
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum-2*np.pi, color='k', linewidth=0.75)
-        ax_corr[dgid, mosdeg_id].annotate('rho=%0.2f'%(rho), xy=(0.05, 0.05), xycoords='axes fraction', fontsize=legendsize)
+        ax_corr[dgid, mosdeg_id].annotate(r'$a=%0.2f$' % (aopt * 2 * np.pi), xy=(0.05, 0.03), xycoords='axes fraction', fontsize=legendsize)
+        # ax_corr[dgid, mosdeg_id].annotate(r'$a=%0.2f$' % (aopt * 2 * np.pi), xy=(0.05, 0.17), xycoords='axes fraction',
+        #                                   fontsize=legendsize)
 
-
-
+        ax_corr[dgid, mosdeg_id].set_xticks([0, 10])
+        ax_corr[dgid, mosdeg_id].set_xticks([5, 15], minor=True)
+        ax_corr[dgid, mosdeg_id].set_xlim(0, 15)
+        if dgid == 0:
+            ax_corr[dgid, mosdeg_id].set_xticklabels([])
         ax_corr[dgid, mosdeg_id].set_ylim(-np.pi, np.pi)
         ax_corr[dgid, mosdeg_id].set_yticks(np.arange(-np.pi, np.pi+0.1, np.pi/2))
         ax_corr[dgid, mosdeg_id].set_yticks(np.arange(-np.pi, np.pi+0.1, np.pi/4), minor=True)
@@ -207,8 +205,8 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
 for i in range(2):
     ax_corr[i, 0].set_ylabel('Lag (rad)')
     ax_corr[i, 0].set_yticklabels(['$-\pi$', '$-\pi/2$', '0', '$\pi/2$', '$\pi$'])
-    ax_corr[1, i].set_xlabel('Dist. diff (cm)')
+    # ax_corr[1, i].set_xlabel('Pair distance (cm)')
 
 fig.savefig(join(save_dir, 'fig4.png'), dpi=300)
-fig.savefig(join(save_dir, 'fig4.eps'), dpi=300)
-fig.savefig(join(save_dir, 'fig4.pdf'), dpi=300)
+fig.savefig(join(save_dir, 'fig4.pdf'))
+fig.savefig(join(save_dir, 'fig4.svg'))

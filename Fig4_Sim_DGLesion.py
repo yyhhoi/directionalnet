@@ -38,6 +38,7 @@ config_dict['theta_f'] = 10
 config_dict['EC_phase_deg'] = 290
 config_dict['Ipos_max'] = 2
 config_dict['Iangle_diff'] = 6
+config_dict['Iangle_compen'] = 0
 config_dict['Ipos_sd'] = 5
 config_dict['Iangle_kappa'] = 1
 config_dict['ECstf_rest'] = 0
@@ -105,8 +106,7 @@ traj_y = np.zeros(traj_x.shape[0])
 traj_a = cal_hd_np(traj_x, traj_y)
 BehDF0 = pd.DataFrame(dict(t=t, traj_x=traj_x, traj_y=traj_y, traj_a =traj_a))
 
-save_dir = join('sim_results', 'fig4')
-os.makedirs(save_dir, exist_ok=True)
+
 
 
 # (45, 225), (90, 270), (135, 315)
@@ -140,10 +140,12 @@ mosdegdict['endx'][180], mosdegdict['endy'][180] = mosdegdict['startx'][180] - p
 config_dict['noise_rate'] = 0
 
 
+save_dir = join('sim_results', 'fig4')
+os.makedirs(save_dir, exist_ok=True)
 for dglabel in ['Ctrl', 'DGlesion']:
     if dglabel == 'Ctrl':
         config_dict['mos_exist'] = True
-        config_dict['wmax_ca3mosca3_adiff'] = 4000
+        config_dict['wmax_ca3mosca3_adiff'] = 3000
         config_dict['ECstf_rest'] = 0
         config_dict['ECstf_target'] = 2
         config_dict['U_ECstf'] = 0.001
@@ -158,6 +160,6 @@ for dglabel in ['Ctrl', 'DGlesion']:
         print(save_pth)
         config_dict['mos_startpos'] = np.stack([mosdegdict['startx'][mosdeg], mosdegdict['starty'][mosdeg]]).T
         config_dict['mos_endpos'] = np.stack([mosdegdict['endx'][mosdeg], mosdegdict['endy'][mosdeg]]).T
-        simdata = simulate_SNN(BehDF0, config_dict)
+        simdata = simulate_SNN(BehDF0, config_dict, store_Activity=True, store_w=False)
         save_pickle(save_pth, simdata)
         del simdata

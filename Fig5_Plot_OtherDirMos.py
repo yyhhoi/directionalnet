@@ -320,7 +320,5 @@ for mospairid, (mosdeg1, mosdeg2) in enumerate(mosdeg_pairs):
 
 
 fig.savefig(join(save_dir, 'fig5.png'), dpi=300)
-fig.savefig(join(save_dir, 'fig5.tiff'), dpi=300)
-fig.savefig(join(save_dir, 'fig5.eps'))
 fig.savefig(join(save_dir, 'fig5.pdf'))
 fig.savefig(join(save_dir, 'fig5.svg'))

@@ -19,7 +19,6 @@ plt.rcParams.update({'font.size': legendsize,
                      'ytick.major.pad': 0,
                      'lines.linewidth': 1,
                      'figure.figsize': (5.2, 6.1),
-                     'figure.facecolor': 'white',
                      'figure.dpi': 300,
                      'axes.spines.top': False,
                      'axes.spines.right': False,
@@ -29,7 +28,7 @@ plt.rcParams.update({'font.size': legendsize,
 jitter_times = int(sys.argv[1])
 jitter_ms = float(sys.argv[2])
 project_tag = 'Jit%d_%dms_gau'%(jitter_times, jitter_ms)
-simdata_dir = 'sim_results/fig6_TrainStand_Icompen2a6'
+simdata_dir = 'sim_results/fig6_TrainStand_Icompen2a4'
 data_dir = join(simdata_dir, project_tag)
 # plot_dir = 'plots/fig6'
 plot_dir = data_dir

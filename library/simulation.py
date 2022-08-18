@@ -102,7 +102,7 @@ def simulate_SNN(BehDF, config_dict, store_Activity=True, store_w=True):
     EC_phase = np.deg2rad(config_dict['EC_phase_deg'])
     Ipos_max = config_dict['Ipos_max']
     Iangle_diff = config_dict['Iangle_diff']
-    Iangle_compen = config_dict['Iangle_compen']
+    Iangle_compen = config_dict['Iangle_compen']  # Relevant only if run_a is None
     Ipos_sd = config_dict['Ipos_sd']
     Iangle_kappa = config_dict['Iangle_kappa']
     ECstf_rest = config_dict['ECstf_rest']

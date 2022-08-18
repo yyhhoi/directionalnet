@@ -388,7 +388,7 @@ def simulate_SNN(BehDF, config_dict, store_Activity=True, store_w=True):
                             Itotal=Itotal_pop, syneff=syneff_pop, ECstf=ECstfx_pop)
     else:
         ActivityData = None
-    if ~store_w:
+    if store_w is False:
         w = None
     MetaData = dict(nn=nn, nn_ca3=nn_ca3, nn_mos=nn_mos, nn_in=nn_in, w=w, EC_phase=EC_phase)
 

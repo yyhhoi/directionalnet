@@ -6,7 +6,7 @@ import os
 import pandas as pd
 from pycircstat import cdiff, mean as cmean
 from library.comput_utils import pair_diff, circgaufunc, get_tspdiff, rcc_wrapper
-from library.script_wrappers import best_worst_analysis
+from library.script_wrappers import best_worst_analysis, find_nidx_along_traj
 from library.shared_vars import total_figw
 from library.utils import save_pickle, load_pickle
 from library.visualization import customlegend, plot_phase_precession, plot_popras, plot_sca_onsetslope, \
@@ -19,10 +19,20 @@ legendsize = 8
 load_dir = 'sim_results/fig2'
 save_dir = 'plots/fig2/'
 os.makedirs(save_dir, exist_ok=True)
-
+plt.rcParams.update({'font.size': legendsize,
+                     "axes.titlesize": legendsize,
+                     'axes.labelpad': 0,
+                     'axes.titlepad': 0,
+                     'xtick.major.pad': 0,
+                     'ytick.major.pad': 0,
+                     'lines.linewidth': 1,
+                     'figure.figsize': (5.2, 4.5),
+                     'figure.dpi': 300,
+                     'axes.spines.top': False,
+                     'axes.spines.right': False,
+                     })
 # ====================================== Figure initialization ==================================
-figw = 5.2
-figh = 4.5
+
 ax_h = 1/3
 ax_w = 1/4
 hgap = 0.14
@@ -38,7 +48,7 @@ wgap_popstats2 = 0.02
 hgap_popstats = 0.02
 yshift_popstats = 0.02
 
-fig = plt.figure(figsize=(figw, figh))
+fig = plt.figure()
 
 ax_WI = [
     fig.add_axes([ax_w * 0 + wgap/2 + xshift_WI1, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
@@ -65,11 +75,6 @@ ax_popstats = [
 
 ax_list = [ax_WI, [ax_ras], ax_eg, ax_popstats]
 ax_all = np.concatenate(ax_list)
-
-for ax_each in ax_all:
-    ax_each.tick_params(labelsize=legendsize)
-    ax_each.spines['top'].set_visible(False)
-    ax_each.spines['right'].set_visible(False)
 
 
 # ======================================Analysis and plotting ==================================
@@ -122,15 +127,8 @@ traj_d = np.append(0, np.cumsum(np.sqrt(np.diff(traj_x)**2 + np.diff(traj_y)**2)
 
 # # Population raster CA3
 # Indices along the trajectory
-all_nidx = np.zeros(traj_x.shape[0])
-for i in range(traj_x.shape[0]):
-    run_x, run_y = traj_x[i], traj_y[i]
-    nidx = np.argmin(np.square(run_x - xxtun1d_ca3) + np.square(run_y - yytun1d_ca3))
-    all_nidx[i] = nidx
-all_nidx = all_nidx[np.sort(np.unique(all_nidx, return_index=True)[1])]
-all_nidx = all_nidx.astype(int)
+all_nidx = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
 all_nidx_dict[0] = all_nidx
-
 
 all_egnidxs = all_nidx[[13, 19]]
 best_nidx, worst_nidx = all_egnidxs[0], all_egnidxs[1]
@@ -304,4 +302,4 @@ for axeach in [ax_ras]:
         axeach.axvline(t[i], c='gray', linewidth=0.25)
 fig.savefig(join(save_dir, 'fig2.png'), dpi=300)
 fig.savefig(join(save_dir, 'fig2.pdf'), dpi=300)
-
+fig.savefig(join(save_dir, 'fig2.svg'), dpi=300)

@@ -46,6 +46,7 @@ config_dict['theta_f'] = 10
 config_dict['EC_phase_deg'] = 290
 config_dict['Ipos_max'] = 2
 config_dict['Iangle_diff'] = 0
+config_dict['Iangle_compen'] = 0
 config_dict['Ipos_sd'] = 5
 config_dict['Iangle_kappa'] = 1
 config_dict['ECstf_rest'] = 0
@@ -168,20 +169,21 @@ BehDF315 = pd.DataFrame(dict(t=t, traj_x=traj_x, traj_y=traj_y, traj_a =traj_a))
 
 BehDF_degs = [0, 180, 90, 270, 45, 225]
 BehDFs = [BehDF0, BehDF180, BehDF90, BehDF270, BehDF45, BehDF225]
+
 save_dir = join('sim_results', 'fig1')
 os.makedirs(save_dir, exist_ok=True)
 
 # Intrinsic model
-# config_dict['ECstf_rest'] = 1
-# config_dict['ECstf_target'] = 1
-# config_dict['wmax_ca3ca3'] = 1100
-# config_dict['Ipos_max'] = 3
-# for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
-#     save_pth = join(save_dir, 'fig1_intrinsic_%.pkl'%(BehDF_deg))
-#     print(save_pth)
-#     simdata = simulate_SNN(BehDF, config_dict)
-#     save_pickle(save_pth, simdata)
-#     del simdata
+config_dict['ECstf_rest'] = 1
+config_dict['ECstf_target'] = 1
+config_dict['wmax_ca3ca3'] = 1100
+config_dict['Ipos_max'] = 3
+for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
+    save_pth = join(save_dir, 'fig1_intrinsic_%d.pkl'%(BehDF_deg))
+    print(save_pth)
+    simdata = simulate_SNN(BehDF, config_dict)
+    save_pickle(save_pth, simdata)
+    del simdata
 
 # Modification to extrinsic
 config_dict['ECstf_rest'] = 0
@@ -190,9 +192,10 @@ config_dict['asym_flag'] = False
 config_dict['wmax_ca3ca3'] = 1000
 config_dict['U_stdx_CA3'] = 0.9
 config_dict['Ipos_max'] = 4.5
+
 for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
     save_pth = join(save_dir, 'fig1_extrinsic_%d.pkl'%(BehDF_deg))
     print(save_pth)
-    simdata = simulate_SNN(BehDF, config_dict)
+    simdata = simulate_SNN(BehDF, config_dict, store_Activity=False, store_w=False)
     save_pickle(save_pth, simdata)
     del simdata

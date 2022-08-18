@@ -18,11 +18,20 @@ legendsize = 8
 load_dir = 'sim_results/fig1'
 save_dir = 'plots/fig1/'
 os.makedirs(save_dir, exist_ok=True)
-save_pth = join(save_dir, 'fig1')
-
+plt.rcParams.update({'font.size': legendsize,
+                     "axes.titlesize": legendsize,
+                     'axes.labelpad': 0,
+                     'axes.titlepad': 0,
+                     'xtick.major.pad': 0,
+                     'ytick.major.pad': 0,
+                     'lines.linewidth': 1,
+                     'figure.figsize': (5.2, 5.2),
+                     'figure.dpi': 300,
+                     'axes.spines.top': False,
+                     'axes.spines.right': False,
+                     })
 # ====================================== Figure initialization ==================================
-figw = 5.2
-figh = 5.2
+
 ax_h = 1/7
 ax_w = 1/7
 hgap = 0.04
@@ -31,7 +40,7 @@ ylift_12 = 0.04
 ylift_3 = 0.02
 wgap = 0.02
 wgap_corr = 0.05
-fig = plt.figure(figsize=(figw, figh))
+fig = plt.figure()
 
 ax_trajs = [
     fig.add_axes([ax_w * 1.5 + wgap/2, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
@@ -93,11 +102,6 @@ ax_corr_ex = [
 ax_list = [ax_trajs, ax_ras_in, ax_precess_in, ax_corr_in, ax_ras_ex, ax_precess_ex, ax_corr_ex]
 ax_all = np.concatenate(ax_list)
 
-for ax_each in ax_all:
-    ax_each.tick_params(labelsize=legendsize)
-    ax_each.spines['top'].set_visible(False)
-    ax_each.spines['right'].set_visible(False)
-
 # ======================================Analysis and plotting ==================================
 
 BehDF_degpairs = [(0, 180), (45, 225), (90, 270)]
@@ -119,7 +123,6 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
             BehDF = simdata['BehDF']
             SpikeDF = simdata['SpikeDF']
             NeuronDF = simdata['NeuronDF']
-            ActivityData = simdata['ActivityData']
             MetaData = simdata['MetaData']
             config_dict = simdata['Config']
 
@@ -130,13 +133,11 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
             theta_phase = BehDF['theta_phase']
 
             nn_ca3 = MetaData['nn_ca3']
-            w = MetaData['w']
 
             xxtun1d = NeuronDF['neuronx'].to_numpy()
             yytun1d = NeuronDF['neurony'].to_numpy()
             aatun1d = NeuronDF['neurona'].to_numpy()
 
-            w_ca3ca3 = w[:nn_ca3, :nn_ca3]
             xxtun1d_ca3 = xxtun1d[:nn_ca3]
             yytun1d_ca3 = yytun1d[:nn_ca3]
             aatun1d_ca3 = aatun1d[:nn_ca3]
@@ -250,8 +251,8 @@ ax_corr_ex[0].set_ylabel('Spike density', fontsize=legendsize, labelpad=0)
 
 
 
-fig.savefig(save_pth + '.png', dpi=300)
-fig.savefig(save_pth + '.eps')
-fig.savefig(save_pth + '.pdf')
+fig.savefig(join(save_dir, 'fig1.png'))
+fig.savefig(join(save_dir, 'fig1.eps'))
+fig.savefig(join(save_dir, 'fig1.pdf'))
 plt.close(fig)
 

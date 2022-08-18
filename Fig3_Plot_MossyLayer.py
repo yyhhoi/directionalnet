@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import os
 from library.comput_utils import get_tspdiff
 from library.correlogram import ThetaEstimator
-from library.script_wrappers import best_worst_analysis, exin_analysis
+from library.script_wrappers import best_worst_analysis, exin_analysis, find_nidx_along_traj
 from library.utils import load_pickle
 from library.visualization import plot_popras, plot_phase_precession, plot_sca_onsetslope, \
     plot_marginal_phase, plot_exin_bestworst_simdissim
@@ -27,8 +27,7 @@ plt.rcParams.update({'font.size': legendsize,
                      'axes.spines.right': False,
                      })
 # ====================================== Figure initialization ==================================
-figw = 5.2
-figh = 5.6
+figw = plt.rcParams['figure.figsize'][0]
 scheme_space_h = (0.8/figw)
 ax_h = (1 - scheme_space_h ) / 4
 ax_ymax = 1 - scheme_space_h
@@ -45,7 +44,7 @@ yshift_popstats = 0.03
 yshift_exin = 0.02
 
 
-fig = plt.figure(figsize=(figw, figh))
+fig = plt.figure()
 
 ax_ras = [
     fig.add_axes([ax_w * 0 + wgap/2 + xshitf_colL, ax_ymax - ax_h + hgap/2, ax_w * 2 - wgap, ax_h - hgap]),
@@ -74,12 +73,6 @@ ax_exin = [
 ]
 
 ax_all = np.concatenate([ax_ras, ax_precess, ax_popstats, ax_exin])
-
-
-for ax_each in ax_all:
-    ax_each.tick_params(labelsize=legendsize)
-    ax_each.spines['top'].set_visible(False)
-    ax_each.spines['right'].set_visible(False)
 
 # ======================================Analysis and plotting ==================================
 direct_c = ['tomato', 'royalblue']
@@ -125,13 +118,7 @@ for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
 
     # # Population raster CA3
     # Indices along the trajectory
-    all_nidx = np.zeros(traj_x.shape[0])
-    for i in range(traj_x.shape[0]):
-        run_x, run_y = traj_x[i], traj_y[i]
-        nidx = np.argmin(np.square(run_x - xxtun1d_ca3) + np.square(run_y - yytun1d_ca3))
-        all_nidx[i] = nidx
-    all_nidx = all_nidx[np.sort(np.unique(all_nidx, return_index=True)[1])]
-    all_nidx = all_nidx.astype(int)
+    all_nidx = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
     all_nidx_dict[mosdeg] = all_nidx
 
     all_egnidxs = all_nidx[[13, 19]]

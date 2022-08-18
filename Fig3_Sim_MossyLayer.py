@@ -46,6 +46,7 @@ config_dict['theta_f'] = 10
 config_dict['EC_phase_deg'] = 290
 config_dict['Ipos_max'] = 2
 config_dict['Iangle_diff'] = 6
+config_dict['Iangle_compen'] = 2
 config_dict['Ipos_sd'] = 5
 config_dict['Iangle_kappa'] = 1
 config_dict['ECstf_rest'] = 0
@@ -126,14 +127,13 @@ BehDF0 = pd.DataFrame(dict(t=t, traj_x=traj_x, traj_y=traj_y, traj_a =traj_a))
 
 
 
-tag = ''
-save_dir = join('sim_results', 'fig3%s'%tag)
+save_dir = join('sim_results', 'fig3')
 
 os.makedirs(save_dir, exist_ok=True)
 
 config_dict['mos_startpos'] = np.stack([mos_startx0, mos_starty0]).T
 config_dict['mos_endpos'] = np.stack([mos_endx0, mos_endy0]).T
-save_pth = join(save_dir, 'fig3%s_MossyLayer_Mosdeg0.pkl'%(tag))
+save_pth = join(save_dir, 'fig3_MossyLayer_Mosdeg0.pkl')
 print(save_pth)
 simdata = simulate_SNN(BehDF0, config_dict)
 save_pickle(save_pth, simdata)
@@ -141,8 +141,8 @@ del simdata
 
 config_dict['mos_startpos'] = np.stack([mos_startx180, mos_starty180]).T
 config_dict['mos_endpos'] = np.stack([mos_endx180, mos_endy180]).T
-save_pth = join(save_dir, 'fig3%s_MossyLayer_Mosdeg180.pkl'%(tag))
+save_pth = join(save_dir, 'fig3_MossyLayer_Mosdeg180.pkl')
 print(save_pth)
-simdata = simulate_SNN(BehDF0, config_dict)
+simdata = simulate_SNN(BehDF0, config_dict, store_Activity=False, store_w=False)
 save_pickle(save_pth, simdata)
 del simdata

@@ -1,26 +1,17 @@
-import time
 from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import os
-import pandas as pd
-from pycircstat import cdiff, mean as cmean
-from library.comput_utils import pair_diff, circgaufunc, get_tspdiff, calc_exin_samepath
+from library.comput_utils import get_tspdiff
 from library.correlogram import ThetaEstimator
 from library.script_wrappers import best_worst_analysis, exin_analysis
-from library.shared_vars import total_figw
-from library.utils import save_pickle, load_pickle
-from library.visualization import customlegend, plot_popras, plot_phase_precession, plot_sca_onsetslope, \
+from library.utils import load_pickle
+from library.visualization import plot_popras, plot_phase_precession, plot_sca_onsetslope, \
     plot_marginal_phase, plot_exin_bestworst_simdissim
-from library.linear_circular_r import rcc
-from library.simulation import createMosProjMat_p2p, directional_tuning_tile, simulate_SNN
-
 # ====================================== Global params and paths ==================================
-# tag = '_NoMos'
-tag = ''
-load_dir = 'sim_results/fig3%s' % tag
-save_dir = 'plots/fig3%s/' % tag
+
+load_dir = 'sim_results/fig3'
+save_dir = 'plots/fig3/'
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,
@@ -29,7 +20,11 @@ plt.rcParams.update({'font.size': legendsize,
                      'axes.titlepad': 0,
                      'xtick.major.pad': 0,
                      'ytick.major.pad': 0,
-
+                     'lines.linewidth': 1,
+                     'figure.figsize': (5.2, 5.6),
+                     'figure.dpi': 300,
+                     'axes.spines.top': False,
+                     'axes.spines.right': False,
                      })
 # ====================================== Figure initialization ==================================
 figw = 5.2
@@ -86,13 +81,11 @@ for ax_each in ax_all:
     ax_each.spines['top'].set_visible(False)
     ax_each.spines['right'].set_visible(False)
 
-fig2, ax2 = plt.subplots(1, 2, figsize=(12, 5), sharex=True, sharey=True)
-
 # ======================================Analysis and plotting ==================================
 direct_c = ['tomato', 'royalblue']
 all_nidx_dict = dict()
-simdata0 = load_pickle(join(load_dir, 'fig3%s_MossyLayer_Mosdeg0.pkl' % tag))
-simdata180 = load_pickle(join(load_dir, 'fig3%s_MossyLayer_Mosdeg180.pkl' % tag))
+simdata0 = load_pickle(join(load_dir, 'fig3_MossyLayer_Mosdeg0.pkl'))
+simdata180 = load_pickle(join(load_dir, 'fig3_MossyLayer_Mosdeg180.pkl'))
 for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
 
     base_axid = mosi*2
@@ -100,7 +93,6 @@ for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
     BehDF = simdata['BehDF']
     SpikeDF = simdata['SpikeDF']
     NeuronDF = simdata['NeuronDF']
-    ActivityData = simdata['ActivityData']
     MetaData = simdata['MetaData']
     config_dict = simdata['Config']
 
@@ -111,16 +103,11 @@ for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
     theta_phase = BehDF['theta_phase']
 
     nn_ca3 = MetaData['nn_ca3']
-    w = MetaData['w']
 
     xxtun1d = NeuronDF['neuronx'].to_numpy()
     yytun1d = NeuronDF['neurony'].to_numpy()
     aatun1d = NeuronDF['neurona'].to_numpy()
 
-    Isen = ActivityData['Isen']
-    Isen_fac = ActivityData['Isen_fac']
-
-    w_ca3ca3 = w[:nn_ca3, :nn_ca3]
     xxtun1d_ca3 = xxtun1d[:nn_ca3]
     yytun1d_ca3 = yytun1d[:nn_ca3]
     aatun1d_ca3 = aatun1d[:nn_ca3]
@@ -193,57 +180,6 @@ for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
     # # Marginal spike phases
     plot_marginal_phase(ax_popstats[base_axid + 1], phasesp_best, phasesp_worst, direct_c, legendsize)
 
-    # New figure for correlation lags
-    correg_dir = join(save_dir, 'corr%d'%(mosdeg))
-    os.makedirs(correg_dir, exist_ok=True)
-    TE = ThetaEstimator(bin_size=5e-3, window_width=200e-3, bandpass=(5, 12))
-    thetaT = 1/theta_f
-    allxdiff, allcorrlag = [], []
-    for i in range(all_nidx.shape[0]):
-        for j in range(i+1, all_nidx.shape[0]):
-
-            nidx1, nidx2 = all_nidx[i], all_nidx[j]
-            x1, x2 = xxtun1d_ca3[nidx1], xxtun1d_ca3[nidx2]
-
-            if x1 > x2:
-                nidx1, nidx2 = all_nidx[j], all_nidx[i]
-                x1, x2 = xxtun1d_ca3[nidx1], xxtun1d_ca3[nidx2]
-
-            xdiff = x2-x1
-            tidxsp1 = SpikeDF.loc[SpikeDF['neuronid'] == nidx1, 'tidxsp'].to_numpy()
-            tidxsp2 = SpikeDF.loc[SpikeDF['neuronid'] == nidx2, 'tidxsp'].to_numpy()
-            tsp1 = t[tidxsp1] * (1e-3)
-            tsp2 = t[tidxsp2] * (1e-3)
-            estThetaT, corrlag, corrinfo = TE.find_theta_isi_hilbert(tsp1, tsp2, theta_window=thetaT*2, default_Ttheta=thetaT)
-            if np.isnan(corrlag):
-                continue
-            (isibins, isiedges, signal_filt, _, alphas, _) = corrinfo
-            isiedgesm = (isiedges[:-1] + isiedges[1:])/2
-            allxdiff.append(xdiff)
-            allcorrlag.append(corrlag)
-
-            # fig, ax = plt.subplots(figsize=(10, 5))
-            # ax.step(isiedgesm, isibins/isibins.max(), where='mid')
-            # ax.plot(isiedgesm, signal_filt/signal_filt.max())
-            # ax.plot(isiedgesm, alphas/alphas.max())
-            # ax.set_title('xdiff=%0.4f'%(xdiff))
-            # fig.savefig(join(correg_dir, 'pair%d-%d.png'%(nidx1, nidx2)))
-            # plt.close(fig)
-
-    ax2[mosi].scatter(allxdiff, allcorrlag, marker='.', s=1)
-    ax2[mosi].set_ylim(-np.pi, np.pi)
-    ax2[mosi].set_yticks(np.arange(-np.pi, np.pi+0.1, np.pi/2))
-    ax2[mosi].set_yticks(np.arange(-np.pi, np.pi+0.1, np.pi/4), minor=True)
-    ax2[mosi].set_yticklabels(['$-\pi$', '$-\pi/2$', '0', '$\pi/2$', '$\pi$'])
-
-    ax2[mosi].set_title('Mos Deg = %d'%(mosdeg))
-
-
-
-
-
-fig2.savefig(join(save_dir, 'corrlags.png'))
-
 
 # # Aver correlation only for 0 and 180 mos deg
 mosdirect_c = ['green', 'brown']  # 0, 180
@@ -314,5 +250,4 @@ ax_exin[2].set_ylabel('')
 
 fig.savefig(join(save_dir, 'fig3.png'), dpi=300)
 fig.savefig(join(save_dir, 'fig3.pdf'), dpi=300)
-
-fig.savefig(join(save_dir, 'fig3.eps'), dpi=300)
+fig.savefig(join(save_dir, 'fig3.svg'), dpi=300)

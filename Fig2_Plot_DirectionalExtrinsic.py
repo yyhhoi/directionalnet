@@ -38,10 +38,14 @@ ax_w = 1/4
 hgap = 0.14
 wgap = 0.08
 xshift_WI1 = 0.03
-xshift_WI2 = 0.1
+xshift_WI2 = -0.04
+xshift_WIeg2 = 0.02
+xshift_WIeg3 = -0.04
+
+xshift_WIeg2_2 = 0.09
+xshift_WIeg3_2 = 0.03
+
 xshift_ras = 0.06
-xshift_WIeg2 = 0.09
-xshift_WIeg3 = 0.03
 xshift_popstats123 = 0.02
 hgap_popstats2 = 0.02
 wgap_popstats2 = 0.02
@@ -52,17 +56,17 @@ fig = plt.figure()
 
 ax_WI = [
     fig.add_axes([ax_w * 0 + wgap/2 + xshift_WI1, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 1 + wgap/2 + xshift_WI2, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 2 + wgap/2 + xshift_WIeg2, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2 + xshift_WIeg3, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2 + xshift_WIeg2, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 2 + wgap/2 + xshift_WIeg3, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2 + xshift_WI2, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
 ]
 
 ax_ras = fig.add_axes([ax_w * 0 + wgap/2 + xshift_ras, 1 - ax_h*2 + hgap/2, ax_w * 2 - wgap, ax_h - hgap])
 
 
 ax_eg = [
-    fig.add_axes([ax_w * 2 + wgap/2 + xshift_WIeg2, 1 - ax_h*2 + hgap/2, ax_w * 1 - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2 + xshift_WIeg3, 1 - ax_h*2 + hgap/2, ax_w * 1 - wgap, ax_h - hgap])
+    fig.add_axes([ax_w * 2 + wgap/2 + xshift_WIeg2_2, 1 - ax_h*2 + hgap/2, ax_w * 1 - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2 + xshift_WIeg3_2, 1 - ax_h*2 + hgap/2, ax_w * 1 - wgap, ax_h - hgap])
 ]
 
 ax_popstats = [
@@ -144,20 +148,20 @@ egnidx = np.argmin(np.square(0 - xxtun1d_ca3) + np.square(0 - yytun1d_ca3) + np.
 w2d_preeg = w_ca3ca3[:, egnidx].reshape(nx_ca3, nx_ca3)
 arrow_alpha = (w2d_preeg-w2d_preeg.min())/w2d_preeg.max()
 arrow_alpha[arrow_alpha<0.1] = 0
-im = ax_WI[0].scatter(xxtun2d_ca3, yytun2d_ca3, c=arrow_alpha, cmap='Blues', s=20)
-ax_WI[0].quiver(xxtun2d_ca3, yytun2d_ca3, np.cos(aatun2d_ca3),
+im = ax_WI[3].scatter(xxtun2d_ca3, yytun2d_ca3, c=arrow_alpha, cmap='Blues', s=20)
+ax_WI[3].quiver(xxtun2d_ca3, yytun2d_ca3, np.cos(aatun2d_ca3),
                 np.sin(aatun2d_ca3), scale=10, alpha=arrow_alpha*0.95+0.05, headwidth=7)
-ax_WI[0].set_xlim(*xlim)
-ax_WI[0].set_ylim(*ylim)
-ax_WI[0].set_xlabel('x (cm)', fontsize=legendsize, labelpad=0)
-ax_WI[0].set_ylabel('y (cm)', fontsize=legendsize, labelpad=-2)
-ax_WI[0].set_xticks(np.arange(-5, 6, 5))
-ax_WI[0].set_xticks(np.arange(-5, 5, 1), minor=True)
-ax_WI[0].set_yticks(np.arange(-5, 6, 5))
-ax_WI[0].set_yticks(np.arange(-5, 6, 1), minor=True)
-ax_WI[0].tick_params(labelsize=legendsize)
+ax_WI[3].set_xlim(*xlim)
+ax_WI[3].set_ylim(*ylim)
+ax_WI[3].set_xlabel('x (cm)', fontsize=legendsize, labelpad=0)
+ax_WI[3].set_ylabel('y (cm)', fontsize=legendsize, labelpad=-2)
+ax_WI[3].set_xticks(np.arange(-5, 6, 5))
+ax_WI[3].set_xticks(np.arange(-5, 5, 1), minor=True)
+ax_WI[3].set_yticks(np.arange(-5, 6, 5))
+ax_WI[3].set_yticks(np.arange(-5, 6, 1), minor=True)
+ax_WI[3].tick_params(labelsize=legendsize)
 norm = mpl.colors.Normalize(vmin=w2d_preeg.min(), vmax=w2d_preeg.max())
-ax_WIpos = ax_WI[0].get_position()
+ax_WIpos = ax_WI[3].get_position()
 ax_WIcb = fig.add_axes([ax_WIpos.x0 + ax_WIpos.width, ax_WIpos.y0, ax_WIpos.width*0.075, ax_WIpos.height])
 cb = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap='Blues'),
              cax=ax_WIcb, orientation='vertical')
@@ -170,38 +174,38 @@ cb.ax.set_ylabel('$W_{ij}$', fontsize=legendsize, labelpad=0.5)
 # # Directional tuning curve
 deg_space = np.linspace(-np.pi, np.pi, 100)
 I_output = circgaufunc(deg_space, 0, Iangle_kappa, Iangle_diff)
-ax_WI[1].plot(deg_space, I_output - I_output.min(), color='k', linewidth=0.75)
-ax_WI[1].set_xticks([-np.pi, -np.pi/2, 0, np.pi/2, np.pi])
-ax_WI[1].set_xticklabels(['$-\pi$', '', '0', '', '$\pi$'])
-ax_WI[1].set_xlabel('Heading (rad)', fontsize=legendsize, labelpad=0)
-ax_WI[1].set_yticks(np.arange(0, 11, 5))
-ax_WI[1].set_yticks(np.arange(0, 10, 1), minor=True)
-ax_WI[1].set_ylabel('$I_{HD}$ (mA)', fontsize=legendsize,  labelpad=-2)
+ax_WI[0].plot(deg_space, I_output - I_output.min(), color='k', linewidth=0.75)
+ax_WI[0].set_xticks([-np.pi, -np.pi/2, 0, np.pi/2, np.pi])
+ax_WI[0].set_xticklabels(['$-\pi$', '', '0', '', '$\pi$'])
+ax_WI[0].set_xlabel('Heading (rad)', fontsize=legendsize, labelpad=0)
+ax_WI[0].set_yticks(np.arange(0, 11, 5))
+ax_WI[0].set_yticks(np.arange(0, 10, 1), minor=True)
+ax_WI[0].set_ylabel('$I_{HD}$ (mA)', fontsize=legendsize,  labelpad=-2)
 
 # # Best and worst sensory input
 for i, label in enumerate(['Best', 'Worst']):
     egnidx = all_egnidxs[i]
     rel_dist = traj_x-xxtun1d_ca3[egnidx]
-    ax_WI[2+i].plot(rel_dist, Isen[:, egnidx], linewidth=0.5, color=direct_c2[i], linestyle='dashed')
-    ax_WI[2+i].plot(rel_dist, Isen_fac[:, egnidx], linewidth=0.5, color=direct_c[i])
+    ax_WI[1+i].plot(rel_dist, Isen[:, egnidx], linewidth=0.5, color=direct_c2[i], linestyle='dashed')
+    ax_WI[1+i].plot(rel_dist, Isen_fac[:, egnidx], linewidth=0.5, color=direct_c[i])
     theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
     for j in theta_cutidx:
-        ax_WI[2+i].axvline(rel_dist[j], c='gray', linewidth=0.25)
-    ax_WI[2+i].set_xticks(np.arange(-8, 9, 4))
-    ax_WI[2+i].set_xticks(np.arange(-9, 9, 1), minor=True)
-    ax_WI[2+i].set_xlim(-10, 10)
-    ax_WI[2+i].set_yticks(np.arange(0, 31, 10))
-    ax_WI[2+i].set_yticks(np.arange(0, 31, 5), minor=True)
-    ax_WI[2+i].set_ylim(0, 30)
+        ax_WI[1+i].axvline(rel_dist[j], c='gray', linewidth=0.25)
+    ax_WI[1+i].set_xticks(np.arange(-8, 9, 4))
+    ax_WI[1+i].set_xticks(np.arange(-9, 9, 1), minor=True)
+    ax_WI[1+i].set_xlim(-10, 10)
+    ax_WI[1+i].set_yticks(np.arange(0, 31, 10))
+    ax_WI[1+i].set_yticks(np.arange(0, 31, 5), minor=True)
+    ax_WI[1+i].set_ylim(0, 30)
 
-ax_WI[3].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c2[0], linestyle='dashed', label=r'${\rm Best}$')
-ax_WI[3].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c[0], label=r'${\rm Best_{fac}}$')
-ax_WI[3].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c2[1], linestyle='dashed', label=r'${\rm Worst}$')
-ax_WI[3].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c[1], label=r'${\rm Worst_{fac}}$')
-customlegend(ax_WI[3], fontsize=legendsize, loc='upper right', handlelength=1.5, handletextpad=0.1)
-ax_WI[2].set_ylabel('$I_{Sen}$ (mA)', fontsize=legendsize, labelpad=0)
-ax_WI[3].set_yticklabels([])
-fig.text(0.72, 0.66, 'Relative position to\nplace cell center (cm)', fontsize=legendsize, va='center')
+ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c2[0], linestyle='dashed', label=r'${\rm Best}$')
+ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c[0], label=r'${\rm Best_{fac}}$')
+ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c2[1], linestyle='dashed', label=r'${\rm Worst}$')
+ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c[1], label=r'${\rm Worst_{fac}}$')
+customlegend(ax_WI[2], fontsize=legendsize, loc='upper right', handlelength=1.5, handletextpad=0.1)
+ax_WI[1].set_ylabel('$I_{Sen}$ (mA)', fontsize=legendsize, labelpad=0)
+ax_WI[2].set_yticklabels([])
+fig.text(0.375, 0.67, 'Relative position to\nplace cell center (cm)', fontsize=legendsize, va='center')
 
 # Population Raster
 plot_popras(ax_ras, SpikeDF, t, all_nidx, all_egnidxs[0], all_egnidxs[1], direct_c[0], direct_c[1])
@@ -220,7 +224,7 @@ for i, label in enumerate(['Best', 'Worst']):
                           plotmeanphase=True)
 ax_eg[0].set_ylabel('Spike phase (rad)', fontsize=legendsize, labelpad=0)
 ax_eg[1].set_yticklabels([])
-fig.text(0.66, 0.34, 'Relative position in the field', fontsize=legendsize)
+fig.text(0.66, 0.35, 'Relative position in the field', fontsize=legendsize)
 
 
 # # All onsets & Marginal phases

@@ -27,8 +27,9 @@ plt.rcParams.update({'font.size': legendsize,
 
 jitter_times = int(sys.argv[1])
 jitter_ms = float(sys.argv[2])
-project_tag = 'Jit%d_%dms_gau'%(jitter_times, jitter_ms)
-simdata_dir = 'sim_results/fig6_TrainStand_Icompen2a4'
+project_tag = 'Jit%d_%0.1fms'%(jitter_times, jitter_ms)
+sim_tag = 'fig6_TrainStand_Icompen2a6c1_Wmos3000'
+simdata_dir = 'sim_results/%s'%(sim_tag)
 data_dir = join(simdata_dir, project_tag)
 # plot_dir = 'plots/fig6'
 plot_dir = data_dir

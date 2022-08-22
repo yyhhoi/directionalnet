@@ -252,7 +252,7 @@ ax_corr_ex[0].set_ylabel('Spike density', fontsize=legendsize, labelpad=0)
 
 
 fig.savefig(join(save_dir, 'fig1.png'))
-fig.savefig(join(save_dir, 'fig1.eps'))
+fig.savefig(join(save_dir, 'fig1.svg'))
 fig.savefig(join(save_dir, 'fig1.pdf'))
 plt.close(fig)
 

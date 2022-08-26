@@ -181,7 +181,7 @@ config_dict['Ipos_max'] = 3
 for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
     save_pth = join(save_dir, 'fig1_intrinsic_%d.pkl'%(BehDF_deg))
     print(save_pth)
-    simdata = simulate_SNN(BehDF, config_dict)
+    simdata = simulate_SNN(BehDF, config_dict, store_Activity=False, store_w=False)
     save_pickle(save_pth, simdata)
     del simdata
 

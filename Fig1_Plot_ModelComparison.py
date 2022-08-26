@@ -6,6 +6,7 @@ import os
 import pandas as pd
 from pycircstat import cdiff, mean as cmean
 from library.comput_utils import pair_diff
+from library.script_wrappers import find_nidx_along_traj
 from library.shared_vars import total_figw
 from library.utils import save_pickle, load_pickle
 from library.visualization import customlegend, plot_phase_precession, plot_popras
@@ -146,13 +147,7 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
 
             # # Population raster CA3
             # Indices along the trajectory
-            all_nidx = np.zeros(traj_x.shape[0])
-            for i in range(traj_x.shape[0]):
-                run_x, run_y = traj_x[i], traj_y[i]
-                nidx = np.argmin(np.square(run_x - xxtun1d_ca3) + np.square(run_y - yytun1d_ca3))
-                all_nidx[i] = nidx
-            all_nidx = all_nidx[np.sort(np.unique(all_nidx, return_index=True)[1])]
-            all_nidx = all_nidx.astype(int)
+            all_nidx = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
             all_nidx_dict[BehDF_deg] = all_nidx
 
             mid_nidx_id = int(all_nidx.shape[0]/2)

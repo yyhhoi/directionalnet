@@ -145,12 +145,13 @@ direct_c2 = ['rosybrown', 'lightsteelblue']
 xlim = (-6, 5)
 ylim = (-5, 6)
 egnidx = np.argmin(np.square(0 - xxtun1d_ca3) + np.square(0 - yytun1d_ca3) + np.square(0 - aatun1d_ca3))
-w2d_preeg = w_ca3ca3[:, egnidx].reshape(nx_ca3, nx_ca3)
+plot_nidx = np.where((xxtun1d_ca3 < xlim[1]) & (xxtun1d_ca3 > xlim[0]) & (yytun1d_ca3 < ylim[1]) & (yytun1d_ca3 > ylim[0]))[0]
+w2d_preeg = w_ca3ca3[plot_nidx, egnidx]
 arrow_alpha = (w2d_preeg-w2d_preeg.min())/w2d_preeg.max()
-arrow_alpha[arrow_alpha<0.1] = 0
-im = ax_WI[3].scatter(xxtun2d_ca3, yytun2d_ca3, c=arrow_alpha, cmap='Blues', s=20)
-ax_WI[3].quiver(xxtun2d_ca3, yytun2d_ca3, np.cos(aatun2d_ca3),
-                np.sin(aatun2d_ca3), scale=10, alpha=arrow_alpha*0.95+0.05, headwidth=7)
+# arrow_alpha[arrow_alpha<0.1] = 0
+im = ax_WI[3].scatter(xxtun1d_ca3[plot_nidx], yytun1d_ca3[plot_nidx], c=arrow_alpha, cmap='Blues', s=20)
+ax_WI[3].quiver(xxtun1d_ca3[plot_nidx], yytun1d_ca3[plot_nidx], np.cos(aatun1d_ca3[plot_nidx]),
+                np.sin(aatun1d_ca3[plot_nidx]), scale=10, alpha=arrow_alpha, headwidth=7)
 ax_WI[3].set_xlim(*xlim)
 ax_WI[3].set_ylim(*ylim)
 ax_WI[3].set_xlabel('x (cm)', fontsize=legendsize, labelpad=0)

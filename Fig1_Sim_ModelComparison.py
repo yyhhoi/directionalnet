@@ -186,10 +186,10 @@ for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
     del simdata
 
 # Modification to extrinsic
-config_dict['ECstf_rest'] = 0
-config_dict['ECstf_target'] = 2
+config_dict['ECstf_rest'] = 1  # 0
+config_dict['ECstf_target'] = 1  # 2
 config_dict['asym_flag'] = False
-config_dict['wmax_ca3ca3'] = 1000
+config_dict['wmax_ca3ca3'] = 1100  # 1000
 config_dict['U_stdx_CA3'] = 0.9
 config_dict['Ipos_max'] = 4.5
 

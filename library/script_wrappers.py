@@ -6,13 +6,8 @@
 
 import numpy as np
 import pandas as pd
-from pycircstat.tests import rayleigh
-from scipy.interpolate import interp1d
-from pycircstat.descriptive import mean as cmean, cdiff, resultant_vector_length
-
+from pycircstat.descriptive import cdiff
 from library.comput_utils import rcc_wrapper, get_tspdiff, calc_exin_samepath, acc_metrics
-from library.linear_circular_r import rcc
-
 
 
 def best_worst_analysis(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20):

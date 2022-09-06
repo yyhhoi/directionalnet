@@ -1,19 +1,13 @@
 from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import os
-import pandas as pd
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
-from pycircstat import cdiff, mean as cmean
-from library.comput_utils import pair_diff, circgaufunc, get_tspdiff, calc_exin_samepath, circular_density_1d
-from library.correlogram import ThetaEstimator
+from pycircstat import mean as cmean
+from library.comput_utils import circular_density_1d
 from library.script_wrappers import best_worst_analysis, exin_analysis
-from library.shared_vars import total_figw
-from library.utils import save_pickle, load_pickle
+from library.utils import load_pickle
 from library.visualization import customlegend, plot_sca_onsetslope, plot_exin_bestworst_simdissim
-from library.linear_circular_r import rcc
-from library.simulation import createMosProjMat_p2p, directional_tuning_tile, simulate_SNN
 
 # ====================================== Global params and paths ==================================
 legendsize = 8

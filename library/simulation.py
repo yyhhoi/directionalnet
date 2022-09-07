@@ -170,7 +170,7 @@ def simulate_SNN(BehDF, config_dict, store_Activity=True, store_w=True):
     Itheta = (1 + np.cos(theta_phase))/2 * theta_amp
 
     # # Positional drive
-    Ipos_max_compen = Ipos_max + (np.cos(EC_phase) + 1)/2 * theta_amp
+    Ipos_max_compen = Ipos_max + (np.cos(EC_phase) + 1)/2 * theta_amp  # equivalent to Ipos_max + 4.7
     config_dict['Ipos_max_compen'] = Ipos_max_compen
 
 

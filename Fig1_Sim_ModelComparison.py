@@ -58,11 +58,11 @@ config_dict['U_ECstf'] = 0.001
 config_dict['xmin'] = -40
 config_dict['xmax'] = 40
 config_dict['nx_ca3'] = 80
-config_dict['nx_mos'] = 4
+config_dict['nx_mos'] = 0
 config_dict['ymin'] = -40
 config_dict['ymax'] = 40
 config_dict['ny_ca3'] = 80
-config_dict['ny_mos'] = 4
+config_dict['ny_mos'] = 0
 config_dict['nn_inca3'] = 250
 config_dict['nn_inmos'] = 250
 

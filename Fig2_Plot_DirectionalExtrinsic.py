@@ -232,6 +232,12 @@ fig.text(0.66, 0.35, 'Relative position in the field', fontsize=legendsize)
 precessdf, info_best, info_worst = best_worst_analysis(SpikeDF, 0, range(nn_ca3), t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20)
 phasesp_best, onset_best, slope_best, nidx_best = info_best
 phasesp_worst, onset_worst, slope_worst, nidx_worst = info_worst
+fig2, ax2 = plt.subplots(1, 1, figsize=(2, 2))
+ax2.scatter(precessdf['onset'], precessdf['slope'], c=precessdf['adiff'], cmap='jet', marker='.', s=1)
+ax2.set_xlim(0.5*np.pi, 1.5*np.pi)
+ax2.set_ylim(-np.pi, 0)
+fig2.savefig(join(save_dir, 'fig2_allangles.png'), dpi=300)
+
 
 # # x,y- coordinates of best-worst sampled neurons
 ax_popstats[0].plot(traj_x, traj_y, linewidth=0.75, c='gray')

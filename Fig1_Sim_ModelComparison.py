@@ -49,8 +49,8 @@ config_dict['Iangle_diff'] = 0
 config_dict['Iangle_compen'] = 0
 config_dict['Ipos_sd'] = 5
 config_dict['Iangle_kappa'] = 1
-config_dict['ECstf_rest'] = 0
-config_dict['ECstf_target'] = 2
+config_dict['ECstf_rest'] = 1
+config_dict['ECstf_target'] = 1
 config_dict['tau_ECstf'] = 0.5e3
 config_dict['U_ECstf'] = 0.001
 
@@ -174,8 +174,6 @@ save_dir = join('sim_results', 'fig1')
 os.makedirs(save_dir, exist_ok=True)
 
 # Intrinsic model
-config_dict['ECstf_rest'] = 1
-config_dict['ECstf_target'] = 1
 config_dict['wmax_ca3ca3'] = 1100
 config_dict['Ipos_max'] = 3
 for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
@@ -186,8 +184,6 @@ for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
     del simdata
 
 # Modification to extrinsic
-config_dict['ECstf_rest'] = 1  # 0
-config_dict['ECstf_target'] = 1  # 2
 config_dict['asym_flag'] = False
 config_dict['wmax_ca3ca3'] = 1100  # 1000
 config_dict['U_stdx_CA3'] = 0.9

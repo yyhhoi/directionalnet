@@ -189,8 +189,9 @@ def plot_tempotron_traces(axRas, axTrace, axW1d, N, X, temN_tax, temNw, Vthresh,
     for Mi in range(M):
 
         for Ni in range(N):
-            tsp = X[Mi, Ni]
-            axRas[Mi].scatter(tsp, [Ni]*tsp.shape[0], marker='|', s=1.5, linewidths=1, color=val2cmap.to_rgba(temNw[Ni]))
+            if Ni % 2 == 0:
+                tsp = X[Mi, Ni]
+                axRas[Mi].scatter(tsp, [Ni]*tsp.shape[0], marker='|', s=1, linewidths=0.75, color=val2cmap.to_rgba(temNw[Ni]))
 
         ysep_NiList = np.arange(0, 400, 20).astype(int)
         ysep_ax = np.arange(0, 400, 20) - 0.5
@@ -226,7 +227,8 @@ def plot_tempotron_traces(axRas, axTrace, axW1d, N, X, temN_tax, temNw, Vthresh,
             axTrace[Mi].set_xticks([])
 
         # Plot flattened weights
-        axW1d.barh(w_yax, temNw, color=val2cmap.to_rgba(temNw))
+        skipidx = np.arange(0, N, 2)
+        axW1d.barh(w_yax[skipidx], temNw[skipidx], height=1.8, color=val2cmap.to_rgba(temNw[skipidx]))
         axW1d.axvline(0, color='gray', lw=0.1)
         axW1d.set_yticks(np.around(np.arange(N), 2))
         axW1d.axis('off')

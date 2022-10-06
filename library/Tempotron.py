@@ -109,13 +109,14 @@ class Tempotron:
                 thresh_idxs = np.where(kout > self.Vthresh)[0]
                 if thresh_idxs.shape[0] < 1:  # No Spike
                     all_spikeFlags[mi] = False
-                    if label:  # (+) pattern. Error trial. Update weigt
+                    if label:  # (+) pattern. Error trial. Update weights
                         tmax = t[kout.argmax()]
-                        mask = alltsp < tmax
-                        nidices_inmax = nidices[mask]
-                        dw_alltsp = self.kern.getk(tmax, alltsp[mask]) * self.lr
-                        for synid in np.unique(nidices_inmax):
-                            self.w[synid] = self.w[synid] + dw_alltsp[nidices_inmax == synid].sum()
+                        self.weight_update(alltsp, nidices, tmax, plus=True)
+                        # mask = alltsp < tmax
+                        # nidices_inmax = nidices[mask]
+                        # dw_alltsp = self.kern.getk(tmax, alltsp[mask]) * self.lr
+                        # for synid in np.unique(nidices_inmax):
+                        #     self.w[synid] = self.w[synid] + dw_alltsp[nidices_inmax == synid].sum()
 
                     else:  # (-) pattern. Correct trial. Do nothing
                         num_correct += 1
@@ -127,26 +128,37 @@ class Tempotron:
 
                     else:  # (-) pattern. Error trial. Update weight
 
-                        # Shunting inhibition after the first spike
+                        # Shunting inhibition after the first spike, it's required to find the real tmax
                         # by re-calculating the post-synaptic membrane potential up until the first spike.
-                        # Shunting is required to find the real tmax
                         t_thresh = t[thresh_idxs[0]]
                         mask_thresh = alltsp < t_thresh
                         nidices_inthresh = nidices[mask_thresh]
                         kout_recalctmp = vtraces[:, mask_thresh[mask_thresh].index] * self.w[nidices_inthresh].reshape(1, -1)
                         kout_recalc = kout_recalctmp.sum(axis=1)
                         tmax = t[kout_recalc.argmax()]
-                        mask = alltsp < tmax
-                        nidices_inmax = nidices[mask]
-                        dw_alltsp = self.kern.getk(tmax, alltsp[mask]) * self.lr
-                        for synid in np.unique(nidices_inmax):
-                            self.w[synid] = self.w[synid] - dw_alltsp[nidices_inmax == synid].sum()
+                        self.weight_update(alltsp, nidices, tmax, plus=False)
+                        # mask = alltsp < tmax
+                        # nidices_inmax = nidices[mask]
+                        # dw_alltsp = self.kern.getk(tmax, alltsp[mask]) * self.lr
+                        # for synid in np.unique(nidices_inmax):
+                        #     self.w[synid] = self.w[synid] - dw_alltsp[nidices_inmax == synid].sum()
             if progress:
                 print('\r Iter %d/%d: Correct trials %d/%d = %0.3f'%(iter_i+1, num_iter, num_correct, MX, num_correct/MX), end='', flush=True)
 
-
             yield all_spikeFlags, self.w.copy()
 
+    def weight_update(self, alltsp, nidices, tmax, plus):
+        mask = alltsp < tmax
+        nidices_inmax = nidices[mask]
+        dw_alltsp = self.kern.getk(tmax, alltsp[mask]) * self.lr
+
+        synid_all, spcounts_all = np.unique(nidices_inmax, return_counts=True)
+        for i in range(synid_all.shape[0]):
+            synid = synid_all[i]
+            if plus:
+                self.w[synid] = self.w[synid] + dw_alltsp[nidices_inmax == synid].sum() / spcounts_all[i] - 2*self.w[synid]
+            else:
+                self.w[synid] = self.w[synid] - dw_alltsp[nidices_inmax == synid].sum() / spcounts_all[i] - 2*self.w[synid]
     def predict(self, X, t, shunt=False):
         """Given input pattern X, predict whether there is output spike
 

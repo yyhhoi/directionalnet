@@ -76,7 +76,7 @@ config_dict['asym_flag'] = False
 # CA3-Mos and Mos-CA3
 config_dict['wmax_ca3mos'] = 0
 config_dict['wmax_mosca3'] = 0
-config_dict['wmax_ca3mosca3_adiff'] = 3000  # 3000
+config_dict['wmax_ca3mosca3_adiff'] = 4000  # 3000
 config_dict['mos_exist'] = True
 config_dict['w_ca3mosca3_akappa'] = 1
 
@@ -144,32 +144,11 @@ BehDF_ori = pd.DataFrame(dict(t=traj_t_all, traj_x=traj_x_all, traj_y=traj_y_all
 BehDF_in = BehDF_ori.copy()
 BehDF_ex = BehDF_ori.copy()
 
-# # Un-comment to replace traj_type -1 (Standing at center in training) as 0 (Running at 0 deg in training)
-# # Ex
-# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_x'] = xlist[1]
-# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_y'] = ylist[1]
-# BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = alist[1]
-# # In
-# BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_x'] = xlist[1]
-# BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_y'] = ylist[1]
-# BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = alist[1]
-
 # Offset trajectory vertically to y=+20 (intrinsic center) and y=-20 (Extrinsic center)
 BehDF_in['traj_y'] = BehDF_ori['traj_y'] + 20
 BehDF_ex['traj_y'] = BehDF_ori['traj_y'] - 20
 
 # # ============================ Parameter notes =====================================
-# Below is for WITHOUT directional tuning
-# config_dict['Ipos_max'] = 2  # 5
-# config_dict['Iangle_diff'] = 6  # 0
-# config_dict['wmax_ca3ca3'] = 500
-# config_dict['wmax_ca3mos'] = 750
-# config_dict['wmax_mosca3'] = 750
-
-
-# Below is for WITH directional tuning
-config_dict['wmax_ca3ca3_adiff'] = 1500  # 1500
-config_dict['wmax_ca3mosca3_adiff'] = 4000  # 3000
 
 # Uncomment below if you do not want EC directionality in Training
 config_dict['Ipos_max'] = 2
@@ -177,10 +156,9 @@ config_dict['Iangle_diff'] = 6
 config_dict['Iangle_compen'] = 2
 BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = np.nan
 BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = np.nan
-# BehDF0['traj_a'] = np.nan  # Turn off ALL EC sensory directionality
 
 # # ============================ Simulation =====================================
-save_dir = join('sim_results', 'fig6_TrainStand_Icompen2a6_Wmos4000')
+save_dir = join('sim_results', 'fig6')
 os.makedirs(save_dir, exist_ok=True)
 
 # Along the DG pathway
@@ -196,15 +174,4 @@ print(save_pth)
 simdata = simulate_SNN(BehDF_ex, config_dict, store_Activity=False, store_w=False)
 save_pickle(save_pth, simdata)
 del simdata
-# ===================== Sanity check ============================
 
-# # Plot the mos conenctions
-# fig, ax = plt.subplots(figsize=(5, 5))
-# for mos_start in mos_startlist:
-#
-#     ax.plot(mos_start[:, 0], mos_start[:, 1])
-#     ax.plot(mos_start[-1, 0], mos_start[-1, 1], marker='o')
-#
-# ax.set_xlim(-20, 20)
-# ax.set_ylim(-20, 20)
-# fig.savefig(join(save_dir, 'MosConfig.png'))

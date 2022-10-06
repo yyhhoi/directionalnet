@@ -25,14 +25,13 @@ plt.rcParams.update({'font.size': legendsize,
 
                      })
 
-jitter_times = int(sys.argv[1])
-jitter_ms = float(sys.argv[2])
-project_tag = 'Jit%d_%0.1fms'%(jitter_times, jitter_ms)
-sim_tag = 'fig6_TrainStand_Icompen2a6_Wmos4000'
+jitter_times = 100
+jitter_ms = 2
+project_tag = 'Jit%d_%0.1fms_NormLearn'%(jitter_times, jitter_ms)
+sim_tag = 'fig6'
 simdata_dir = 'sim_results/%s'%(sim_tag)
 data_dir = join(simdata_dir, project_tag)
-# plot_dir = 'plots/fig6'
-plot_dir = data_dir
+plot_dir = 'plots/fig6'
 os.makedirs(plot_dir, exist_ok=True)
 
 # ====================================== Plot setting ==================================
@@ -46,9 +45,10 @@ yshift1 = -0.015
 inseq_yshift = -0.035
 exseq_yshift = -0.02
 
-# Top 2nd column: Tempotron illustration
+# Top 2nd & 3rd column: Intrinsic raster & Tempotron illustration
 axtem_w = 1.3/5  # The next half 1.375 is for drawing
-tem_xshift = 0.02
+axtem_x = ax_w1
+tem_xshift = xshift1 + ax_w1
 tem_yshift = 0.005
 tem_hgap = 0.02
 tem_wgap = 0.1
@@ -67,7 +67,7 @@ yshift4 = -0.028
 yshift34_1 = -0.005
 
 # Population Raster plots
-ax_h_ras = 2/5
+ax_h_ras = 1.5/5
 ax_w_ras = 1/12  # 0.5/10.5 for 1d weights
 hgap_ras = 0.06
 ras_xshift = 0.1
@@ -84,17 +84,13 @@ ax_trainScheme = fig.add_axes([ax_w1 * 0 + wgap1/2 + xshift1, 1 - ax_h1 * 1 + hg
 ax_trainSeqIn = fig.add_axes([ax_w1 * 0 + wgap1/2 + xshift1, 1 - ax_h1 * 1.5 + hgap1/2 + yshift1 + inseq_yshift, ax_w1 - wgap1, ax_h1/2 - hgap1])
 ax_trainSeqEx = fig.add_axes([ax_w1 * 0 + wgap1/2 + xshift1, 1 - ax_h1 * 2.0 + hgap1/2 + yshift1 + exseq_yshift, ax_w1 - wgap1, ax_h1/2 - hgap1])
 
-ax_tem   = fig.add_axes([ax_w1 * 1 + tem_wgap/2 + xshift1 + tem_xshift          , 1 - ax_h1 * 2 + tem_hgap/2 + tem_yshift, axtem_w - tem_wgap, ax_h1*2 - tem_hgap])
-ax_trace = fig.add_axes([ax_w1 * 1 + axtem_w + tem_wgap/2 + xshift1 + tem_xshift + trace_xshift, 1 - ax_h1 * 2 + tem_hgap/2 + tem_yshift, axtem_w - tem_wgap, ax_h1*0.5])
+ax_tem   = fig.add_axes([axtem_x + tem_wgap/2 + tem_xshift, 1 - ax_h1 * 2 + tem_hgap/2 + tem_yshift, axtem_w - tem_wgap, ax_h1*2 - tem_hgap])
+ax_trace = fig.add_axes([axtem_x + axtem_w + tem_wgap/2 + tem_xshift + trace_xshift, 1 - ax_h1 * 2 + tem_hgap/2 + tem_yshift, axtem_w - tem_wgap, ax_h1*0.5])
 
 axW_x = ax_w1 + xshift1 + axtem_w * 2
-ax_inW2D = fig.add_axes([axW_x + wgap3/2 + xshift3, 1 - ax_h3 * 1 + hgap3/2 + yshift3 + yshift34_1, ax_w3 - wgap3, ax_h3 - hgap3 - wgap3])
-ax_exW2D = fig.add_axes([axW_x + wgap3/2 + xshift3, 1 - ax_h3 * 2 + hgap3/2 + yshift3, ax_w3 - wgap3, ax_h3 - hgap3 - wgap3])
-ax_cbar = fig.add_axes([axW_x + wgap3/2 + xshift3, 0.975, ax_w3 - wgap3, 0.005])
-
+# ax_cbar = fig.add_axes([axW_x + wgap3/2 + xshift3, 0.975, ax_w3 - wgap3, 0.005])
 ax_testScheme = fig.add_axes([axW_x + ax_w3 + wgap3/2 + xshift4, 1 - ax_h3 * 1 + hgap3/2 + yshift4 + yshift34_1, ax_w3 - wgap3, ax_h3 - hgap3 - wgap3])
 ax_acc = fig.add_axes([axW_x + ax_w3 + wgap3/2 + xshift4, 1 - ax_h3 * 2 + hgap3/2 + yshift4, ax_w3 - wgap3, ax_h3 - hgap3 - wgap3])
-
 
 ax_inRas180 = [fig.add_axes([ax_w_ras * i + ras_xshift, 1 - ax_h1*2 - ax_h_ras * 1 + trace_h + hgap_ras/2 + ras_in_yshift, ax_w_ras, ax_h_ras - hgap_ras - trace_h]) for i in range(10)]
 ax_exRas180 = [fig.add_axes([ax_w_ras * i + ras_xshift, 1 - ax_h1*2 - ax_h_ras * 2 + trace_h + hgap_ras/2 + ras_ex_yshift, ax_w_ras, ax_h_ras - hgap_ras - trace_h]) for i in range(10)]
@@ -105,11 +101,14 @@ ax_exRasW1d = fig.add_axes([ax_w_ras * 10 + ras_xshift, 1 - ax_h1*2 - ax_h_ras *
 ax_inRasTrace = [fig.add_axes([ax_w_ras * i + ras_xshift, 1 - ax_h1*2 - ax_h_ras * 1 + trace_hshift + ras_in_yshift, ax_w_ras, trace_h]) for i in range(10)]
 ax_exRasTrace = [fig.add_axes([ax_w_ras * i + ras_xshift, 1 - ax_h1*2 - ax_h_ras * 2 + trace_hshift + ras_ex_yshift, ax_w_ras, trace_h]) for i in range(10)]
 
-ax_exinW2D = [ax_inW2D, ax_exW2D]
 ax_exinRas = [ax_inRas180, ax_exRas180]
 ax_exinRasTrace = [ax_inRasTrace, ax_exRasTrace]
 ax_exinRasW1d = [ax_inRasW1d, ax_exRasW1d]
 ax_exinSeq = [ax_trainSeqIn, ax_trainSeqEx]
+
+
+fig_exinW2d, ax_exinW2D = plt.subplots(2, 1, figsize=(1.5, 3))
+ax_cbar = fig_exinW2d.add_axes([0.1, 0.9, 0.8, 0.02])
 
 # ====================================== Determine weight color scale ==================================
 all_temNw = np.concatenate([np.load(join(data_dir, 'w_%s_ex.npy'%(project_tag))), np.load(join(data_dir, 'w_%s_in.npy'%(project_tag)))])
@@ -229,7 +228,6 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         ax_exinW2D[exin_i].set_ylim(-30-border, -10+border)
     else:
         ax_exinW2D[exin_i].set_ylim(10 - border, 30 + border)
-
     if exintag == 'in':
         cbar = fig.colorbar(im, cax=ax_cbar, orientation='horizontal')
         cbar.ax.set_xticks([-0.06, 0, 0.06])
@@ -296,3 +294,5 @@ ax_acc.set_xlabel(r'$\varphi (\circ)$', labelpad=-5)
 fig.savefig(join(plot_dir, 'fig6.png'), dpi=300)
 fig.savefig(join(plot_dir, 'fig6.pdf'))
 fig.savefig(join(plot_dir, 'fig6.svg'))
+
+fig_exinW2d.savefig(join(plot_dir, 'fig6_W2D.png'), dpi=150)

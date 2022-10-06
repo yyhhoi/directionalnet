@@ -9,10 +9,10 @@ from library.utils import save_pickle, load_pickle
 import sys
 
 # ====================================== Global params and paths ==================================
-jitter_times = int(sys.argv[1])
-jitter_ms = float(sys.argv[2])
-project_tag = 'Jit%d_%0.1fms'%(jitter_times, jitter_ms)
-sim_tag = 'fig6_TrainStand_Icompen2a6_Wmos4000'
+jitter_times = 100
+jitter_ms = 2
+project_tag = 'Jit%d_%0.1fms_NormLearn'%(jitter_times, jitter_ms)
+sim_tag = 'fig6'
 data_dir = 'sim_results/%s' % sim_tag
 save_dir = 'sim_results/%s/%s' % (sim_tag, project_tag)
 os.makedirs(save_dir, exist_ok=True)

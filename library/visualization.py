@@ -174,41 +174,65 @@ def plot_exin_bestworst_simdissim(ax, exindf, exindict, direct_c, sim_c, dissim_
     ax[2].set_ylim(0, np.max(np.concatenate([nbins1, nbins2, nbins3, nbins4]))*1.3)
 
 
-def plot_tempotron_traces(axRas, axTrace, axW1d, N, X, temN_tax, temNw, Vthresh, all_nidx, yytun1d, kout_all, tspout_all, val2cmap, exintag):
+def plot_tempotron_traces(axRas, axTrace, axW1d, N, X, temN_tax, temNw, Vthresh, all_nidx, yytun1d, kout_all, tspout_all, val2cmap, exintag, exin_c):
 
     M = len(axRas)
-    w_yax = np.arange(N)
-    y_nidx = yytun1d[all_nidx[w_yax]]
 
+    # Find every second rows (in terms of unique y vales)
+    y_nidx = yytun1d[all_nidx]
     if exintag == 'in':
-
-        ylim = (np.max(np.where(y_nidx <14.7)[0]), np.min(np.where(y_nidx > 25.8)[0]))
+        yall = np.arange(10, 30)
+        y2rows = [ (yall[i], yall[i]+1)  for i in np.arange(0, yall.shape[0], 2)]
     else:
-        ylim = (np.max(np.where(y_nidx <-24.8)[0]), np.min(np.where(y_nidx > -14.7)[0]))
+        yall = np.arange(-30, -10)
+        y2rows = [ (yall[i], yall[i]+1)  for i in np.arange(0, yall.shape[0], 2)]
+
+    # Select the indices of the neurons of every second y-row
+    select_nidx = []
+    select_nidxID = []
+    for y2row in y2rows:
+        nidxIDtmp = np.where((y_nidx > y2row[0]) & (y_nidx < y2row[1]))[0]
+        select_nidxID.extend(nidxIDtmp)
+        select_nidx.extend(all_nidx[nidxIDtmp])
+    select_nidx = np.array(select_nidx)
+    select_nidxID = np.array(select_nidxID)
+    select_N = select_nidxID.shape[0]
+    y_nidx2 = yytun1d[select_nidx]
+
+    # Reset the ylim in index space
+    if exintag == 'in':
+        ylim = (np.max(np.where(y_nidx2 < 15)[0]), np.min(np.where(y_nidx2 > 26)[0]))
+    else:
+        ylim = (np.max(np.where(y_nidx2 < -25)[0]), np.min(np.where(y_nidx2 > -14)[0]))
+
+    # Index the weights
+    w_yax = np.arange(select_N)
+    select_w = temNw[select_nidxID]
 
     for Mi in range(M):
 
-        for Ni in range(N):
-            if Ni % 2 == 0:
-                tsp = X[Mi, Ni]
-                axRas[Mi].scatter(tsp, [Ni]*tsp.shape[0], marker='|', s=1, linewidths=0.75, color=val2cmap.to_rgba(temNw[Ni]))
+        for Ni in range(select_N):
+            tsp = X[Mi, select_nidxID[Ni]]
+            axRas[Mi].scatter(tsp, [Ni]*tsp.shape[0], marker='|', s=0.75, linewidths=1, color=val2cmap.to_rgba(select_w[Ni]))
 
-        ysep_NiList = np.arange(0, 400, 20).astype(int)
-        ysep_ax = np.arange(0, 400, 20) - 0.5
+        ysep_NiList = np.arange(0, select_N, 20).astype(int)
+        ysep_ax = np.arange(20, select_N, 20) + 0.5
         for ysep in ysep_ax:
-            axRas[Mi].axhline(ysep, color='gray', lw=0.5)
+            axRas[Mi].axhline(ysep, color='gray', lw=0.2)
         axRas[Mi].set_yticks(ysep_NiList + 10)
         axRas[Mi].set_xlim(0, 100)
         axRas[Mi].set_xticks([])
-        axRas[Mi].set_yticklabels(np.around(yytun1d[all_nidx[ysep_NiList + 10]], 0).astype(int).astype(str))
+        axRas[Mi].set_yticklabels(np.around(yytun1d[select_nidx[ysep_NiList + 10]], 0).astype(int).astype(str))
         axRas[Mi].set_ylim(ylim[0], ylim[1])
         if Mi > 0:
             axRas[Mi].set_yticks([])
         if Mi == 0:
             axRas[Mi].set_ylabel('y (cm)')
+        axRas[Mi].spines['left'].set_linewidth(0.5)
+        axRas[Mi].spines['right'].set_linewidth(0.5)
 
         # Plot voltage trace
-        axTrace[Mi].plot(temN_tax, kout_all[Mi], color='gray')
+        axTrace[Mi].plot(temN_tax, kout_all[Mi], color=exin_c[exintag], lw=1)
         if tspout_all[Mi].shape[0] > 0:
             axTrace[Mi].eventplot([tspout_all[Mi][0]], lineoffsets=2.5, linelengths=0.5, linewidths=1, color='r')
         axTrace[Mi].set_xlim(0, 100)
@@ -227,8 +251,7 @@ def plot_tempotron_traces(axRas, axTrace, axW1d, N, X, temN_tax, temNw, Vthresh,
             axTrace[Mi].set_xticks([])
 
         # Plot flattened weights
-        skipidx = np.arange(0, N, 2)
-        axW1d.barh(w_yax[skipidx], temNw[skipidx], height=1.8, color=val2cmap.to_rgba(temNw[skipidx]))
+        axW1d.barh(w_yax, select_w, height=1, color=val2cmap.to_rgba(select_w))
         axW1d.axvline(0, color='gray', lw=0.1)
         axW1d.set_yticks(np.around(np.arange(N), 2))
         axW1d.axis('off')

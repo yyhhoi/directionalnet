@@ -11,7 +11,7 @@ import sys
 # ====================================== Global params and paths ==================================
 jitter_times = 100
 jitter_ms = 2
-project_tag = 'Jit%d_%0.1fms_NormLearn'%(jitter_times, jitter_ms)
+project_tag = 'Jit%d_%0.1fms'%(jitter_times, jitter_ms)
 sim_tag = 'fig6'
 data_dir = 'sim_results/%s' % sim_tag
 save_dir = 'sim_results/%s/%s' % (sim_tag, project_tag)
@@ -159,7 +159,7 @@ for exintag in exintags:
 
     # ======================== Training and testing =====================================
     N = len(X_train[0])
-    num_iter = 500
+    num_iter = 100
     Vthresh = 2
     tau = 5
     tau_s = tau / 4

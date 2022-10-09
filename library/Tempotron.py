@@ -156,9 +156,9 @@ class Tempotron:
         for i in range(synid_all.shape[0]):
             synid = synid_all[i]
             if plus:
-                self.w[synid] = self.w[synid] + dw_alltsp[nidices_inmax == synid].sum() / spcounts_all[i] - 2*self.w[synid]
+                self.w[synid] = self.w[synid] + dw_alltsp[nidices_inmax == synid].sum()
             else:
-                self.w[synid] = self.w[synid] - dw_alltsp[nidices_inmax == synid].sum() / spcounts_all[i] - 2*self.w[synid]
+                self.w[synid] = self.w[synid] - dw_alltsp[nidices_inmax == synid].sum()
     def predict(self, X, t, shunt=False):
         """Given input pattern X, predict whether there is output spike
 

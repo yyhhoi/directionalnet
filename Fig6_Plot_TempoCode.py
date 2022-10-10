@@ -224,7 +224,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         for jiti, dftmp2 in dftmp.groupby('jitbatch_test'):
             jitPred[jiti] = dftmp2.Y_pred_test.sum() > 0.5
         acc[trajtype] = jitPred.mean()
-    acclabel = 'No-loop' if exintag=='in' else 'With-loop'
+    acclabel = 'With-loop' if exintag=='in' else 'No-loop'
     ax_acc.plot(deg_ax, acc, color=exin_c[exintag], label=acclabel )
 
     # # Plot 2D Weights

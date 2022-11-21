@@ -135,7 +135,7 @@ config_dict['mos_startpos'] = np.stack([mos_startx0, mos_starty0]).T
 config_dict['mos_endpos'] = np.stack([mos_endx0, mos_endy0]).T
 save_pth = join(save_dir, 'fig3_MossyLayer_Mosdeg0.pkl')
 print(save_pth)
-simdata = simulate_SNN(BehDF0, config_dict)
+simdata = simulate_SNN(BehDF0, config_dict, store_Activity=False, store_w=False)
 save_pickle(save_pth, simdata)
 del simdata
 

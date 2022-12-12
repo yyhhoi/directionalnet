@@ -54,8 +54,8 @@ def plot_sca_onsetslope(fig, ax, onset_best, slope_best, onset_worst, slope_wors
     slope_bestmu, slope_worstmu = np.median(slope_best), np.median(slope_worst)
 
     # # Slopes and onsets of best-worst neurons
-    ax.scatter(onset_best, slope_best, marker='.', c=direct_c[0], s=4)
-    ax.scatter(onset_worst, slope_worst, marker='.', c=direct_c[1], s=4)
+    ax.scatter(onset_best, slope_best, marker='.', c=direct_c[0], s=2)
+    ax.scatter(onset_worst, slope_worst, marker='.', c=direct_c[1], s=2)
     ax.set_xlim(onset_lim[0], onset_lim[1])
     ax.set_ylim(slope_lim[0], slope_lim[1])
 
@@ -88,14 +88,14 @@ def plot_marginal_phase(ax, phasesp_best, phasesp_worst, direct_c, fontsize):
     phasebins = np.linspace(0, 2*np.pi, 30)
     binsphasebest, _, _ = ax.hist(phasesp_best, bins=phasebins, density=True, histtype='step', color=direct_c[0], linewidth=0.75)
     binsphaseworst, _, _ = ax.hist(phasesp_worst, bins=phasebins, density=True, histtype='step', color=direct_c[1], linewidth=0.75)
-    ax.axvline(phasesp_bestmu, ymin=0.75, ymax=0.9, linewidth=0.75, color=direct_c[0])
-    ax.axvline(phasesp_worstmu, ymin=0.75, ymax=0.9, linewidth=0.75, color=direct_c[1])
+    ax.axvline(phasesp_bestmu, ymin=0.6, ymax=0.75, linewidth=0.75, color=direct_c[0])
+    ax.axvline(phasesp_worstmu, ymin=0.6, ymax=0.75, linewidth=0.75, color=direct_c[1])
     ax.set_xlabel('Spike phase (rad)', fontsize=fontsize, labelpad=0)
     ax.set_xticks(np.arange(0, np.pi*2+0.01, np.pi/2))
     ax.set_xticklabels(['0', '', '$\pi$', '', '$2\pi$'])
     ax.set_xticks(np.arange(0, np.pi*2, np.pi/4), minor=True)
     ax.set_yticks([0, 0.5])
-    ax.set_ylim(0, np.max([binsphasebest.max(), binsphaseworst.max()])*1.5)
+    ax.set_ylim(0, np.max([binsphasebest.max(), binsphaseworst.max()])*2)
     ax.set_ylabel('Spike density', fontsize=fontsize, labelpad=0)
     ax.ticklabel_format(axis='y', style='sci', scilimits=(0, 0), useMathText=True)
     # ax.yaxis.get_offset_text().set_x(0.02)

@@ -137,7 +137,7 @@ all_nidx_dict[0] = all_nidx
 all_egnidxs = all_nidx[[13, 19]]
 best_nidx, worst_nidx = all_egnidxs[0], all_egnidxs[1]
 direct_c = ['tomato', 'royalblue']
-direct_c2 = ['rosybrown', 'lightsteelblue']
+direct_c2 = ['darkred', 'darkblue']
 
 # ======================== Plotting =================
 
@@ -166,9 +166,9 @@ ax_WIpos = ax_WI[3].get_position()
 ax_WIcb = fig.add_axes([ax_WIpos.x0 + ax_WIpos.width, ax_WIpos.y0, ax_WIpos.width*0.075, ax_WIpos.height])
 cb = fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap='Blues'),
              cax=ax_WIcb, orientation='vertical')
-cb.set_ticks(np.arange(0, 3001, 1000))
-cb.set_ticklabels(['0', '1', '2', '3'])  # add x1e3
-cb.set_ticks(np.arange(0, 3501, 500), minor=True)
+cb.set_ticks(np.arange(0, 2001, 1000))
+cb.set_ticklabels(['0', '1', '2'])  # add x1e3
+cb.set_ticks(np.arange(0, 2001, 500), minor=True)
 cb.ax.tick_params(labelsize=legendsize, pad=1)
 cb.ax.set_ylabel('$W_{ij}$', fontsize=legendsize, labelpad=0.5)
 
@@ -199,9 +199,9 @@ for i, label in enumerate(['Best', 'Worst']):
     ax_WI[1+i].set_yticks(np.arange(0, 31, 5), minor=True)
     ax_WI[1+i].set_ylim(0, 30)
 
-ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c2[0], linestyle='dashed', label=r'${\rm Best}$')
+ax_WI[2].plot([-4, 4], [-5, -5], linewidth=1, color=direct_c2[0], linestyle='dashed', label=r'${\rm Best}$')
 ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c[0], label=r'${\rm Best_{fac}}$')
-ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c2[1], linestyle='dashed', label=r'${\rm Worst}$')
+ax_WI[2].plot([-4, 4], [-5, -5], linewidth=1, color=direct_c2[1], linestyle='dashed', label=r'${\rm Worst}$')
 ax_WI[2].plot([-4, 4], [-5, -5], linewidth=0.5, color=direct_c[1], label=r'${\rm Worst_{fac}}$')
 customlegend(ax_WI[2], fontsize=legendsize, loc='upper right', handlelength=1.5, handletextpad=0.1)
 ax_WI[1].set_ylabel('$I_{Sen}$ (mA)', fontsize=legendsize, labelpad=0)
@@ -250,17 +250,15 @@ ax_popstats[0].set_ylabel('y (cm)', fontsize=legendsize, labelpad=-10)
 
 # # Slopes and onsets of best-worst neurons
 plot_sca_onsetslope(fig, ax_popstats[1], onset_best, slope_best, onset_worst, slope_worst,
-                    onset_lim=(0.5*np.pi, 1.5*np.pi), slope_lim=(-np.pi, 0), direct_c=direct_c)
+                    onset_lim=(0.25*np.pi, 1.25*np.pi), slope_lim=(-np.pi, 0.6*np.pi), direct_c=direct_c)
 
-ax_popstats[1].set_xlim(0.5*np.pi, 1.5*np.pi)
-ax_popstats[1].set_xticks([0.5*np.pi, np.pi, 1.5*np.pi])
-ax_popstats[1].set_xticks(np.arange(0.5*np.pi, 1.5*np.pi, 0.25*np.pi), minor=True)
-ax_popstats[1].set_xticklabels(['$0.5\pi$', '$\pi$', '$1.5\pi$'])
+ax_popstats[1].set_xticks(np.arange(0.5 * np.pi, 1.1 * np.pi, 0.5 * np.pi))
+ax_popstats[1].set_xticks(np.arange(0.25 * np.pi, 1.25 * np.pi, 0.25 * np.pi), minor=True)
+ax_popstats[1].set_xticklabels([r'$\pi/2$', '$\pi$'])
 ax_popstats[1].set_xlabel('Onset (rad)', fontsize=legendsize, labelpad=0)
-ax_popstats[1].set_ylim(-np.pi, 0)
-ax_popstats[1].set_yticks([-np.pi, -np.pi/2, 0])
-ax_popstats[1].set_yticks(np.arange(-np.pi, 0.1, np.pi/4), minor=True)
-ax_popstats[1].set_yticklabels(['$-\pi$', r'$\frac{-\pi}{2}$', '0'])
+ax_popstats[1].set_yticks(np.arange(-np.pi, 0.6 * np.pi, 0.5 * np.pi))
+ax_popstats[1].set_yticklabels(['$-\pi$', r'$\frac{-\pi}{2}$', '$0$', r'$\frac{\pi}{2}$'])
+ax_popstats[1].set_yticks(np.arange(-np.pi, 0.6 * np.pi, 0.25 * np.pi), minor=True)
 ax_popstats[1].set_ylabel('Slope (rad)', fontsize=legendsize, labelpad=-2)
 
 
@@ -293,20 +291,20 @@ for unival_y_best in univals_y_best:
             all_tsp_diff_180_list.append(tsp_diff180)
 all_tsp_diff = np.concatenate(all_tsp_diff_list)
 all_tsp_diff_180 = np.concatenate(all_tsp_diff_180_list)
-ax_popstats[3].hist(all_tsp_diff, bins=edges, histtype='step', linewidth=0.75, density=True)
-ax_popstats[3].hist(all_tsp_diff_180, bins=edges, histtype='step', linewidth=0.75, density=True)
+ax_popstats[3].hist(all_tsp_diff, bins=edges, histtype='step', linewidth=0.75, density=True, color='darkorange', label='Right')
+ax_popstats[3].hist(all_tsp_diff_180, bins=edges, histtype='step', linewidth=0.75, density=True, color='mediumspringgreen', label='Left')
 ax_popstats[3].set_xticks((-100, -50, 0, 50, 100))
 ax_popstats[3].set_xticklabels(('-100', '', '0', '', '100'))
 ax_popstats[3].set_xticks(np.arange(-100, 101, 10), minor=True)
 ax_popstats[3].set_xlabel('Time lag (ms)', fontsize=legendsize, labelpad=0)
 ax_popstats[3].set_ylabel('Spike density', fontsize=legendsize, labelpad=0)
-ax_popstats[3].set_ylim(0, 0.0175)
-ax_popstats[3].set_yticks([0, 0.01])
-ax_popstats[3].set_yticks(np.arange(0, 0.02, 0.005), minor=True)
+ax_popstats[3].set_ylim(0, 0.0225)
+ax_popstats[3].set_yticks([0, 0.01, 0.02])
+ax_popstats[3].set_yticks(np.arange(0, 0.02, 0.05), minor=True)
 ax_popstats[3].ticklabel_format(axis='y', style='sci', scilimits=(0, 0), useMathText=True)
 ax_popstats[3].yaxis.get_offset_text().set_visible(False)
 ax_popstats[3].annotate(r'$\times 10^{-1}$', xy=(0.01, 0.9), xycoords='axes fraction', fontsize=legendsize)
-
+customlegend(ax_popstats[3])
 for axeach in [ax_ras]:
     theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
     for i in theta_cutidx:

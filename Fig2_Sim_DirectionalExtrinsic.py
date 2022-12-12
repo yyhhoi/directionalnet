@@ -76,8 +76,8 @@ config_dict['tau_stdx'] = 0.5e3
 # # Weights
 # CA3-CA3
 config_dict['wmax_ca3ca3'] = 0
-config_dict['wmax_ca3ca3_adiff'] = 3500
-config_dict['w_ca3ca3_akappa'] = 2
+config_dict['wmax_ca3ca3_adiff'] = 2000
+config_dict['w_ca3ca3_akappa'] = 1
 config_dict['asym_flag'] = False
 
 # CA3-Mos and Mos-CA3

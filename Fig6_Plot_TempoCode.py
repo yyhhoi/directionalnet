@@ -193,7 +193,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         ysepN_ax = np.arange(0, 400, 20).astype(int)
         ysep_ax = ysepN_ax -0.5
         for ysep in ysep_ax:
-            ax_tem.axhline(ysep, color='gray', lw=0.1)
+            ax_tem.axhline(ysep, color='gray', lw=0.5)
 
         ax_tem.set_xlabel('Time (ms)')
         ax_tem.set_xticks(np.arange(0, 61, 20))
@@ -205,7 +205,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         ax_tem.set_ylim(120, 260)
 
         ax_trace.plot(temN_tax, kout_train_ori[chosen_cycle], lw=1, color='k')
-        ax_trace.axhline(Vthresh, color='gray', lw=0.1)
+        ax_trace.axhline(Vthresh, color='gray', lw=0.5)
         ax_trace.eventplot([tspout_train_ori[chosen_cycle][0]], lineoffsets=3.2, linelengths=1, color='r', linewidths=1, zorder=3)
         ax_trace.spines.left.set_visible(False)
         ax_trace.set_xlabel('Time (ms)')

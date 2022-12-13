@@ -242,7 +242,7 @@ def plot_tempotron_traces(axRas, axTrace, axW1d, N, X, temN_tax, temNw, Vthresh,
         else:
             axTrace[Mi].set_xticklabels([])
         axTrace[Mi].set_ylim(0.1, 3)
-        axTrace[Mi].axhline(Vthresh, color='k', linewidth=0.1)
+        axTrace[Mi].axhline(Vthresh, color='k', linewidth=0.5)
         axTrace[Mi].set_yticks([])
         axTrace[Mi].spines.left.set_visible(False)
         if Mi > 0:

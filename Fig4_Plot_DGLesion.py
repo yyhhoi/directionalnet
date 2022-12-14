@@ -9,8 +9,8 @@ from library.linear_circular_r import rcc
 
 # ====================================== Global params and paths ==================================
 legendsize = 8
-load_dir = 'sim_results/fig4'
-save_dir = 'plots/fig4/'
+load_dir = 'sim_results/fig4_2'
+save_dir = 'plots/fig4_2/'
 os.makedirs(save_dir, exist_ok=True)
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,
@@ -182,7 +182,7 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
         ydum = regress['phi0'] + 2*np.pi*regress['aopt']*xdum
         R, rho, p, aopt = regress['R'], regress['rho'], regress['p'], regress['aopt']
 
-        ax_corr[dgid, mosdeg_id].scatter(allxdiff, allcorrlag, marker='.', s=1, color=dgcase_c[dgid])
+        ax_corr[dgid, mosdeg_id].scatter(allxdiff, allcorrlag, marker='.', s=0.5, lw=1, color=dgcase_c[dgid])
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum, color='k', linewidth=0.75)
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum+2*np.pi, color='k', linewidth=0.75)
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum-2*np.pi, color='k', linewidth=0.75)

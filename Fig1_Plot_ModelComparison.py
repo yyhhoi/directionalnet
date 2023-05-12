@@ -3,15 +3,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
-import pandas as pd
-from pycircstat import cdiff, mean as cmean
 from library.comput_utils import pair_diff
 from library.script_wrappers import find_nidx_along_traj
-from library.shared_vars import total_figw
-from library.utils import save_pickle, load_pickle
-from library.visualization import customlegend, plot_phase_precession, plot_popras
-from library.linear_circular_r import rcc
-from library.simulation import createMosProjMat_p2p, directional_tuning_tile, simulate_SNN
+from library.utils import load_pickle
+from library.visualization import plot_phase_precession, plot_popras
 
 
 # ====================================== Global params and paths ==================================
@@ -50,7 +45,6 @@ ax_trajs = [
 ]
 
 ygp_in = 0.02
-
 ax_ras_in = [
     fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),
     fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),

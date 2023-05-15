@@ -146,9 +146,10 @@ def find_nidx_along_traj(traj_x, traj_y, xxtun1d, yytun1d):
         run_x, run_y = traj_x[i], traj_y[i]
         nidx = np.argmin(np.square(run_x - xxtun1d) + np.square(run_y - yytun1d))
         all_nidx[i] = nidx
-    all_nidx = all_nidx[np.sort(np.unique(all_nidx, return_index=True)[1])]
-    all_nidx = all_nidx.astype(int)
-    return all_nidx
+    uni_index = np.unique(all_nidx, return_index=True)[1]
+    all_nidx_uni = all_nidx[np.sort(uni_index)]
+    all_nidx_uni = all_nidx_uni.astype(int)
+    return all_nidx_uni, all_nidx
 
 
 def datagen_jitter(X, Y, trajtype, jitter_num, jitter_ms=2.5, startseed=None):

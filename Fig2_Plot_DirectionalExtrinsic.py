@@ -131,7 +131,7 @@ traj_d = np.append(0, np.cumsum(np.sqrt(np.diff(traj_x)**2 + np.diff(traj_y)**2)
 
 # # Population raster CA3
 # Indices along the trajectory
-all_nidx = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
+all_nidx, all_nidx_all = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
 all_nidx_dict[0] = all_nidx
 
 all_egnidxs = all_nidx[[13, 19]]

@@ -112,7 +112,7 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
 
         # # Indices along the trajectory
         if mosdeg == 0:
-            all_nidx = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
+            all_nidx, all_nidx_all = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
 
 
         # # Removing EC STF for Leison case

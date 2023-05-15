@@ -14,7 +14,7 @@ def customlegend(ax, handlelength=1.2, linewidth=1.2, handletextpad=0.1, **kwarg
         legobj.set_linewidth(linewidth)
     return ax
 
-def plot_popras(ax, SpikeDF, t, allnidx, bestnidx, worstnidx, best_c, worst_c, ras_c='gray'):
+def plot_popras(ax, SpikeDF, t, allnidx, bestnidx, worstnidx, best_c, worst_c):
     for counti, neuronid in enumerate(allnidx):
         tidxsp_neuron = SpikeDF[SpikeDF['neuronid'] == neuronid]['tidxsp']
         tsp_neuron = t[tidxsp_neuron]

@@ -32,7 +32,7 @@ ax_h = 1/7
 ax_w = 1/7
 hgap = 0.04
 ylift_precess = 0.015
-ylift_12 = 0.04
+
 ylift_3 = 0.02
 wgap = 0.02
 wgap_corr = 0.05
@@ -44,55 +44,58 @@ ax_trajs = [
     fig.add_axes([ax_w * 5.5 + wgap/2, 1 - ax_h + hgap/2, ax_w - wgap, ax_h - hgap]),
 ]
 
-ygp_in = 0.02
+ylift_ras_in = 0.025
 ax_ras_in = [
-    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*2 + hgap/2 - ygp_in + ylift_12, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*2 + hgap/2 + ylift_ras_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*2 + hgap/2 + ylift_ras_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*2 + hgap/2 + ylift_ras_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*2 + hgap/2 + ylift_ras_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*2 + hgap/2 + ylift_ras_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*2 + hgap/2 + ylift_ras_in, ax_w - wgap, ax_h - hgap]),
 ]
 
+ylift_precess_in = 0.055
 ax_precess_in = [
-    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess_in, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*3 + hgap/2 + ylift_precess_in, ax_w - wgap, ax_h - hgap]),
 ]
 
+ylift_corr_in = 0.02
 ax_corr_in = [
-    fig.add_axes([ax_w * 1 + wgap/2 + wgap_corr/2, 1 - ax_h*4 + hgap/2 + ygp_in + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2 + wgap_corr/2, 1 - ax_h*4 + hgap/2 + ygp_in + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
-    fig.add_axes([ax_w * 5 + wgap/2 + wgap_corr/2, 1 - ax_h*4 + hgap/2 + ygp_in + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2 + wgap_corr/2, 1 - ax_h*4 + hgap/2 + ylift_corr_in + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2 + wgap_corr/2, 1 - ax_h*4 + hgap/2 + ylift_corr_in + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
+    fig.add_axes([ax_w * 5 + wgap/2 + wgap_corr/2, 1 - ax_h*4 + hgap/2 + ylift_corr_in + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
 ]
 
 
-ygp_ex = 0.02
+ylift_ras_ex = 0.025
 ax_ras_ex = [
-    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*5 + hgap/2 - ygp_ex + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*5 + hgap/2 - ygp_ex + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*5 + hgap/2 - ygp_ex + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*5 + hgap/2 - ygp_ex + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*5 + hgap/2 - ygp_ex + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*5 + hgap/2 - ygp_ex + ylift_12, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*5 + hgap/2 + ylift_ras_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*5 + hgap/2 + ylift_ras_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*5 + hgap/2 + ylift_ras_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*5 + hgap/2 + ylift_ras_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*5 + hgap/2 + ylift_ras_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*5 + hgap/2 + ylift_ras_ex, ax_w - wgap, ax_h - hgap]),
 ]
-
+ylift_precess_ex = 0.055
 ax_precess_ex = [
-    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
-    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess + ylift_12, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 2 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 4 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 5 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess_ex, ax_w - wgap, ax_h - hgap]),
+    fig.add_axes([ax_w * 6 + wgap/2, 1 - ax_h*6 + hgap/2 + ylift_precess_ex, ax_w - wgap, ax_h - hgap]),
 ]
 
+ylift_corr_ex = 0.02
 ax_corr_ex = [
-    fig.add_axes([ax_w * 1 + wgap/2 + wgap_corr/2, 1 - ax_h*7 + hgap/2 + ygp_ex + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
-    fig.add_axes([ax_w * 3 + wgap/2 + wgap_corr/2, 1 - ax_h*7 + hgap/2 + ygp_ex + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
-    fig.add_axes([ax_w * 5 + wgap/2 + wgap_corr/2, 1 - ax_h*7 + hgap/2 + ygp_ex + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
+    fig.add_axes([ax_w * 1 + wgap/2 + wgap_corr/2, 1 - ax_h*7 + hgap/2 + ylift_corr_ex + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
+    fig.add_axes([ax_w * 3 + wgap/2 + wgap_corr/2, 1 - ax_h*7 + hgap/2 + ylift_corr_ex + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
+    fig.add_axes([ax_w * 5 + wgap/2 + wgap_corr/2, 1 - ax_h*7 + hgap/2 + ylift_corr_ex + ylift_3, ax_w*2 - wgap - wgap_corr, ax_h - hgap]),
 ]
 ax_list = [ax_trajs, ax_ras_in, ax_precess_in, ax_corr_in, ax_ras_ex, ax_precess_ex, ax_corr_ex]
 ax_all = np.concatenate(ax_list)
@@ -141,7 +144,7 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
 
             # # Population raster CA3
             # Indices along the trajectory
-            all_nidx = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
+            all_nidx, all_nidx_all = find_nidx_along_traj(traj_x, traj_y, xxtun1d_ca3, yytun1d_ca3)
             all_nidx_dict[BehDF_deg] = all_nidx
 
             mid_nidx_id = int(all_nidx.shape[0]/2)
@@ -164,16 +167,26 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
 
             # Raster plot - CA3 pyramidal
             rowid2, colid2 = 1+exin_id*3, 0 + Behdeg_pairid*2 + Behdeg_id
-            plot_popras(ax_list[rowid2][colid2], SpikeDF, t, all_nidx, all_egnidxs[0], all_egnidxs[1], 'gray', direct_c[Behdeg_id])
+            ras_nidx = all_nidx[::-1] if Behdeg_id == 1 else all_nidx
+            plot_popras(ax_list[rowid2][colid2], SpikeDF, t, ras_nidx, all_egnidxs[0], all_egnidxs[1], 'gray', direct_c[Behdeg_id])
             ax_list[rowid2][colid2].set_ylim(8, 32)
             ax_list[rowid2][colid2].set_xlim(t.max()/2-400, t.max()/2+400)
             ax_list[rowid2][colid2].set_xticks([])
             ax_list[rowid2][colid2].set_yticks([])
             ax_list[rowid2][colid2].spines['bottom'].set_visible(False)
             ax_list[rowid2][colid2].spines['left'].set_visible(False)
+
+            traj_idx = [np.where(ras_nidx == int(nidx))[0][0] for nidx in all_nidx_all]
+            trajidx_uni, trajidx_uniidx = np.unique(traj_idx, return_index=True)
+            error = +0.5 if Behdeg_id == 1 else -0.5
+            ax_list[rowid2][colid2].plot(t[trajidx_uniidx], trajidx_uni + error, lw=0.5, color='k')
+
             theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
-            for i in theta_cutidx:
-                ax_list[rowid2][colid2].axvline(t[i], c='gray', linewidth=0.25)
+            for i in range(len(theta_cutidx)-1):
+                if i % 2==0:
+                    cutidx1, cutidx2 = theta_cutidx[i], theta_cutidx[i+1]
+                    ax_list[rowid2][colid2].axvspan(t[cutidx1], t[cutidx2], color='gray', alpha=0.1)
+
 
 
             # Phase precession
@@ -183,7 +196,7 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
             tsp_eg, phasesp_eg = t[tidxsp_eg], theta_phase[tidxsp_eg]
             dsp_eg = traj_d[tidxsp_eg]
             plot_phase_precession(ax_list[rowid3][colid3], dsp_eg, phasesp_eg, s=4, c=direct_c[Behdeg_id],
-                                  fontsize=legendsize, plotmeanphase=False, statxy=(0.27, 0.7))
+                                  fontsize=legendsize-1, plotmeanphase=False, statxy=(0.25, 0.675))
 
             # Correlation
             rowid4, colid4 = 3 + exin_id*3, Behdeg_pairid
@@ -211,7 +224,8 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
             ax_list[rowid4][colid4].set_xticks((-100, -50, 0, 50, 100))
             ax_list[rowid4][colid4].set_xticklabels(('-100', '', '0', '', '100'))
             ax_list[rowid4][colid4].set_xticks(np.arange(-100, 101, 10), minor=True)
-            ax_list[rowid4][colid4].set_xlabel('Time lag (ms)', fontsize=legendsize, labelpad=0)
+            if (colid4 == 0) and (rowid4==3):
+                ax_list[rowid4][colid4].set_xlabel('Time lag (ms)', fontsize=legendsize, labelpad=0)
             ax_list[rowid4][colid4].set_yticks([0, 0.02])
             ax_list[rowid4][colid4].ticklabel_format(axis='y', style='sci', scilimits=(0, 0), useMathText=True)
             ax_list[rowid4][colid4].yaxis.get_offset_text().set_y(-0.4)

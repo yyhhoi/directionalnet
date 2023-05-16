@@ -167,10 +167,17 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
 
             # Raster plot - CA3 pyramidal
             rowid2, colid2 = 1+exin_id*3, 0 + Behdeg_pairid*2 + Behdeg_id
-            ras_nidx = all_nidx[::-1] if Behdeg_id == 1 else all_nidx
+            if Behdeg_id == 1:
+                ras_nidx = all_nidx[::-1]
+                error = 0.5
+                xlims = (t.max()/2, t.max()/2 + 400)
+            else:
+                ras_nidx = all_nidx
+                error = -0.5
+                xlims = (t.max() / 2 - 400, t.max() / 2)
             plot_popras(ax_list[rowid2][colid2], SpikeDF, t, ras_nidx, all_egnidxs[0], all_egnidxs[1], 'gray', direct_c[Behdeg_id])
             ax_list[rowid2][colid2].set_ylim(8, 32)
-            ax_list[rowid2][colid2].set_xlim(t.max()/2-400, t.max()/2+400)
+            ax_list[rowid2][colid2].set_xlim(xlims[0], xlims[1])
             ax_list[rowid2][colid2].set_xticks([])
             ax_list[rowid2][colid2].set_yticks([])
             ax_list[rowid2][colid2].spines['bottom'].set_visible(False)
@@ -178,7 +185,6 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
 
             traj_idx = [np.where(ras_nidx == int(nidx))[0][0] for nidx in all_nidx_all]
             trajidx_uni, trajidx_uniidx = np.unique(traj_idx, return_index=True)
-            error = +0.5 if Behdeg_id == 1 else -0.5
             ax_list[rowid2][colid2].plot(t[trajidx_uniidx], trajidx_uni + error, lw=0.5, color='k')
 
             theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]

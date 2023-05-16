@@ -133,9 +133,14 @@ for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
     ax_ras[mosi].set_xticklabels(['500', '', '1500'])
     ax_ras[mosi].set_xticks(np.arange(400, 1601, 100), minor=True)
     ax_ras[mosi].set_xlabel('Time (ms)', fontsize=legendsize, labelpad=-6)
+    traj_idx = [np.where(all_nidx == int(nidx))[0][0] for nidx in all_nidx_all]
+    trajidx_uni, trajidx_uniidx = np.unique(traj_idx, return_index=True)
+    ax_ras[mosi].plot(t[trajidx_uniidx], trajidx_uni - 0.5, lw=0.5, color='k')
     theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
-    for i in theta_cutidx:
-        ax_ras[mosi].axvline(t[i], c='gray', linewidth=0.25)
+    for i in range(len(theta_cutidx) - 1):
+        if i % 2 == 0:
+            cutidx1, cutidx2 = theta_cutidx[i], theta_cutidx[i + 1]
+            ax_ras[mosi].axvspan(t[cutidx1], t[cutidx2], color='gray', alpha=0.1)
 
     # Phase precession
     for i, label in enumerate(['Best', 'Worst']):

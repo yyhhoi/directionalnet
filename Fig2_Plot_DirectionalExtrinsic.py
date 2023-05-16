@@ -190,8 +190,10 @@ for i, label in enumerate(['Best', 'Worst']):
     ax_WI[1+i].plot(rel_dist, Isen[:, egnidx], linewidth=0.5, color=direct_c2[i], linestyle='dashed')
     ax_WI[1+i].plot(rel_dist, Isen_fac[:, egnidx], linewidth=0.5, color=direct_c[i])
     theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
-    for j in theta_cutidx:
-        ax_WI[1+i].axvline(rel_dist[j], c='gray', linewidth=0.25)
+    for j in range(len(theta_cutidx) - 1):
+        if j % 2 == 0:
+            cutidx1, cutidx2 = theta_cutidx[j], theta_cutidx[j + 1]
+            ax_WI[1+i].axvspan(rel_dist[cutidx1], rel_dist[cutidx2], color='gray', alpha=0.1)
     ax_WI[1+i].set_xticks(np.arange(-8, 9, 4))
     ax_WI[1+i].set_xticks(np.arange(-9, 9, 1), minor=True)
     ax_WI[1+i].set_xlim(-10, 10)
@@ -210,10 +212,18 @@ fig.text(0.375, 0.67, 'Relative position to\nplace cell center (cm)', fontsize=l
 
 # Population Raster
 plot_popras(ax_ras, SpikeDF, t, all_nidx, all_egnidxs[0], all_egnidxs[1], direct_c[0], direct_c[1])
+traj_idx = [np.where(all_nidx == int(nidx))[0][0] for nidx in all_nidx_all]
+trajidx_uni, trajidx_uniidx = np.unique(traj_idx, return_index=True)
+ax_ras.plot(t[trajidx_uniidx], trajidx_uni - 0.5, lw=0.5, color='k')
 ax_ras.set_ylim(5, 25)
 ax_ras.set_xlim(t.max()/2-700, t.max()/2+500)
 ax_ras.set_xlabel('Time (ms)', fontsize=legendsize, labelpad=0)
 ax_ras.set_ylabel('Place cell index\n along the trajectory', fontsize=legendsize, labelpad=0)
+theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
+for i in range(len(theta_cutidx) - 1):
+    if i % 2 == 0:
+        cutidx1, cutidx2 = theta_cutidx[i], theta_cutidx[i + 1]
+        ax_ras.axvspan(t[cutidx1], t[cutidx2], color='gray', alpha=0.1)
 
 # Phase precession
 for i, label in enumerate(['Best', 'Worst']):
@@ -291,8 +301,8 @@ for unival_y_best in univals_y_best:
             all_tsp_diff_180_list.append(tsp_diff180)
 all_tsp_diff = np.concatenate(all_tsp_diff_list)
 all_tsp_diff_180 = np.concatenate(all_tsp_diff_180_list)
-ax_popstats[3].hist(all_tsp_diff, bins=edges, histtype='step', linewidth=0.75, density=True, color='darkorange', label='Right')
-ax_popstats[3].hist(all_tsp_diff_180, bins=edges, histtype='step', linewidth=0.75, density=True, color='mediumspringgreen', label='Left')
+ax_popstats[3].hist(all_tsp_diff, bins=edges, histtype='step', linewidth=0.75, density=True, color='darkorange')
+ax_popstats[3].hist(all_tsp_diff_180, bins=edges, histtype='step', linewidth=0.75, density=True, color='mediumspringgreen')
 ax_popstats[3].set_xticks((-100, -50, 0, 50, 100))
 ax_popstats[3].set_xticklabels(('-100', '', '0', '', '100'))
 ax_popstats[3].set_xticks(np.arange(-100, 101, 10), minor=True)
@@ -304,11 +314,6 @@ ax_popstats[3].set_yticks(np.arange(0, 0.02, 0.05), minor=True)
 ax_popstats[3].ticklabel_format(axis='y', style='sci', scilimits=(0, 0), useMathText=True)
 ax_popstats[3].yaxis.get_offset_text().set_visible(False)
 ax_popstats[3].annotate(r'$\times 10^{-1}$', xy=(0.01, 0.9), xycoords='axes fraction', fontsize=legendsize)
-customlegend(ax_popstats[3])
-for axeach in [ax_ras]:
-    theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
-    for i in theta_cutidx:
-        axeach.axvline(t[i], c='gray', linewidth=0.25)
 fig.savefig(join(save_dir, 'fig2.png'), dpi=300)
 fig.savefig(join(save_dir, 'fig2.pdf'), dpi=300)
 fig.savefig(join(save_dir, 'fig2.svg'), dpi=300)

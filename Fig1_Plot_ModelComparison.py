@@ -170,11 +170,11 @@ for exin_id, exin_tag in enumerate(['intrinsic', 'extrinsic']):
             if Behdeg_id == 1:
                 ras_nidx = all_nidx[::-1]
                 error = 0.5
-                xlims = (t.max()/2, t.max()/2 + 400)
+                xlims = (t.max()/2 -200, t.max()/2 + 200)
             else:
                 ras_nidx = all_nidx
                 error = -0.5
-                xlims = (t.max() / 2 - 400, t.max() / 2)
+                xlims = (t.max() / 2 - 200, t.max() / 2 + 200)
             plot_popras(ax_list[rowid2][colid2], SpikeDF, t, ras_nidx, all_egnidxs[0], all_egnidxs[1], 'gray', direct_c[Behdeg_id])
             ax_list[rowid2][colid2].set_ylim(8, 32)
             ax_list[rowid2][colid2].set_xlim(xlims[0], xlims[1])

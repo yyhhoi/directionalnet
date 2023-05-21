@@ -9,8 +9,8 @@ from library.linear_circular_r import rcc
 
 # ====================================== Global params and paths ==================================
 legendsize = 8
-load_dir = 'sim_results/fig4_2'
-save_dir = 'plots/fig4_2/'
+load_dir = 'sim_results/fig4'
+save_dir = 'plots/fig4'
 os.makedirs(save_dir, exist_ok=True)
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,
@@ -121,8 +121,10 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
             rel_dist = traj_x-xxtun1d_ca3[egnidx]
             ax_sen.plot(rel_dist, Isen_fac[:, egnidx], linewidth=0.5, color=dgcase_c[dgid])
             theta_cutidx = np.where(np.diff(theta_phase_plot) < -6)[0]
-            for j in theta_cutidx:
-                ax_sen.axvline(rel_dist[j], c='gray', linewidth=0.25)
+            for i in range(len(theta_cutidx)-1):
+                if i % 2==0:
+                    cutidx1, cutidx2 = theta_cutidx[i], theta_cutidx[i+1]
+                    ax_sen.axvspan(rel_dist[cutidx1], rel_dist[cutidx2], color='gray', alpha=0.05)
             ax_sen.set_xticks(np.arange(-8, 9, 4))
             ax_sen.set_xticklabels(['-8', '', '0', '', '8'])
             ax_sen.set_xticks(np.arange(-9, 9, 1), minor=True)
@@ -181,12 +183,12 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
         xdum = np.linspace(0, 1, 100)
         ydum = regress['phi0'] + 2*np.pi*regress['aopt']*xdum
         R, rho, p, aopt = regress['R'], regress['rho'], regress['p'], regress['aopt']
-
+        slope_percm = aopt * 2 * np.pi / ctmp
         ax_corr[dgid, mosdeg_id].scatter(allxdiff, allcorrlag, marker='.', s=0.5, lw=1, color=dgcase_c[dgid])
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum, color='k', linewidth=0.75)
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum+2*np.pi, color='k', linewidth=0.75)
         ax_corr[dgid, mosdeg_id].plot(xdum*ctmp, ydum-2*np.pi, color='k', linewidth=0.75)
-        ax_corr[dgid, mosdeg_id].annotate(r'$a=%0.2f$' % (aopt * 2 * np.pi), xy=(0.05, 0.03), xycoords='axes fraction', fontsize=legendsize)
+        ax_corr[dgid, mosdeg_id].annotate(r'$a=%0.3f$' % (slope_percm), xy=(0.05, 0.03), xycoords='axes fraction', fontsize=legendsize)
         # ax_corr[dgid, mosdeg_id].annotate(r'$a=%0.2f$' % (aopt * 2 * np.pi), xy=(0.05, 0.17), xycoords='axes fraction',
         #                                   fontsize=legendsize)
 
@@ -207,6 +209,6 @@ for i in range(2):
     ax_corr[i, 0].set_yticklabels(['$-\pi$', '$-\pi/2$', '0', '$\pi/2$', '$\pi$'])
     # ax_corr[1, i].set_xlabel('Pair distance (cm)')
 
-fig.savefig(join(save_dir, 'fig4.png'), dpi=300)
-fig.savefig(join(save_dir, 'fig4.pdf'))
-fig.savefig(join(save_dir, 'fig4.svg'))
+fig.savefig(join(save_dir, 'fig4_revised.png'), dpi=300)
+fig.savefig(join(save_dir, 'fig4_revised.pdf'))
+fig.savefig(join(save_dir, 'fig4_revised.svg'))

@@ -1,12 +1,11 @@
 # Mossy layer at 0 deg
-
 from os.path import join
-import time
 import numpy as np
 import os
 import pandas as pd
 from library.comput_utils import cal_hd_np
-from library.utils import save_pickle, load_pickle
+from library.shared_vars import sim_results_dir
+from library.utils import save_pickle
 from library.simulation import simulate_SNN
 
 
@@ -158,7 +157,7 @@ BehDF_ex.loc[BehDF_ex['traj_type'] == -1, 'traj_a'] = np.nan
 BehDF_in.loc[BehDF_in['traj_type'] == -1, 'traj_a'] = np.nan
 
 # # ============================ Simulation =====================================
-save_dir = join('sim_results', 'fig6')
+save_dir = join(sim_results_dir, 'fig6')
 os.makedirs(save_dir, exist_ok=True)
 
 # Along the DG pathway

@@ -6,13 +6,14 @@ from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from pycircstat import mean as cmean
 from library.comput_utils import circular_density_1d
 from library.script_wrappers import best_worst_analysis, exin_analysis
+from library.shared_vars import sim_results_dir, plots_dir
 from library.utils import load_pickle
 from library.visualization import customlegend, plot_sca_onsetslope, plot_exin_bestworst_simdissim
 
 # ====================================== Global params and paths ==================================
 legendsize = 8
-load_dir = 'sim_results/fig5'
-save_dir = 'plots/fig5/'
+load_dir = join(sim_results_dir, 'fig5')
+save_dir = join(plots_dir, 'fig5')
 os.makedirs(save_dir, exist_ok=True)
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,

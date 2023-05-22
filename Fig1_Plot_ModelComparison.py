@@ -1,18 +1,17 @@
 from os.path import join
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import os
 from library.comput_utils import pair_diff
 from library.script_wrappers import find_nidx_along_traj
 from library.utils import load_pickle
 from library.visualization import plot_phase_precession, plot_popras
-
+from library.shared_vars import sim_results_dir, plots_dir
 
 # ====================================== Global params and paths ==================================
 legendsize = 8
-load_dir = 'sim_results/fig1'
-save_dir = 'plots/fig1/'
+load_dir = join(sim_results_dir, 'fig1')
+save_dir = join(plots_dir, 'fig1')
 os.makedirs(save_dir, exist_ok=True)
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,

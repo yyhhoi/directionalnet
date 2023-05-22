@@ -5,10 +5,9 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.cm as cm
 from library.Tempotron import Tempotron
+from library.shared_vars import sim_results_dir, plots_dir
 from library.utils import load_pickle
 from library.visualization import plot_tempotron_traces, customlegend
-from library.script_wrappers import directional_acc_metrics
-import sys
 # ====================================== Global params and paths ==================================
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,
@@ -29,9 +28,9 @@ jitter_times = 100
 jitter_ms = 2
 project_tag = 'Jit%d_%0.1fms'%(jitter_times, jitter_ms)
 sim_tag = 'fig6'
-simdata_dir = 'sim_results/%s'%(sim_tag)
+simdata_dir = join(sim_results_dir, sim_tag)
 data_dir = join(simdata_dir, project_tag)
-plot_dir = 'plots/fig6'
+plot_dir = join(plots_dir, sim_tag)
 os.makedirs(plot_dir, exist_ok=True)
 
 # ====================================== Plot setting ==================================

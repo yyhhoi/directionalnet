@@ -3,21 +3,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
-import pandas as pd
-from pycircstat import cdiff, mean as cmean
-from library.comput_utils import pair_diff, circgaufunc, get_tspdiff, rcc_wrapper
+from library.comput_utils import circgaufunc, get_tspdiff
 from library.script_wrappers import best_worst_analysis, find_nidx_along_traj
-from library.shared_vars import total_figw
-from library.utils import save_pickle, load_pickle
+from library.shared_vars import sim_results_dir, plots_dir
+from library.utils import load_pickle
 from library.visualization import customlegend, plot_phase_precession, plot_popras, plot_sca_onsetslope, \
     plot_marginal_phase
-from library.linear_circular_r import rcc
 
 
 # ====================================== Global params and paths ==================================
 legendsize = 8
-load_dir = 'sim_results/fig2'
-save_dir = 'plots/fig2/'
+load_dir = join(sim_results_dir, 'fig2')
+save_dir = join(plots_dir, 'fig2')
 os.makedirs(save_dir, exist_ok=True)
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,

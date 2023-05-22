@@ -3,15 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from library.comput_utils import get_tspdiff
-from library.correlogram import ThetaEstimator
 from library.script_wrappers import best_worst_analysis, exin_analysis, find_nidx_along_traj
+from library.shared_vars import sim_results_dir, plots_dir
 from library.utils import load_pickle
 from library.visualization import plot_popras, plot_phase_precession, plot_sca_onsetslope, \
     plot_marginal_phase, plot_exin_bestworst_simdissim
 # ====================================== Global params and paths ==================================
 
-load_dir = 'sim_results/fig3'
-save_dir = 'plots/fig3/'
+load_dir = join(sim_results_dir, 'fig3')
+save_dir = join(plots_dir, 'fig3')
 os.makedirs(save_dir, exist_ok=True)
 legendsize = 8
 plt.rcParams.update({'font.size': legendsize,

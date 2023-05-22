@@ -5,6 +5,7 @@ import numpy as np
 import os
 import pandas as pd
 from library.comput_utils import cal_hd_np
+from library.shared_vars import sim_results_dir
 from library.utils import save_pickle
 from library.simulation import simulate_SNN
 
@@ -140,7 +141,7 @@ mosdegdict['endx'][180], mosdegdict['endy'][180] = mosdegdict['startx'][180] - p
 config_dict['noise_rate'] = 0
 
 
-save_dir = join('sim_results', 'fig4')
+save_dir = join(sim_results_dir, 'fig4')
 os.makedirs(save_dir, exist_ok=True)
 for dglabel in ['Ctrl', 'DGlesion']:
     if dglabel == 'Ctrl':

@@ -4,13 +4,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 from library.correlogram import ThetaEstimator
 from library.script_wrappers import find_nidx_along_traj
+from library.shared_vars import sim_results_dir, plots_dir
 from library.utils import load_pickle
 from library.linear_circular_r import rcc
 
 # ====================================== Global params and paths ==================================
 legendsize = 8
-load_dir = 'sim_results/fig4'
-save_dir = 'plots/fig4'
+load_dir = join(sim_results_dir, 'fig4')
+save_dir = join(plots_dir, 'fig4')
 os.makedirs(save_dir, exist_ok=True)
 plt.rcParams.update({'font.size': legendsize,
                      "axes.titlesize": legendsize,

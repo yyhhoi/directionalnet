@@ -1,20 +1,12 @@
 # Directional sensory input and synaptic weights
-
 from os.path import join
-import time
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 import os
 import pandas as pd
-from scipy.stats import vonmises, pearsonr, circmean
-from pycircstat import cdiff, mean as cmean
-from library.comput_utils import cal_hd_np, pair_diff, gaufunc2d, gaufunc2d_angles, circgaufunc, boxfunc2d
-from library.shared_vars import total_figw
-from library.utils import save_pickle, load_pickle
-from library.visualization import customlegend
-from library.linear_circular_r import rcc
-from library.simulation import createMosProjMat_p2p, directional_tuning_tile, simulate_SNN
+from library.comput_utils import cal_hd_np
+from library.shared_vars import sim_results_dir
+from library.utils import save_pickle
+from library.simulation import simulate_SNN
 
 
 # # ================================= Network Parameters ==========================================
@@ -129,7 +121,7 @@ BehDF180 = pd.DataFrame(dict(t=t, traj_x=traj_x, traj_y=traj_y, traj_a =traj_a))
 
 BehDF_degs = [0, 180]
 BehDFs = [BehDF0, BehDF180]
-save_dir = join('sim_results', 'fig2')
+save_dir = join(sim_results_dir, 'fig2')
 os.makedirs(save_dir, exist_ok=True)
 for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
     save_pth = join(save_dir, 'fig2_DirectionalExtrinsic_%d.pkl'%(BehDF_deg))

@@ -2,6 +2,8 @@ from os.path import join
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+
+from library.comput_utils import circular_density_1d
 from library.correlogram import ThetaEstimator
 from library.script_wrappers import find_nidx_along_traj
 from library.shared_vars import sim_results_dir, plots_dir
@@ -62,6 +64,7 @@ for ax_each in ax.ravel():
     ax_each.spines['top'].set_visible(False)
     ax_each.spines['right'].set_visible(False)
 
+fig2, ax2 = plt.subplots(figsize=(6, 4))
 # ======================================Analysis and plotting ==================================
 
 
@@ -136,7 +139,6 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
 
         # # Correlation lags for Control and DG Lesion
         xdiffmax = 20 if dglabel == 'Ctrl' else 20
-        # xlimmax = 22
         TE = ThetaEstimator(bin_size=5e-3, window_width=200e-3, bandpass=(5, 12))
         thetaT = 1/theta_f
         allxdiff, allcorrlag = [], []
@@ -144,9 +146,13 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
         poprate_list = []
         nsp_edges = np.arange(-dt/2, t.max()+dt, dt)
         ker = np.ones(int(100/dt)) / 0.1  # sum over 100ms, divided by 100ms gives Hz
+        all_phasesp = []
         for i in range(all_nidx.shape[0]):
             tspidx_r = SpikeDF.loc[SpikeDF['neuronid'] == all_nidx[i], 'tidxsp'].to_numpy()
             tsp_r = t[tspidx_r]
+            phasesp_r = theta_phase[tspidx_r]
+            if tspidx_r.shape[0] > 5:
+                all_phasesp.extend(phasesp_r)
             tsp_r_bins, _ = np.histogram(tsp_r, bins=nsp_edges)
             rates = np.convolve(tsp_r_bins, ker, mode='same')
             poprate_list.append(rates)
@@ -174,6 +180,15 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
                 isiedgesm = (isiedges[:-1] + isiedges[1:])/2
                 allxdiff.append(xdiff)
                 allcorrlag.append(corrlag)
+
+        if (dgid == 1) and (mosdeg_id == 1):
+            pass
+        else:
+            edges = np.linspace(0, 2 * np.pi, 72)
+            edm = (edges[:-1] + edges[1:])/2
+            phasecount, _ = np.histogram(all_phasesp, bins=edges)
+            alpha_ax, density = circular_density_1d(edm, np.pi*16, 100, (0, 2*np.pi), w=phasecount)
+            ax2.plot(alpha_ax, density, linewidth=0.75, label='%s-%d'%(dglabel, mosdeg) )
 
         allxdiff = np.array(allxdiff)
         allcorrlag = np.array(allcorrlag)
@@ -213,3 +228,10 @@ for i in range(2):
 fig.savefig(join(save_dir, 'fig4_revised.png'), dpi=300)
 fig.savefig(join(save_dir, 'fig4_revised.pdf'))
 fig.savefig(join(save_dir, 'fig4_revised.svg'))
+
+
+ax2.legend()
+ax2.set_ylim(0, None)
+
+fig2.savefig(join(save_dir, 'fig4_Phase.png'))
+fig2.savefig(join(save_dir, 'fig4_Phase.svg'))

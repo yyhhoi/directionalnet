@@ -8,10 +8,23 @@ import numpy as np
 import pandas as pd
 from pycircstat.descriptive import cdiff
 from library.comput_utils import rcc_wrapper, get_tspdiff, calc_exin_samepath, acc_metrics
+from scipy.ndimage import gaussian_filter1d
+
+def gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20, calc_rate=False):
+
+    precessdf_dict = dict(nidx=[], adiff=[], phasesp=[], onset=[], slope=[], phase_range=[])
+
+    dt = t[1] - t[0]
+    # kert = np.linspace(-500, 501, 1)
+    # ker_sigma = 150
+    # ker = 1 / (ker_sigma * np.sqrt(2*np.pi)) * np.exp(np.square(kert) / (-2 * ker_sigma**2))
+    # # ker = np.ones(int(100 / dt)) / 0.1  # sum over 100ms, divided by 100ms gives Hz
+    nsp_edges = np.arange(-dt / 2, t.max() + dt, dt)
+
+    if calc_rate:
+        precessdf_dict['peak_rate'] = []
 
 
-def best_worst_analysis(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20):
-    precessdf_dict = dict(nidx=[], adiff=[], phasesp=[], onset=[], slope=[])
     for neuronid in ca3nidx:
         neuronxtmp = xxtun1d[neuronid]
         if np.abs(neuronxtmp) > abs_xlim:
@@ -32,7 +45,22 @@ def best_worst_analysis(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d
         precessdf_dict['phasesp'].append(phasesp_eg)
         precessdf_dict['onset'].append(onset)
         precessdf_dict['slope'].append(slope)
+        precessdf_dict['phase_range'].append(phasesp_eg.max() - phasesp_eg.min())
+
+        if calc_rate:
+            tsp_r_bins, _ = np.histogram(tsp_eg, bins=nsp_edges)
+            rates = gaussian_filter1d(tsp_r_bins.astype(float), sigma=500, mode='constant', cval=0)
+            # rates = np.convolve(tsp_r_bins, ker, mode='same')
+            precessdf_dict['peak_rate'].append(rates.max())
+
+
     precessdf = pd.DataFrame(precessdf_dict)
+    return precessdf
+
+
+def best_worst_analysis(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20):
+    precessdf = gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20)
+
 
     bestprecessdf = precessdf[precessdf['adiff'] <= (np.pi/6)].reset_index(drop=True)
     worstprecessdf = precessdf[precessdf['adiff'] >= (np.pi - np.pi/6)].reset_index(drop=True)

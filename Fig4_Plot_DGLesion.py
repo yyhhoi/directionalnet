@@ -3,7 +3,9 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from pycircstat.descriptive import mean as cmean
-from library.comput_utils import circular_density_1d
+from scipy.ndimage import gaussian_filter1d
+
+from library.comput_utils import circular_density_1d, linear_density_1d
 from library.correlogram import ThetaEstimator
 from library.script_wrappers import find_nidx_along_traj, gen_precessdf
 from library.shared_vars import sim_results_dir, plots_dir
@@ -64,7 +66,9 @@ for ax_each in ax.ravel():
     ax_each.spines['top'].set_visible(False)
     ax_each.spines['right'].set_visible(False)
 
-fig_phase, ax_phase = plt.subplots(2,2, figsize=(8, 8))
+fig_phase, ax_phase = plt.subplots(2, 1, figsize=(1.2, 2), sharex=True)
+
+
 # ======================================Analysis and plotting ==================================
 
 
@@ -179,21 +183,21 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
 
             precessdf = gen_precessdf(SpikeDF, 0, np.arange(nn_ca3), t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20, calc_rate=True)
             phase_ranges = precessdf['phase_range'].to_numpy()
-
+            precess_phasesp = np.concatenate(precessdf['phasesp'].to_list())
             mean_phases = precessdf['phasesp'].apply(cmean).to_numpy()
             peak_rates = precessdf['peak_rate'].to_numpy()
 
-
-            precess_phasesp = np.concatenate(precessdf['phasesp'].to_list())
-            edges = np.linspace(0, 2 * np.pi, 72)
-            ax_phase[0, 0].hist(precess_phasesp, bins=edges, histtype='step', density=True, label='%s-%d'%(dglabel, mosdeg) )
-            ax_phase[0, 1].hist(phase_ranges, bins=edges, histtype='step', density=True, label='%s-%d'%(dglabel, mosdeg) )
-            ax_phase[1, 0].scatter(mean_phases, peak_rates, marker='.', alpha=0.5)
-            ax_phase[1, 1].scatter(phase_ranges, peak_rates, marker='.', alpha=0.5)
-
+            edges = np.linspace(0, 2 * np.pi, 36)
             # edm = (edges[:-1] + edges[1:])/2
-            # alpha_ax, density = circular_density_1d(edm, np.pi*16, 100, (0, 2*np.pi), w=phasecount)
-            # ax_phase[0].plot(alpha_ax, density, linewidth=0.75, label='%s-%d'%(dglabel, mosdeg) )
+            # precess_count, _ = np.histogram(precess_phasesp, bins=edges)
+            # phasespax, phasespden = circular_density_1d(edm, 24*np.pi, bins=200, bound=(0, 2*np.pi), w=precess_count)
+            # range_count, _ = np.histogram(phase_ranges, bins=edges)
+            # range_ax, range_den = linear_density_1d(edm, 0.1, 200, (0, 2*np.pi), w=range_count)
+            # ax_phase[0].plot(phasespax, phasespden, label='%s-%d' % (dglabel, mosdeg), color=dgcase_c[dgid])
+            # ax_phase[1].plot(range_ax, range_den, label='%s-%d' % (dglabel, mosdeg), color=dgcase_c[dgid])
+
+            ax_phase[0].hist(precess_phasesp, bins=edges, histtype='step', density=True)
+            ax_phase[1].hist(phase_ranges, bins=edges, histtype='step', density=True)
 
         allxdiff = np.array(allxdiff)
         allcorrlag = np.array(allcorrlag)
@@ -234,18 +238,13 @@ fig.savefig(join(save_dir, 'fig4_revised.png'), dpi=300)
 fig.savefig(join(save_dir, 'fig4_revised.pdf'))
 fig.savefig(join(save_dir, 'fig4_revised.svg'))
 
+ax_phase[1].set_xticks(np.deg2rad(np.arange(0, 361, 90)))
+ax_phase[1].set_xticklabels(['0', '', '$\pi/2$', '', '$\pi$'])
+ax_phase[1].set_xticks(np.deg2rad(np.arange(0, 361, 45)), minor=True)
+ax_phase[0].set_ylim(0, 1.5)
+ax_phase[1].set_ylim(0, 1.5)
 
-ax_phase[0, 0].legend()
-ax_phase[0, 1].legend()
-ax_phase[0, 0].set_ylim(0, None)
-ax_phase[0, 1].set_ylim(0, None)
-
-ax_phase[1, 0].set_xlabel('mean phase')
-ax_phase[1, 0].set_ylabel('Peak rate')
-ax_phase[1, 1].set_xlabel('phase range')
-ax_phase[1, 1].set_ylabel('Peak rate')
-
-
+fig_phase.tight_layout()
 
 fig_phase.savefig(join(save_dir, 'fig4_Phase.png'))
 fig_phase.savefig(join(save_dir, 'fig4_Phase.svg'))

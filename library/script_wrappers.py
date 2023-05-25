@@ -48,10 +48,12 @@ def gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatu
         precessdf_dict['phase_range'].append(phasesp_eg.max() - phasesp_eg.min())
 
         if calc_rate:
-            tsp_r_bins, _ = np.histogram(tsp_eg, bins=nsp_edges)
-            rates = gaussian_filter1d(tsp_r_bins.astype(float), sigma=500, mode='constant', cval=0)
+            time = tsp_eg.max() - tsp_eg.min()
+            rate = tsp_eg.shape[0] / time
+            # tsp_r_bins, _ = np.histogram(tsp_eg, bins=nsp_edges)
+            # rates = gaussian_filter1d(tsp_r_bins.astype(float), sigma=500, mode='constant', cval=0)
             # rates = np.convolve(tsp_r_bins, ker, mode='same')
-            precessdf_dict['peak_rate'].append(rates.max())
+            precessdf_dict['peak_rate'].append(rate)
 
 
     precessdf = pd.DataFrame(precessdf_dict)

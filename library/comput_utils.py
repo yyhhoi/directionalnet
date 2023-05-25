@@ -272,11 +272,17 @@ def circular_density_1d(alpha, kappa, bins, bound, w=None):
     return alpha_ax, density
 
 
-def linear_density_1d(x, std, bins, bound):
+def linear_density_1d(x, std, bins, bound, w=None):
     x_ax = np.linspace(bound[0], bound[1], num=bins)
     density = np.zeros(x_ax.shape[0])
-    for val in x:
-        density += norm.pdf(x_ax, loc=val, scale=std)
+    if w is None:
+        w = np.ones(x.shape[0])
+
+    for id, val in enumerate(x):
+        if np.isnan(w[id]):
+            continue
+        density += w[id] * norm.pdf(x_ax, loc=val, scale=std)
+
     density = density / np.sum(density)
     return x_ax, density
 

@@ -234,9 +234,9 @@ for i in range(2):
     ax_corr[i, 0].set_yticklabels(['$-\pi$', '$-\pi/2$', '0', '$\pi/2$', '$\pi$'])
     # ax_corr[1, i].set_xlabel('Pair distance (cm)')
 
-fig.savefig(join(save_dir, 'fig4_revised.png'), dpi=300)
-fig.savefig(join(save_dir, 'fig4_revised.pdf'))
-fig.savefig(join(save_dir, 'fig4_revised.svg'))
+fig.savefig(join(save_dir, 'fig4.png'), dpi=300)
+fig.savefig(join(save_dir, 'fig4.pdf'))
+fig.savefig(join(save_dir, 'fig4.svg'))
 
 ax_phase[1].set_xticks(np.deg2rad(np.arange(0, 361, 90)))
 ax_phase[1].set_xticklabels(['0', '', '$\pi/2$', '', '$\pi$'])

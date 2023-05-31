@@ -13,8 +13,8 @@ from library.simulation import simulate_SNN
 
 # # ================================= Network Parameters ==========================================
 ph = ParamsHolder()
-config_dict_Ctrl = ph.fig4_Ctrl()
-config_dict_DGlesion = ph.fig4_DGlesion()
+config_dict_Ctrl = ph.fig4_Ctrl_NoRecurrence()
+config_dict_DGlesion = ph.fig4_DGlesion_NoRecurrence()
 dt = config_dict_Ctrl['dt']
 
 # # ================================= Traj ==========================================

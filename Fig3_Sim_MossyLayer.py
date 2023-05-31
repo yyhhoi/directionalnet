@@ -12,7 +12,7 @@ from library.simulation import simulate_SNN
 
 # # ================================= Network Parameters ==========================================
 ph = ParamsHolder()
-config_dict = ph.fig3()
+config_dict = ph.fig3_NoRecurrence()
 dt = config_dict['dt']
 
 # Mossy layer projection trajectory, 0 deg

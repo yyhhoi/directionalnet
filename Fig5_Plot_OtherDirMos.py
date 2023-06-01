@@ -189,9 +189,13 @@ for mospairid, (mosdeg1, mosdeg2) in enumerate(mosdeg_pairs):
         precess_x, precess_y = xxtun1d_ca3[precess_nidx], yytun1d_ca3[precess_nidx]
         precess_onsets, precess_slopes = precessdf2['onset'].to_numpy(), precessdf2['slope'].to_numpy()
         precess_phasesp = precessdf2['phasesp'].apply(cmean).to_numpy()
-        mappable1 = ax[base_axid+mosi, 2].scatter(precess_x, precess_y, c=precess_slopes, cmap='jet', marker='.', s=2, vmin=-np.pi, vmax=np.pi)
-        mappable2 = ax[base_axid+mosi, 3].scatter(precess_x, precess_y, c=precess_onsets, cmap='jet', marker='.', s=2, vmin=0.5*np.pi, vmax=1.25*np.pi)
-        mappable3 = ax[base_axid+mosi, 4].scatter(precess_x, precess_y, c=precess_phasesp, cmap='jet', marker='.', s=2, vmin=0.375*np.pi, vmax=np.pi)
+        # mappable1 = ax[base_axid+mosi, 2].scatter(precess_x, precess_y, c=precess_slopes, cmap='jet', marker='.', s=2, vmin=-np.pi, vmax=np.pi)
+        # mappable2 = ax[base_axid+mosi, 3].scatter(precess_x, precess_y, c=precess_onsets, cmap='jet', marker='.', s=2, vmin=0.5*np.pi, vmax=1.25*np.pi)
+        # mappable3 = ax[base_axid+mosi, 4].scatter(precess_x, precess_y, c=precess_phasesp, cmap='jet', marker='.', s=2, vmin=0.375*np.pi, vmax=np.pi)
+        mappable1 = ax[base_axid + mosi, 2].scatter(precess_x, precess_y, c=precess_slopes, cmap='jet', marker='.', s=2)
+        mappable2 = ax[base_axid + mosi, 3].scatter(precess_x, precess_y, c=precess_onsets, cmap='jet', marker='.', s=2)
+        mappable3 = ax[base_axid + mosi, 4].scatter(precess_x, precess_y, c=precess_phasesp, cmap='jet', marker='.',
+                                                    s=2)
         if (mosi == 0):
 
             cbaxes1 = inset_axes(ax[base_axid+mosi, 2], width="100%", height="100%", loc='lower center', bbox_transform=ax[base_axid+mosi, 2].transAxes, bbox_to_anchor=[0.15, 0.95, 0.7, 0.1])
@@ -203,16 +207,16 @@ for mospairid, (mosdeg1, mosdeg2) in enumerate(mosdeg_pairs):
 
             cbaxes2 = inset_axes(ax[base_axid+mosi, 3], width="100%", height="100%", loc='lower center', bbox_transform=ax[base_axid+mosi, 3].transAxes, bbox_to_anchor=[0.15, 0.95, 0.7, 0.1])
             cbar2 = plt.colorbar(mappable2, cax=cbaxes2, orientation='horizontal')
-            cbar2.set_ticks(np.arange(0.5*np.pi, np.pi + 0.1, 0.5*np.pi))
-            cbar2.set_ticks(np.arange(0.5*np.pi, 1.25*np.pi+0.1, 0.25*np.pi), minor=True)
-            cbar2.set_ticklabels([r'$\pi/2$', '$\pi$'])
+            # cbar2.set_ticks(np.arange(0.5*np.pi, np.pi + 0.1, 0.5*np.pi))
+            # cbar2.set_ticks(np.arange(0.5*np.pi, 1.25*np.pi+0.1, 0.25*np.pi), minor=True)
+            # cbar2.set_ticklabels([r'$\pi/2$', '$\pi$'])
             cbar2.ax.set_title('Onset (rad)')
 
             cbaxes3 = inset_axes(ax[base_axid+mosi, 4], width="100%", height="100%", loc='lower center', bbox_transform=ax[base_axid+mosi, 4].transAxes, bbox_to_anchor=[0.15, 0.95, 0.7, 0.1])
             cbar3 = plt.colorbar(mappable3, cax=cbaxes3, orientation='horizontal')
-            cbar3.set_ticks(np.arange(0.5*np.pi, np.pi+0.1, 0.5*np.pi))
-            cbar3.set_ticks(np.arange(0.5*np.pi, np.pi, 0.25*np.pi), minor=True)
-            cbar3.set_ticklabels(['$\pi/2$', '$\pi$'])
+            # cbar3.set_ticks(np.arange(0.5*np.pi, np.pi+0.1, 0.5*np.pi))
+            # cbar3.set_ticks(np.arange(0.5*np.pi, np.pi, 0.25*np.pi), minor=True)
+            # cbar3.set_ticklabels(['$\pi/2$', '$\pi$'])
             cbar3.ax.set_title('Phase (rad)')
 
 

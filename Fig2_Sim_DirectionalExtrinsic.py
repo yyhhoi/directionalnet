@@ -38,6 +38,8 @@ BehDFs = [BehDF0, BehDF180]
 save_dir = join(sim_results_dir, 'fig2')
 os.makedirs(save_dir, exist_ok=True)
 for BehDF_deg, BehDF in zip(BehDF_degs, BehDFs):
+    if BehDF_deg==180:
+        continue
     save_pth = join(save_dir, 'fig2_DirectionalExtrinsic_%d.pkl'%(BehDF_deg))
     print(save_pth)
     simdata = simulate_SNN(BehDF, config_dict)

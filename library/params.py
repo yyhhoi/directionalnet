@@ -232,6 +232,25 @@ class ParamsHolder:
         return config_dict
 
 
+    def fig2_NoRecurrence(self):
+        config_dict = deepcopy(self.config_dict)
+        config_dict['Ipos_max'] = 5 #6
+        config_dict['Iangle_diff'] = 9 #8
+        config_dict['Ipos_sd'] = 5
+        config_dict['U_ECstf'] = 0.001
+
+        config_dict['ECstf_rest'] = 0.25
+        config_dict['ECstf_target'] = 1.5
+        config_dict['nx_mos'] = 40
+        config_dict['ny_mos'] = 4
+        config_dict['U_stdx_CA3'] = 0.7
+        config_dict['wmax_ca3ca3'] = 0
+        config_dict['wmax_ca3ca3_adiff'] = 0.1
+        config_dict['w_ca3ca3_akappa'] = 1
+        config_dict['asym_flag'] = False
+        config_dict['wmax_CA3in'] = 50
+        config_dict['wmax_inCA3'] = 5
+        return config_dict
 
     def fig3_NoRecurrence(self):
         config_dict = deepcopy(self.config_dict)
@@ -304,30 +323,10 @@ class ParamsHolder:
         return config_dict
 
 
-    def fig2_NoRecurrence(self):
-        config_dict = deepcopy(self.config_dict)
-        config_dict['Ipos_max'] = 5 #6
-        config_dict['Iangle_diff'] = 9 #8
-        config_dict['Ipos_sd'] = 5
-        config_dict['U_ECstf'] = 0.001
-
-        config_dict['ECstf_rest'] = 0.25
-        config_dict['ECstf_target'] = 1.5
-        config_dict['nx_mos'] = 40
-        config_dict['ny_mos'] = 4
-        config_dict['U_stdx_CA3'] = 0.7
-        config_dict['wmax_ca3ca3'] = 0
-        config_dict['wmax_ca3ca3_adiff'] = 0.1
-        config_dict['w_ca3ca3_akappa'] = 1
-        config_dict['asym_flag'] = False
-        config_dict['wmax_CA3in'] = 50
-        config_dict['wmax_inCA3'] = 5
-        return config_dict
-
     def fig5_NoRecurrence(self):
         config_dict = deepcopy(self.config_dict)
-        config_dict['Ipos_max'] = 6 # 6
-        config_dict['Iangle_diff'] = 10 # 8
+        config_dict['Ipos_max'] = 5 # 6
+        config_dict['Iangle_diff'] = 9 # 8
 
         config_dict['ECstf_rest'] = 0.25
         config_dict['ECstf_target'] = 1.5
@@ -338,7 +337,7 @@ class ParamsHolder:
         config_dict['wmax_ca3ca3_adiff'] = 0
         config_dict['w_ca3ca3_akappa'] = 1
         config_dict['asym_flag'] = False
-        config_dict['wmax_ca3mosca3_adiff'] = 4500
+        config_dict['wmax_ca3mosca3_adiff'] = 5000
         config_dict['mos_exist'] = True
         config_dict['wmax_CA3in'] = 50
         config_dict['wmax_inCA3'] = 5

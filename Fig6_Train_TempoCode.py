@@ -10,7 +10,7 @@ from library.utils import save_pickle, load_pickle
 
 # ====================================== Global params and paths ==================================
 jitter_times = 100
-jitter_ms = 0.25
+jitter_ms = 0.05
 project_tag = 'Jit%d_%0.1fms'%(jitter_times, jitter_ms)
 sim_tag = 'fig6'
 data_dir = join(sim_results_dir, sim_tag)

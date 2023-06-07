@@ -346,9 +346,30 @@ class ParamsHolder:
         return config_dict
 
 
-    def fig6_NoRecurrence(self):
+    def fig6_NoRecurrence_WithLoop(self):
         config_dict = deepcopy(self.config_dict)
         config_dict['Ipos_max'] = 6 # 6
+        config_dict['Iangle_diff'] = 14 # 8
+        config_dict['Iangle_compen'] = 2
+        config_dict['ECstf_rest'] = 0.25
+        config_dict['ECstf_target'] = 1.5
+        config_dict['nx_mos'] = 40
+        config_dict['ny_mos'] = 40
+        config_dict['U_stdx_CA3'] = 0.7  # 0.7
+        config_dict['wmax_ca3ca3'] = 0
+        config_dict['wmax_ca3ca3_adiff'] = 0
+        config_dict['w_ca3ca3_akappa'] = 1
+        config_dict['asym_flag'] = False
+        config_dict['wmax_ca3mosca3_adiff'] = 5500
+        config_dict['mos_exist'] = True
+        config_dict['wmax_CA3in'] = 50
+        config_dict['wmax_inCA3'] = 5
+        config_dict['wmax_Mosin'] = 350
+        config_dict['wmax_inMos'] = 35
+        return config_dict
+    def fig6_NoRecurrence_NoLoop(self):
+        config_dict = deepcopy(self.config_dict)
+        config_dict['Ipos_max'] = 4 # 6
         config_dict['Iangle_diff'] = 14 # 8
         config_dict['Iangle_compen'] = 2
         config_dict['ECstf_rest'] = 0.25

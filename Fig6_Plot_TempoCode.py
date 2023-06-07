@@ -25,7 +25,7 @@ plt.rcParams.update({'font.size': legendsize,
                      })
 
 jitter_times = 100
-jitter_ms = 0.05
+jitter_ms = 2
 project_tag = 'Jit%d_%0.1fms'%(jitter_times, jitter_ms)
 sim_tag = 'fig6'
 simdata_dir = join(sim_results_dir, sim_tag)

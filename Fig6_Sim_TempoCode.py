@@ -12,17 +12,19 @@ from library.simulation import simulate_SNN
 
 # # ================================= Network Parameters ==========================================
 ph = ParamsHolder()
-config_dict = ph.fig6_NoRecurrence()
-dt = config_dict['dt']
+config_dict_WL = ph.fig6_NoRecurrence_WithLoop()
+config_dict_NL = ph.fig6_NoRecurrence_NoLoop()
+dt = config_dict_WL['dt']
 
 # Mossy layer projection trajectory
 projl_MosCA3 = 4  # 4
 mos_startx0 = np.arange(-20, 21, 2)  # 0 degree
 mos_starty0 = np.zeros(mos_startx0.shape[0]) + 20
 mos_endx0, mos_endy0 = mos_startx0 + projl_MosCA3, mos_starty0
-config_dict['mos_startpos'] = np.stack([mos_startx0, mos_starty0]).T
-config_dict['mos_endpos'] = np.stack([mos_endx0, mos_endy0]).T
-
+config_dict_WL['mos_startpos'] = np.stack([mos_startx0, mos_starty0]).T
+config_dict_WL['mos_endpos'] = np.stack([mos_endx0, mos_endy0]).T
+config_dict_NL['mos_startpos'] = np.stack([mos_startx0, mos_starty0]).T
+config_dict_NL['mos_endpos'] = np.stack([mos_endx0, mos_endy0]).T
 
 # # ================================= Traj ==========================================
 
@@ -85,14 +87,14 @@ os.makedirs(save_dir, exist_ok=True)
 # Along the DG pathway
 save_pth = join(save_dir, 'fig6_in.pkl')
 print(save_pth)
-simdata = simulate_SNN(BehDF_in, config_dict, store_Activity=False, store_w=False)
+simdata = simulate_SNN(BehDF_in, config_dict_WL, store_Activity=False, store_w=False)
 save_pickle(save_pth, simdata)
 del simdata
 
 # Outside of DG pathway
 save_pth = join(save_dir, 'fig6_ex.pkl')
 print(save_pth)
-simdata = simulate_SNN(BehDF_ex, config_dict, store_Activity=False, store_w=False)
+simdata = simulate_SNN(BehDF_ex, config_dict_NL, store_Activity=False, store_w=False)
 save_pickle(save_pth, simdata)
 del simdata
 

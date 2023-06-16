@@ -139,6 +139,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         vec_y = np.zeros(num_vecs)
         vec_dx = np.zeros(num_vecs)
         vec_dy = np.zeros(num_vecs)
+        vec_amp = np.zeros(num_vecs)
         valid_ind = []
 
 
@@ -198,6 +199,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
                     vec_y[i] = centery
                     vec_dx[i] = np.real(mean_vec)
                     vec_dy[i] = np.imag(mean_vec)
+                    vec_amp[i] = np.abs(mean_vec)
                     valid_ind.append(i)
                     # mean_angle = np.angle(mean_vec)
                     # mean_vec = np.exp(1j * mean_angle)
@@ -210,6 +212,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         vec_dict['y_%d_%d'%(exin_i, rangei)] = vec_y[valid_ind]
         vec_dict['dx_%d_%d'%(exin_i, rangei)] = vec_dx[valid_ind]
         vec_dict['dy_%d_%d'%(exin_i, rangei)] = vec_dy[valid_ind]
+        vec_dict['amp_%d_%d' % (exin_i, rangei)] = vec_amp[valid_ind]
         vec_dict['animalx_%d_%d'%(exin_i, rangei)] = animal_x
         vec_dict['animaly_%d_%d'%(exin_i, rangei)] = animal_y
 
@@ -225,34 +228,42 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         vec_y = vec_dict['y_%d_%d'%(exin_i, rangei)]
         vec_dx = vec_dict['dx_%d_%d'%(exin_i, rangei)]
         vec_dy = vec_dict['dy_%d_%d'%(exin_i, rangei)]
+        vec_amp = vec_dict['amp_%d_%d'%(exin_i, rangei)]
         animal_x = vec_dict['animalx_%d_%d'%(exin_i, rangei)]
         animal_y = vec_dict['animaly_%d_%d'%(exin_i, rangei)]
 
         vec_angle = np.angle(vec_dx + 1j * vec_dy)
         norm_vec = np.exp(1j * vec_angle)
 
-
-        ax[exin_i, rangei].quiver(vec_x, vec_y, np.real(norm_vec), np.imag(norm_vec),
-                                  color=arrow_cmap(arrow_cnorm(vec_angle)), headwidth=5, scale=15
-                                  )
+        if vec_amp.sum() < 1e-5:
+            ax[exin_i, rangei].scatter(vec_x, vec_y, color='gray', marker='.', s=2)
+        else:
+            ax[exin_i, rangei].quiver(vec_x, vec_y,
+                                      np.real(norm_vec), np.imag(norm_vec),
+                                      color=arrow_cmap(arrow_cnorm(vec_angle)),
+                                      headwidth=5, scale=15)
 
 
         ax[exin_i, rangei].scatter(animal_x, animal_y, marker='D', c='k', alpha=0.5, s=4)
 
-        if exin_i == 0:
-            ax[exin_i, rangei].set_xlim(-5, 11)
-            ax[exin_i, rangei].set_ylim(15, 25)
-        else:
-            ax[exin_i, rangei].set_xlim(-5, 5)
-            ax[exin_i, rangei].set_ylim(-25, -15)
+        # if exin_i == 0:
+        #     ax[exin_i, rangei].set_xlim(-5, 11)
+        #     ax[exin_i, rangei].set_ylim(15, 25)
+        # else:
+        #     ax[exin_i, rangei].set_xlim(-5, 5)
+        #     ax[exin_i, rangei].set_ylim(-25, -15)
         ax[exin_i, rangei].axis('off')
 
-
-ax[0, 0].set_xlim(-5, 10)
-ax[1, 0].set_xlim(-5, 10)
-
-ax[0, 0].set_ylim(12.5, 27.5)
-ax[1, 0].set_ylim(-27.5, -12.5)
+if sim_results_dir == 'sim_results_NoRecurrence':
+    ax[0, 0].set_xlim(-5, 12)
+    ax[1, 0].set_xlim(-5, 12)
+    ax[0, 0].set_ylim(11.5, 28.5)
+    ax[1, 0].set_ylim(-28.5, -11.5)
+else:
+    ax[0, 0].set_xlim(-5, 10)
+    ax[1, 0].set_xlim(-5, 10)
+    ax[0, 0].set_ylim(12.5, 27.5)
+    ax[1, 0].set_ylim(-27.5, -12.5)
 fig.tight_layout()
 fig.savefig(join(save_dir, 'fig7.png'), dpi=230)
 fig.savefig(join(save_dir, 'fig7.svg'))

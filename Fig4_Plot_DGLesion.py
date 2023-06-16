@@ -66,7 +66,7 @@ for ax_each in ax.ravel():
     ax_each.spines['top'].set_visible(False)
     ax_each.spines['right'].set_visible(False)
 
-fig_phase, ax_phase = plt.subplots(2, 1, figsize=(1.2, 2), sharex=True)
+fig_phase, ax_phase = plt.subplots(2, 2, figsize=(2.0, 2), sharex=True, sharey='row')
 
 
 # ======================================Analysis and plotting ==================================
@@ -177,27 +177,21 @@ for dgid, dglabel in enumerate(['Ctrl', 'DGlesion']):
                 allxdiff.append(xdiff)
                 allcorrlag.append(corrlag)
 
-        if (dgid == 1) and (mosdeg_id == 1):
-            pass
-        else:
+        # Plot Phase ranges
+        precessdf = gen_precessdf(SpikeDF, 0, np.arange(nn_ca3), t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20, calc_rate=True)
+        phase_ranges = precessdf['phase_range'].to_numpy()
+        precess_phasesp = np.concatenate(precessdf['phasesp'].to_list())
+        mean_phases = precessdf['phasesp'].apply(cmean).to_numpy()
+        peak_rates = precessdf['peak_rate'].to_numpy()
+        edges = np.linspace(0, 2 * np.pi, 36)
 
-            precessdf = gen_precessdf(SpikeDF, 0, np.arange(nn_ca3), t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20, calc_rate=True)
-            phase_ranges = precessdf['phase_range'].to_numpy()
-            precess_phasesp = np.concatenate(precessdf['phasesp'].to_list())
-            mean_phases = precessdf['phasesp'].apply(cmean).to_numpy()
-            peak_rates = precessdf['peak_rate'].to_numpy()
-
-            edges = np.linspace(0, 2 * np.pi, 36)
-            # edm = (edges[:-1] + edges[1:])/2
-            # precess_count, _ = np.histogram(precess_phasesp, bins=edges)
-            # phasespax, phasespden = circular_density_1d(edm, 24*np.pi, bins=200, bound=(0, 2*np.pi), w=precess_count)
-            # range_count, _ = np.histogram(phase_ranges, bins=edges)
-            # range_ax, range_den = linear_density_1d(edm, 0.1, 200, (0, 2*np.pi), w=range_count)
-            # ax_phase[0].plot(phasespax, phasespden, label='%s-%d' % (dglabel, mosdeg), color=dgcase_c[dgid])
-            # ax_phase[1].plot(range_ax, range_den, label='%s-%d' % (dglabel, mosdeg), color=dgcase_c[dgid])
-
-            ax_phase[0].hist(precess_phasesp, bins=edges, histtype='step', density=True)
-            ax_phase[1].hist(phase_ranges, bins=edges, histtype='step', density=True)
+        ax_phase[0, mosdeg_id].hist(precess_phasesp, bins=edges, histtype='step', density=True, color=dgcase_c[dgid])
+        ax_phase[1, mosdeg_id].hist(phase_ranges, bins=edges, histtype='step', density=True, color=dgcase_c[dgid])
+        ax_phase[1, mosdeg_id].set_xticks(np.deg2rad(np.arange(0, 361, 90)))
+        ax_phase[1, mosdeg_id].set_xticklabels(['0', '', '$\pi$', '', '$2\pi$'])
+        ax_phase[1, mosdeg_id].set_xticks(np.deg2rad(np.arange(0, 361, 45)), minor=True)
+        ax_phase[0, mosdeg_id].set_ylim(0, 1.5)
+        ax_phase[1, mosdeg_id].set_ylim(0, 1.5)
 
         allxdiff = np.array(allxdiff)
         allcorrlag = np.array(allcorrlag)
@@ -238,11 +232,8 @@ fig.savefig(join(save_dir, 'fig4.png'), dpi=300)
 fig.savefig(join(save_dir, 'fig4.pdf'))
 fig.savefig(join(save_dir, 'fig4.svg'))
 
-ax_phase[1].set_xticks(np.deg2rad(np.arange(0, 361, 90)))
-ax_phase[1].set_xticklabels(['0', '', '$\pi/2$', '', '$\pi$'])
-ax_phase[1].set_xticks(np.deg2rad(np.arange(0, 361, 45)), minor=True)
-ax_phase[0].set_ylim(0, 1.5)
-ax_phase[1].set_ylim(0, 1.5)
+
+
 
 fig_phase.tight_layout()
 

@@ -40,12 +40,16 @@ def gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatu
         (dsp_norm, phasesp), (onset, slope), _ = rcc_wrapper(dsp_eg, phasesp_eg)
         if (onset > (1.9 * np.pi)) or (onset < (-1.9 * np.pi)):
             continue
+
+        phasesp_eg_shift = np.mod(phasesp_eg + np.pi/4, 2*np.pi)
+        phase_range = phasesp_eg_shift.max() - phasesp_eg_shift.min()
+
         precessdf_dict['nidx'].append(neuronid)
         precessdf_dict['adiff'].append(adiff)
         precessdf_dict['phasesp'].append(phasesp_eg)
         precessdf_dict['onset'].append(onset)
         precessdf_dict['slope'].append(slope)
-        precessdf_dict['phase_range'].append(phasesp_eg.max() - phasesp_eg.min())
+        precessdf_dict['phase_range'].append(phase_range)
 
         if calc_rate:
             time = tsp_eg.max() - tsp_eg.min()

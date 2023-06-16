@@ -348,7 +348,7 @@ class ParamsHolder:
 
     def fig6_NoRecurrence_WithLoop(self):
         config_dict = deepcopy(self.config_dict)
-        config_dict['Ipos_max'] = 6 # 6
+        config_dict['Ipos_max'] = 2 # 6
         config_dict['Iangle_diff'] = 14 # 8
         config_dict['Iangle_compen'] = 2
         config_dict['ECstf_rest'] = 0.25
@@ -369,7 +369,7 @@ class ParamsHolder:
         return config_dict
     def fig6_NoRecurrence_NoLoop(self):
         config_dict = deepcopy(self.config_dict)
-        config_dict['Ipos_max'] = 4 # 6
+        config_dict['Ipos_max'] = 2 # 6
         config_dict['Iangle_diff'] = 14 # 8
         config_dict['Iangle_compen'] = 2
         config_dict['ECstf_rest'] = 0.25

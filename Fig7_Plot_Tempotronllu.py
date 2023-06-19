@@ -254,16 +254,16 @@ for exin_i, exintag in enumerate(['in', 'ex']):
         #     ax[exin_i, rangei].set_ylim(-25, -15)
         ax[exin_i, rangei].axis('off')
 
-if sim_results_dir == 'sim_results_NoRecurrence':
-    ax[0, 0].set_xlim(-5, 12)
-    ax[1, 0].set_xlim(-5, 12)
-    ax[0, 0].set_ylim(11.5, 28.5)
-    ax[1, 0].set_ylim(-28.5, -11.5)
-else:
-    ax[0, 0].set_xlim(-5, 10)
-    ax[1, 0].set_xlim(-5, 10)
-    ax[0, 0].set_ylim(12.5, 27.5)
-    ax[1, 0].set_ylim(-27.5, -12.5)
+# if sim_results_dir == 'sim_results_NoRecurrence':
+ax[0, 0].set_xlim(-5, 12)
+ax[1, 0].set_xlim(-5, 12)
+ax[0, 0].set_ylim(11.5, 28.5)
+ax[1, 0].set_ylim(-28.5, -11.5)
+# else:
+# ax[0, 0].set_xlim(-5, 10)
+# ax[1, 0].set_xlim(-5, 10)
+# ax[0, 0].set_ylim(12.5, 27.5)
+# ax[1, 0].set_ylim(-27.5, -12.5)
 fig.tight_layout()
 fig.savefig(join(save_dir, 'fig7.png'), dpi=230)
 fig.savefig(join(save_dir, 'fig7.svg'))

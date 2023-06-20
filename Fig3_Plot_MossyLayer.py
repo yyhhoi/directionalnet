@@ -154,6 +154,10 @@ for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
 
     # # All onsets & Marginal phases
     precessdf, info_best, info_worst = best_worst_analysis(SpikeDF, 0, range(nn_ca3), t, theta_phase, traj_d, xxtun1d, aatun1d)
+    all_slopes = precessdf['slope'].to_numpy()
+    median_slope = np.median(all_slopes)
+    IQR_slope = np.quantile(all_slopes, 0.75) - np.quantile(all_slopes, 0.25)
+    print('Mos deg %d, median slope = %0.4f, IQR = %0.4f' % (mosdeg, median_slope, IQR_slope))
     phasesp_best, onset_best, slope_best, nidx_best = info_best
     phasesp_worst, onset_worst, slope_worst, nidx_worst = info_worst
     all_nidx_dict['best_mos%d' % mosdeg] = nidx_best

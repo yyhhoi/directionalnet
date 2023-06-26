@@ -244,7 +244,7 @@ for exin_i, exintag in enumerate(['in', 'ex']):
                                       headwidth=5, scale=15)
 
 
-        ax[exin_i, rangei].scatter(animal_x, animal_y, marker='D', c='k', alpha=0.5, s=4)
+        ax[exin_i, rangei].scatter(animal_x, animal_y, marker='x', c='k', alpha=1, s=20)
 
         # if exin_i == 0:
         #     ax[exin_i, rangei].set_xlim(-5, 11)

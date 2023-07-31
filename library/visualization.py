@@ -14,7 +14,7 @@ def customlegend(ax, handlelength=1.2, linewidth=1.2, handletextpad=0.1, **kwarg
         legobj.set_linewidth(linewidth)
     return ax
 
-def plot_popras(ax, SpikeDF, t, allnidx, bestnidx, worstnidx, best_c, worst_c):
+def plot_popras(ax, SpikeDF, t, allnidx, bestnidx, worstnidx, best_c, worst_c, default_c='gray'):
     for counti, neuronid in enumerate(allnidx):
         tidxsp_neuron = SpikeDF[SpikeDF['neuronid'] == neuronid]['tidxsp']
         tsp_neuron = t[tidxsp_neuron]
@@ -23,7 +23,7 @@ def plot_popras(ax, SpikeDF, t, allnidx, bestnidx, worstnidx, best_c, worst_c):
         elif neuronid == worstnidx:
             ras_c = worst_c
         else:
-            ras_c = 'gray'
+            ras_c = default_c
         ax.eventplot(tsp_neuron, lineoffsets=counti, linelengths=1, linewidths=0.5, color=ras_c)
         if tidxsp_neuron.shape[0] < 1:
             continue

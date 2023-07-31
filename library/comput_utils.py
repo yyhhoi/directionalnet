@@ -1583,7 +1583,7 @@ def calc_exin_samepath(samebins, oppbins):
 
 
 
-def rcc_wrapper(dsp, phasesp, abound=(-1., 1.)):
+def rcc_wrapper(dsp, phasesp, abound=(-1., 0.5)):
     dspmin, dsprange = dsp.min(), dsp.max() - dsp.min()
     dsp_norm = (dsp-dspmin)/dsprange
     regress = rcc(dsp_norm, phasesp, abound=abound)

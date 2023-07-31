@@ -10,7 +10,7 @@ from pycircstat.descriptive import cdiff
 from library.comput_utils import rcc_wrapper, get_tspdiff, calc_exin_samepath, acc_metrics
 from scipy.ndimage import gaussian_filter1d
 
-def gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20, calc_rate=False):
+def gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20, calc_rate=False, min_Nspikes=5):
 
     precessdf_dict = dict(nidx=[], adiff=[], phasesp=[], onset=[], slope=[], phase_range=[])
 
@@ -31,7 +31,7 @@ def gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatu
             continue
 
         tidxsp_tmp = SpikeDF.loc[SpikeDF['neuronid']==neuronid, 'tidxsp'].to_numpy()
-        if tidxsp_tmp.shape[0] < 5:
+        if tidxsp_tmp.shape[0] < min_Nspikes:
             continue
         atun_this = aatun1d[neuronid]
         adiff = np.abs(cdiff(atun_this, ref_a))
@@ -65,12 +65,12 @@ def gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatu
 
 
 def best_worst_analysis(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20):
-    precessdf = gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=20)
-
+    precessdf = gen_precessdf(SpikeDF, ref_a, ca3nidx, t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=abs_xlim)
 
     bestprecessdf = precessdf[precessdf['adiff'] <= (np.pi/6)].reset_index(drop=True)
     worstprecessdf = precessdf[precessdf['adiff'] >= (np.pi - np.pi/6)].reset_index(drop=True)
-
+    # import pdb
+    # pdb.set_trace()
     phasesp_best, phasesp_worst = np.concatenate(bestprecessdf['phasesp'].to_numpy()), np.concatenate(worstprecessdf['phasesp'].to_numpy())
     onset_best, onset_worst = np.array(bestprecessdf['onset'].to_numpy()), np.array(worstprecessdf['onset'].to_numpy())
     slope_best, slope_worst = np.array(bestprecessdf['slope'].to_numpy()), np.array(worstprecessdf['slope'].to_numpy())

@@ -12,7 +12,7 @@ from library.simulation import simulate_SNN
 
 # # ================================= Network Parameters ==========================================
 ph = ParamsHolder()
-config_dict = ph.fig2_NoRecurrence()
+config_dict = ph.fig2()
 dt = config_dict['dt']
 
 # 0 deg

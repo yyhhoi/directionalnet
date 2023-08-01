@@ -49,7 +49,7 @@ def plot_phase_precession(ax, dsp, phasesp, s, c, label='', fontsize=8, plotmean
     return None
 
 
-def plot_sca_onsetslope(fig, ax, onset_best, slope_best, onset_worst, slope_worst, onset_lim, slope_lim, direct_c):
+def plot_sca_onsetslope(fig, ax, onset_best, slope_best, onset_worst, slope_worst, onset_lim, slope_lim, direct_c, mar_axfrac=1):
     onset_bestmu, onset_worstmu = cmean(onset_best), cmean(onset_worst)
     slope_bestmu, slope_worstmu = np.median(slope_best), np.median(slope_worst)
 
@@ -63,7 +63,7 @@ def plot_sca_onsetslope(fig, ax, onset_best, slope_best, onset_worst, slope_wors
     # # Marginal onset and slope
     axposori = ax.get_position()
     onsetbins = np.linspace(onset_lim[0], onset_lim[1], 30)
-    ax_maronset = fig.add_axes([axposori.x0, axposori.y0+axposori.height, axposori.width, axposori.height * 0.3])
+    ax_maronset = fig.add_axes([axposori.x0, axposori.y0+axposori.height*mar_axfrac, axposori.width, axposori.height * 0.3])
     binsonsetbest, _, _ = ax_maronset.hist(onset_best, bins=onsetbins, density=True, histtype='step', color=direct_c[0], linewidth=0.75)
     binsonsetworst, _, _ = ax_maronset.hist(onset_worst, bins=onsetbins, density=True, histtype='step', color=direct_c[1], linewidth=0.75)
     ax_maronset.axvline(onset_bestmu, ymin=0.75, ymax=0.95, linewidth=0.75, color=direct_c[0])
@@ -73,7 +73,7 @@ def plot_sca_onsetslope(fig, ax, onset_best, slope_best, onset_worst, slope_wors
     ax_maronset.axis('off')
 
     slopebins = np.linspace(slope_lim[0], slope_lim[1], 30)
-    ax_marslope = fig.add_axes([axposori.x0+axposori.width, axposori.y0, axposori.width * 0.3, axposori.height])
+    ax_marslope = fig.add_axes([axposori.x0+axposori.width*mar_axfrac, axposori.y0, axposori.width * 0.3, axposori.height])
     binsslopebest, _, _ = ax_marslope.hist(slope_best, bins=slopebins, density=True, histtype='step', color=direct_c[0], linewidth=0.75, orientation='horizontal')
     binsslopeworst, _, _ = ax_marslope.hist(slope_worst, bins=slopebins, density=True, histtype='step', color=direct_c[1], linewidth=0.75, orientation='horizontal')
     ax_marslope.axhline(slope_bestmu, xmin=0.75, xmax=0.95, linewidth=0.75, color=direct_c[0])

@@ -8,7 +8,7 @@ from library.shared_vars import sim_results_dir, plots_dir
 from library.utils import load_pickle
 from library.visualization import plot_popras, plot_phase_precession, plot_sca_onsetslope, \
     plot_marginal_phase, plot_exin_bestworst_simdissim
-analysis_tag = '_Speed_100cms_I2_4_Isd20_Wmos3000_MosProj12_ECtau1000'
+analysis_tag = '_100cms_I2_6_Isd15_Wmos3000_MosProj4_ECtau500_STDtau500_theta10'
 print('Analysis Tag = ', analysis_tag)
 
 # ====================================== Global params and paths ==================================
@@ -147,15 +147,16 @@ for mosi, mosdeg, simdata in ((0, 0, simdata0), (1, 180, simdata180)):
             ax_ras[mosi].axvspan(t[cutidx1], t[cutidx2], color='gray', alpha=0.1)
 
     # Phase precession
-    for i, label in enumerate(['Best', 'Worst']):
-        egnidx = all_egnidxs[i]
-        tidxsp_eg = SpikeDF.loc[SpikeDF['neuronid'] == egnidx, 'tidxsp'].to_numpy()
-        tsp_eg, phasesp_eg = t[tidxsp_eg], theta_phase[tidxsp_eg]
-        dsp_eg = traj_d[tidxsp_eg]
-        plot_phase_precession(ax_precess[base_axid+i], dsp_eg, phasesp_eg, s=4, c=direct_c[i], fontsize=legendsize,
-                              plotmeanphase=True)
-        ax_precess[base_axid+i].set_xlabel('Position', labelpad=-6, fontsize=legendsize)
     try:
+        for i, label in enumerate(['Best', 'Worst']):
+            egnidx = all_egnidxs[i]
+            tidxsp_eg = SpikeDF.loc[SpikeDF['neuronid'] == egnidx, 'tidxsp'].to_numpy()
+            tsp_eg, phasesp_eg = t[tidxsp_eg], theta_phase[tidxsp_eg]
+            dsp_eg = traj_d[tidxsp_eg]
+            plot_phase_precession(ax_precess[base_axid+i], dsp_eg, phasesp_eg, s=4, c=direct_c[i], fontsize=legendsize,
+                                  plotmeanphase=True)
+            ax_precess[base_axid+i].set_xlabel('Position', labelpad=-6, fontsize=legendsize)
+
         # # All onsets & Marginal phases
         precessdf, info_best, info_worst = best_worst_analysis(SpikeDF, 0, range(nn_ca3), t, theta_phase, traj_d, xxtun1d, aatun1d, abs_xlim=40)
         all_slopes = precessdf['slope'].to_numpy()

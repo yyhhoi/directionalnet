@@ -10,7 +10,7 @@ from library.utils import save_pickle
 from library.simulation import simulate_SNN
 
 
-analysis_tag = '_Speed_100cms_I2_4_Isd20_Wmos3000_MosProj12_ECtau1000'
+analysis_tag = '_100cms_I2_6_Isd15_Wmos3000_MosProj4_ECtau500_STDtau500_theta10'
 print('Analysis Tag = ', analysis_tag)
 
 # # ================================= Network Parameters ==========================================
@@ -20,7 +20,7 @@ config_dict = ph.fig3_Speed()
 dt = config_dict['dt']
 
 # Mossy layer projection trajectory, 0 deg
-projl_MosCA3 = 12
+projl_MosCA3 = 4
 mos_startx0 = np.arange(-40, 41, 2)  # 0 degree
 mos_starty0 = np.zeros(mos_startx0.shape[0])
 mos_endx0, mos_endy0 = mos_startx0 + projl_MosCA3, mos_starty0

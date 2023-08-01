@@ -153,10 +153,10 @@ class ParamsHolder:
         config_dict['dt'] = 0.1
         config_dict['spdelay'] = int(2 / config_dict['dt'])  # unit = indices
         config_dict['Ipos_max'] = 2  # 2
-        config_dict['Ipos_sd'] = 5  # 5
-        config_dict['Iangle_diff'] = 6  # 6
+        config_dict['Ipos_sd'] = 20  # 5
+        config_dict['Iangle_diff'] = 4  # 6
         config_dict['wsd_global'] = 2  # 2
-        config_dict['tau_ECstf'] = 0.5e3  # 0.5e3
+        config_dict['tau_ECstf'] = 1e3  # 0.5e3
         config_dict['wmax_ca3ca3_adiff'] = 1500  # 1500
         config_dict['wmax_ca3mosca3_adiff'] = 3000  # 3000
         # ========================================================

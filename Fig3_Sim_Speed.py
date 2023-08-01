@@ -10,7 +10,7 @@ from library.utils import save_pickle
 from library.simulation import simulate_SNN
 
 
-analysis_tag = '_Speed_40cms_I2_6_Isd5_Wmos3000_MosProj12_ECtau500'
+analysis_tag = '_Speed_100cms_I2_4_Isd20_Wmos3000_MosProj12_ECtau1000'
 print('Analysis Tag = ', analysis_tag)
 
 # # ================================= Network Parameters ==========================================
@@ -34,7 +34,7 @@ mos_endx180, mos_endy180 = mos_startx180 - projl_MosCA3, mos_starty180
 
 
 # 0 deg
-speed = 40  # cm/s
+speed = 100  # cm/s
 traj_r = 40
 t = np.arange(0, (traj_r*2/speed)*1000, dt)
 traj_x = np.linspace(-traj_r, traj_r, t.shape[0])

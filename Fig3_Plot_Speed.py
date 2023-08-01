@@ -8,7 +8,7 @@ from library.shared_vars import sim_results_dir, plots_dir
 from library.utils import load_pickle
 from library.visualization import plot_popras, plot_phase_precession, plot_sca_onsetslope, \
     plot_marginal_phase, plot_exin_bestworst_simdissim
-analysis_tag = '_100cms_I2_6_Isd15_Wmos3000_MosProj4_ECtau500_STDtau500_theta10'
+analysis_tag = '_20cms_I6_6_Isd5_Wmos3000_MosProj4_ECtau150_STDtau150_theta10'
 print('Analysis Tag = ', analysis_tag)
 
 # ====================================== Global params and paths ==================================

@@ -35,14 +35,14 @@ tags_S2 = [
 ]
 tags_S3 = [
     # A - Change in STF time constants
-    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau250_STDtau500_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau100_STDtau500_theta10',
+    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau250_STDtau500_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau2000_STDtau500_theta10',
     '_20cms_I6_6_Isd5_Wmos3000_MosProj4_ECtau100_STDtau500_theta10',
     # B - Lower STD time constants
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau100_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau2000_theta10',
-    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau500_Uca0_theta10',
+    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau150_STDtau150_theta10',
  ]
 numtags_S2 = len(tags_S2)
 numtags_S3 = len(tags_S3)

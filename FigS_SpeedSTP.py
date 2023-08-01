@@ -40,7 +40,7 @@ tags_S3 = [
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau2000_STDtau500_theta10',
     '_20cms_I6_6_Isd5_Wmos3000_MosProj4_ECtau100_STDtau500_theta10',
     # B - Lower STD time constants
-    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau250_STDtau100_theta10',
+    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau100_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau2000_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau500_Uca0_theta10',
  ]

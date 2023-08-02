@@ -22,7 +22,7 @@ plt.rcParams.update({'font.size': legendsize,
                      })
 
 
-tags_S2 = [
+tags_supp2 = [
     # A - original
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau500_theta10',
     # B - Change speed
@@ -33,28 +33,28 @@ tags_S2 = [
     # D - faster theta
     '_100cms_I2_6_Isd15_Wmos3000_MosProj12_ECtau500_STDtau500_theta12', # or with MosProj4
 ]
-tags_S3 = [
+tags_supp1 = [
     # A - Change in STF time constants
-    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau100_STDtau500_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau250_STDtau500_theta10',
+    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau100_STDtau500_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau2000_STDtau500_theta10',
     '_20cms_I6_6_Isd5_Wmos3000_MosProj4_ECtau100_STDtau500_theta10',
     # B - Lower STD time constants
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau100_theta10',
     '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau500_STDtau2000_theta10',
-    '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau150_STDtau150_theta10',
+    # '_20cms_I2_6_Isd5_Wmos3000_MosProj4_ECtau150_STDtau150_theta10',
  ]
-numtags_S2 = len(tags_S2)
-numtags_S3 = len(tags_S3)
-fig_S2_ras, ax_S2_ras = plt.subplots(numtags_S2, 1, figsize=(4, 7))
-fig_S2_pp, ax_S2_pp = plt.subplots(numtags_S2, 1, figsize=(2, 7), sharex=True)
-fig_S3_ras, ax_S3_ras = plt.subplots(numtags_S3, 1, figsize=(4, 10), sharex=True)
-fig_S3_pp, ax_S3_pp = plt.subplots(numtags_S3, 1, figsize=(2, 10), sharex=True)
+numtags_supp2 = len(tags_supp2)
+numtags_supp1 = len(tags_supp1)
+fig_supp2_ras, ax_supp2_ras = plt.subplots(numtags_supp2, 1, figsize=(4, 7))
+fig_supp2_pp, ax_supp2_pp = plt.subplots(numtags_supp2, 1, figsize=(2, 7), sharex=True)
+fig_supp1_ras, ax_supp1_ras = plt.subplots(numtags_supp1, 1, figsize=(4, 8.5), sharex=True)
+fig_supp1_pp, ax_supp1_pp = plt.subplots(numtags_supp1, 1, figsize=(2, 8.5), sharex=True)
 
 
 
 
-save_dir = join(plots_dir, 'figS')
+save_dir = join(plots_dir, 'fig3')
 os.makedirs(save_dir, exist_ok=True)
 
 
@@ -170,31 +170,31 @@ def plot_figS_ras(simdata, ax, fig2, ax2, tag):
 
 
 
-for tagi, analysis_tag in enumerate(tags_S2):
+for tagi, analysis_tag in enumerate(tags_supp2):
     print('Plotting ', tagi, analysis_tag)
     load_dir = join(sim_results_dir, 'fig3%s'%analysis_tag)
     simdata = load_pickle(join(load_dir, 'fig3_MossyLayer_Mosdeg0.pkl'))
-    plot_figS_ras(simdata, ax_S2_ras[tagi], fig_S2_pp, ax_S2_pp[tagi], analysis_tag)
+    plot_figS_ras(simdata, ax_supp2_ras[tagi], fig_supp2_pp, ax_supp2_pp[tagi], analysis_tag)
 
-for tagi, analysis_tag in enumerate(tags_S3):
+for tagi, analysis_tag in enumerate(tags_supp1):
     print('Plotting ', tagi, analysis_tag)
     load_dir = join(sim_results_dir, 'fig3%s'%analysis_tag)
     simdata = load_pickle(join(load_dir, 'fig3_MossyLayer_Mosdeg0.pkl'))
-    plot_figS_ras(simdata, ax_S3_ras[tagi], fig_S3_pp, ax_S3_pp[tagi], analysis_tag)
+    plot_figS_ras(simdata, ax_supp1_ras[tagi], fig_supp1_pp, ax_supp1_pp[tagi], analysis_tag)
 
-    ax_S3_ras[tagi].set_xlim(1600, 2400)
-    ax_S3_ras[tagi].set_xticks([1600, 2000, 2400])
-    ax_S3_ras[tagi].set_xticks(np.arange(1600, 2401, 100), minor=True)
-    ax_S3_ras[tagi].set_ylim(20, 60)
-    ax_S3_ras[tagi].set_yticks([20, 40, 60])
-    ax_S3_ras[tagi].set_yticks(np.arange(20, 61, 10), minor=True)
+    ax_supp1_ras[tagi].set_xlim(1600, 2400)
+    ax_supp1_ras[tagi].set_xticks([1600, 2000, 2400])
+    ax_supp1_ras[tagi].set_xticks(np.arange(1600, 2401, 100), minor=True)
+    ax_supp1_ras[tagi].set_ylim(20, 60)
+    ax_supp1_ras[tagi].set_yticks([20, 40, 60])
+    ax_supp1_ras[tagi].set_yticks(np.arange(20, 61, 10), minor=True)
 
 
-fig_S2_ras.savefig(join(save_dir, 'figS2_ras.png'), dpi=300)
-fig_S2_ras.savefig(join(save_dir, 'figS2_ras.svg'), dpi=300)
-fig_S3_ras.savefig(join(save_dir, 'figS3_ras.png'), dpi=300)
-fig_S3_ras.savefig(join(save_dir, 'figS3_ras.svg'), dpi=300)
-fig_S2_pp.savefig(join(save_dir, 'figS2_pp.png'), dpi=300)
-fig_S2_pp.savefig(join(save_dir, 'figS2_pp.svg'), dpi=300)
-fig_S3_pp.savefig(join(save_dir, 'figS3_pp.png'), dpi=300)
-fig_S3_pp.savefig(join(save_dir, 'figS3_pp.svg'), dpi=300)
+fig_supp2_ras.savefig(join(save_dir, 'fig_supp2_ras.png'), dpi=300)
+fig_supp2_ras.savefig(join(save_dir, 'fig_supp2_ras.svg'), dpi=300)
+fig_supp1_ras.savefig(join(save_dir, 'fig_supp1_ras.png'), dpi=300)
+fig_supp1_ras.savefig(join(save_dir, 'fig_supp1_ras.svg'), dpi=300)
+fig_supp2_pp.savefig(join(save_dir, 'fig_supp2_pp.png'), dpi=300)
+fig_supp2_pp.savefig(join(save_dir, 'fig_supp2_pp.svg'), dpi=300)
+fig_supp1_pp.savefig(join(save_dir, 'fig_supp1_pp.png'), dpi=300)
+fig_supp1_pp.savefig(join(save_dir, 'fig_supp1_pp.svg'), dpi=300)
